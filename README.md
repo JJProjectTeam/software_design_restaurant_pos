@@ -1,1 +1,1 @@
-Code Coverage: 
+![image](.github/badges/jacoco.svg)
