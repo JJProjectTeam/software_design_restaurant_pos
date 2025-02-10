@@ -18,7 +18,7 @@ public class TodoState implements OrderState {
     @Override
     public void cancelOrder() {
         System.out.println("Order cancelled before processing");
-        // TBD how to handle this interaction
+        order.setState(new InactiveState(order));
     }
 
     @Override

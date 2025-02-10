@@ -18,7 +18,7 @@ public class DoingState implements OrderState {
     @Override
     public void cancelOrder() {
         System.out.println("Order cancelled while in progress");
-        order.setState(new TodoState(order));
+        order.setState(new InactiveState(order));
     }
 
     @Override
