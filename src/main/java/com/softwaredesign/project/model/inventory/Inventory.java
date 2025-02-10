@@ -50,6 +50,21 @@ public class Inventory implements ISubject {
         notifyObservers(name, ingredient.getQuantity());
     }
 
+    public void updateInventory(Map<String, Integer> ingredientUpdates) throws IllegalArgumentException {
+        for (Map.Entry<String, Integer> entry : ingredientUpdates.entrySet()) {
+            String name = entry.getKey();
+            int amount = entry.getValue();
+            
+            Ingredient ingredient = ingredients.get(name);
+            if (ingredient == null) {
+                throw new IllegalArgumentException("Ingredient " + name + " not found in inventory");
+            }
+
+            ingredient.setQuantity(amount);
+            notifyObservers(name, amount);
+        }
+    }
+
     public int getStock(String name) {
         Ingredient ingredient = ingredients.get(name);
         return ingredient != null ? ingredient.getQuantity() : 0;

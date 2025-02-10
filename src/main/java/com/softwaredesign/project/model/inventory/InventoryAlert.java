@@ -21,7 +21,6 @@ public class InventoryAlert implements IObserver {
         if (isLowStock(quantity)) {
             view.showLowStockWarning(ingredient, quantity);
         }
-        // Show the stock update - TODO remove when view is implemented
         view.showStockUpdate(ingredient, quantity);
     }
 }
