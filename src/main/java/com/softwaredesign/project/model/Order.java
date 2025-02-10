@@ -21,6 +21,11 @@ public class Order {
         return state;
     }
 
+    // Direct state restoration for command pattern undo operations
+    public void restoreState(OrderState previousState) {
+        this.state = previousState;
+    }
+
     public void processOrder() {
         state.processOrder();
     }
@@ -44,4 +49,5 @@ public class Order {
                 ", state=" + state.getClass().getSimpleName() +
                 '}';
     }
+
 }
