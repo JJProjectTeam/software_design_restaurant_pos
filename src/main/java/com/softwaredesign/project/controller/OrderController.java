@@ -14,21 +14,25 @@ public class OrderController {
     }
 
 
-    public void placeOrder(List<Recipe> recipes) {
-        // Check if the order is possible to make 
-        if (kitchen.checkOrderIngredients(recipes)) {
-            // If possible, place the order 
-            kitchen.placeOrder(recipes);
-        } else {
-            // If not possible, return an error
-            System.out.println("Error: Order ingredients not available");
-        }
-    }
+    // public void placeOrder(List<Recipe> recipes) {
+    //     // Check if the order is possible to make 
+    //     if (orderManager.checkOrderIngredients(recipes)) {
+    //         // If possible, place the order 
+            
+
+    //         kitchen.placeOrder(recipes);
+    //     } else {
+    //         // If not possible, return an error
+    //         System.out.println("Error: Order ingredients not available");
+    //     }
+    // }
 
 
-    public void checkOrderStatus(Order order) {
-        orderManager.getOrderStatus(order);
-    }  
+    // public void checkOrderStatus(Order order) {
+    //     orderManager.getOrderStatus(order);
+    // }  
+
+    
     
     
 

@@ -10,22 +10,7 @@ public class TodoState implements State {
     }
 
     @Override
-    public void completeOrder(Order order) {
-        order.setState(new DoneState());
-    }
-
-    @Override
     public void cancelOrder(Order order) {
         order.setState(new CancelledState());
-    }
-
-    @Override
-    public void pauseOrder(Order order) {
-        order.setState(new PausedState());
-    }
-
-    @Override
-    public void resumeOrder(Order order) {
-        order.setState(new DoingState());
     }
 }

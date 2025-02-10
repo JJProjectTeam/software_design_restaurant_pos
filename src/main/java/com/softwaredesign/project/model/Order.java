@@ -1,10 +1,12 @@
 package com.softwaredesign.project.model;
 import java.util.List;
+import java.util.ArrayList;
 
-import com.softwaredesign.project.model.States.TodoState;
+import com.softwaredesign.project.model.States.TodoState;	
+
 
 public class Order {
-    private List<Recipe> items;
+    private List<Recipe> items = new ArrayList<>();
     private State state;
 
 
@@ -35,6 +37,10 @@ public class Order {
 
     public void completeOrder() {
         state.completeOrder(this);
+    }
+
+    public List<Recipe> getItems() {
+        return items;
     }
 }
 

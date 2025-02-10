@@ -11,11 +11,11 @@ public class Waiter {
         this.orderController = orderController;
     }
 
-    public void placeOrder(List<Recipe> recipes) {
-        orderController.placeOrder(recipes);
-    }
+    // public void placeOrder(List<Recipe> recipes) {
+    //     orderController.placeOrder(recipes);
+    // }
 
-    public void checkOrderStatus(Order order) {
-        orderController.checkOrderStatus(order);
-    }
+    // public void checkOrderStatus(Order order) {
+    //     orderController.checkOrderStatus(order);
+    // }
 }

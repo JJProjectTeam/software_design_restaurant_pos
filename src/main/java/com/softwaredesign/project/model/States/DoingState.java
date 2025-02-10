@@ -5,11 +5,6 @@ import com.softwaredesign.project.model.State;
 
 public class DoingState implements State {
     @Override
-    public void processOrder(Order order) {
-        order.setState(new DoingState());
-    }
-
-    @Override
     public void completeOrder(Order order) {
         order.setState(new DoneState());
     }
@@ -22,10 +17,5 @@ public class DoingState implements State {
     @Override
     public void pauseOrder(Order order) {
         order.setState(new PausedState());
-    }
-
-    @Override
-    public void resumeOrder(Order order) {
-        order.setState(new DoingState());
     }
 }

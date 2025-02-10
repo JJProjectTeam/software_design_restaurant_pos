@@ -9,10 +9,30 @@ public class Meal {
         this.ingredients = ingredients;
     }
 
+    public double getPrice() {
+        double price = 0;
+        for (Ingredient ingredient : ingredients) {
+            price += ingredient.getPrice();
+        }
+        return price;
+    }
+
 
     @Override
     public String toString() {
-        return name + "with" + ingredients;
+        StringBuilder result = new StringBuilder(name + " with ");
+        for (int i = 0; i < ingredients.size(); i++) {
+            if (i == ingredients.size() - 1) {
+                result.append(ingredients.get(i));
+            } else if (i == ingredients.size() - 2) {
+                result.append(ingredients.get(i)).append(" and ");
+            } else {
+                result.append(ingredients.get(i)).append(", ");
+            }
+        }
+
+        result.append(" Price: ").append(getPrice());
+        return result.toString();
     }
 }
 
