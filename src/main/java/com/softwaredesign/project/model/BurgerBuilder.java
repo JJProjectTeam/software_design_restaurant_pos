@@ -6,12 +6,4 @@ public class BurgerBuilder extends Recipe {
         super(baseIngredients);
         this.name = "Burger";
     }
-
-    public void addTopping(Ingredient topping) {
-        addIngredient(topping);
-    }
-
-    public void removeTopping(Ingredient topping) {
-        removeIngredient(topping);
-    }
 }
