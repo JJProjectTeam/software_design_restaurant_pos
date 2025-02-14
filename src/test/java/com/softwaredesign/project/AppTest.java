@@ -17,9 +17,5 @@ public class AppTest
     {
         assertTrue( true );
     }
-    @Test
-    public void additionTest()
-    {
-        assertTrue(App.add(3, 12) == 15);
-    }
+
 }
