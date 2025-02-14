@@ -32,10 +32,12 @@ public class Driver {
         // 6. Submit order to manager
         orderManager.addOrder(order);
 
+        
         // 7. Demonstrate the station flow for each recipe
         System.out.println("Order Processing Started");
         System.out.println("------------------------");
-
+        orderManager.processOrder();
+        
         for (Recipe recipe : order.getRecipes()) {
             System.out.println("\nProcessing " + recipe.getName());
             System.out.println("Required stations in order:");

@@ -1,6 +1,7 @@
 package com.Order;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
@@ -16,6 +17,7 @@ public abstract class Recipe {
         this.name = name;
         this.ingredients = new ArrayList<>();
         initializeBaseIngredients();
+        stationsToVisit = new LinkedList<>();
     }
 
     protected abstract void initializeBaseIngredients();
