@@ -1,6 +1,6 @@
-package com.Order;
+package com.softwaredesign.project.Order;
 
-import com.softwaredesign.project.model.Ingredient;
+import com.softwaredesign.project.extras.Ingredient;
 
 public class KebabRecipe extends Recipe {
     public KebabRecipe() {

@@ -1,10 +1,10 @@
-package com.softwaredesign.project.model;
+package com.softwaredesign.project.extras;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.Order.Station;
+import com.softwaredesign.project.Order.Station;
 
 public class Ingredient {
     private String name;

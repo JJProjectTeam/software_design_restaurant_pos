@@ -1,4 +1,4 @@
-package com.Order;
+package com.softwaredesign.project.Order;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
 
-import com.softwaredesign.project.model.Ingredient;
+import com.softwaredesign.project.extras.Ingredient;
 
 public abstract class Recipe {
     protected String name;
@@ -62,5 +62,9 @@ public abstract class Recipe {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    public Meal buildMeal() {
+        return new Meal(name, ingredients);
     }
 }

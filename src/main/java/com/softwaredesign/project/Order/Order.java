@@ -1,10 +1,12 @@
-package com.Order;
+package com.softwaredesign.project.Order;
 
 import java.util.List;
 import java.util.Map;
+
+import com.softwaredesign.project.extras.Ingredient;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-import com.softwaredesign.project.model.Ingredient;
 
 public class Order {
     private List<Recipe> recipes;
@@ -15,9 +17,11 @@ public class Order {
         this.modifications = new HashMap<>();
     }
 
-    public void addRecipe(Recipe recipe) {
-        recipes.add(recipe);
-        modifications.put(recipe, new RecipeModification());
+    public void addRecipes(Recipe... recipes) {
+        for (Recipe recipe : recipes) {
+            this.recipes.add(recipe);
+            modifications.put(recipe, new RecipeModification());
+        }
     }
 
     public void addModification(Recipe recipe, Ingredient ingredient, boolean isAddition) {

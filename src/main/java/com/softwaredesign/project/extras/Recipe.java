@@ -1,5 +1,7 @@
-package com.softwaredesign.project.model;
+package com.softwaredesign.project.extras;
 import java.util.List;
+
+import com.softwaredesign.project.Order.Meal;
 
 public abstract class Recipe {
     protected String name;

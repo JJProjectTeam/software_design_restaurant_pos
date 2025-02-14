@@ -1,9 +1,11 @@
-package com.Order;
+package com.softwaredesign.project.Order;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import com.softwaredesign.project.model.Ingredient;
+
+import com.softwaredesign.project.extras.Ingredient;
 
 public class OrderManager {
     Queue<Order> orders;
@@ -31,7 +33,7 @@ public class OrderManager {
             return recipes;
         }
 
-        return null;
+        return new ArrayList<>();
     }
 
     private void makeAmendments(Recipe recipe, Order order) {

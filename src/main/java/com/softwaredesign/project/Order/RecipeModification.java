@@ -1,8 +1,9 @@
-package com.Order;
+package com.softwaredesign.project.Order;
 
-import com.softwaredesign.project.model.Ingredient;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.softwaredesign.project.extras.Ingredient;
 
 public class RecipeModification {
     private List<Ingredient> addedIngredients;

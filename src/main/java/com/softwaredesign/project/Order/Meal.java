@@ -1,5 +1,7 @@
-package com.softwaredesign.project.model;
+package com.softwaredesign.project.Order;
 import java.util.List;
+
+import com.softwaredesign.project.extras.Ingredient;
 public class Meal {
     private String name;
     private final List<Ingredient> ingredients;

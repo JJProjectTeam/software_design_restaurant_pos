@@ -1,9 +1,9 @@
-package com.Order;
+package com.softwaredesign.project.Order;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import com.softwaredesign.project.model.Ingredient;
+import com.softwaredesign.project.extras.Ingredient;
 
 public class StationMapper {
 
