@@ -1,48 +1,35 @@
 package com.softwaredesign.project.kitchen;
 
 import com.softwaredesign.project.engine.GameEngine;
+import com.softwaredesign.project.engine.Simulator;
 
 public class KitchenExample {
     public static void main(String[] args) {
-        // Create the game engine
-        GameEngine engine = new GameEngine();
-
-        // Create kitchen stations
-        PrepStation prepStation = new PrepStation();
-        CookStation cookStation = new CookStation();
-
-        // Create a recipe and define its workflow
-        Recipe burger = new Recipe("Burger");
-        burger.addWorkflowStep(PrepStation.class);  // First goes to prep
-        burger.addWorkflowStep(CookStation.class);  // Then goes to cook
-
-        // Register all entities with the engine
-        engine.registerEntity(prepStation);
-        engine.registerEntity(cookStation);
-        engine.registerEntity(burger);
-
-        // Start the engine
-        engine.start();
-
-        System.out.println("Initial burger workflow: needs " + burger.getNextRequiredStation().getSimpleName());
-
-        // Assign burger to prep station
-        prepStation.assignRecipe(burger);
-
-        // First tick - burger will be prepped
-        System.out.println("Tick 1 - Prepping burger");
-        engine.step();
-
-        // Second tick - try to assign to both stations, only cook station will accept
-        System.out.println("Tick 2 - Attempting to assign to stations");
-        prepStation.assignRecipe(burger);  // Will fail because burger needs cook station
-        cookStation.assignRecipe(burger);  // Will succeed because it's the next required station
-        engine.step();
-
-        // Third tick - burger will be cooked
-        System.out.println("Tick 3 - Cooking burger");
-        engine.step();
-
-        System.out.println("Burger preparation complete: " + burger.isComplete());
+        // Get the game engine instance
+        GameEngine engine = GameEngine.getInstance();
+        
+        // Create and register the kitchen
+        Kitchen kitchen = new Kitchen();
+        engine.registerEntity(kitchen);
+        
+        // Create a simulator to control the engine
+        Simulator simulator = new Simulator(engine);
+        
+        // Submit three orders
+        kitchen.submitOrder(); // Order 1
+        kitchen.submitOrder(); // Order 2
+        kitchen.submitOrder(); // Order 3
+        
+        System.out.println("Starting kitchen simulation...");
+        System.out.println("Each order needs 5 ticks for grilling and 3 ticks for plating");
+        
+        // Run simulation for 20 ticks
+        for (int tick = 1; tick <= 20; tick++) {
+            System.out.println("\nTick " + tick);
+            simulator.step();
+            kitchen.processOrders(); // Move orders between stations
+        }
+        
+        System.out.println("\nKitchen simulation complete!");
     }
 }

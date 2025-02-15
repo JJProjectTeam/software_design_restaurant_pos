@@ -5,14 +5,30 @@ import java.util.ArrayList;
 
 /**
  * Core engine class that manages entities and updates them in a two-phase approach.
+ * Implemented as a singleton since only one engine instance should exist.
  */
 public class GameEngine {
+    private static GameEngine instance = null;
     private final List<Entity> entities;
     private boolean isRunning;
 
-    public GameEngine() {
+    /**
+     * Private constructor to prevent direct instantiation.
+     */
+    private GameEngine() {
         this.entities = new ArrayList<>();
         this.isRunning = false;
+    }
+
+    /**
+     * Gets the singleton instance of the GameEngine.
+     * @return The singleton GameEngine instance
+     */
+    public static GameEngine getInstance() {
+        if (instance == null) {
+            instance = new GameEngine();
+        }
+        return instance;
     }
 
     /**
@@ -24,10 +40,10 @@ public class GameEngine {
     }
 
     /**
-     * Unregisters an entity from the engine.
-     * @param entity The entity to unregister
+     * Deregisters an entity from the engine.
+     * @param entity The entity to deregister
      */
-    public void unregisterEntity(Entity entity) {
+    public void deregisterEntity(Entity entity) {
         entities.remove(entity);
     }
 

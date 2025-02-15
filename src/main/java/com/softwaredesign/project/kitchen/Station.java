@@ -1,41 +1,45 @@
 package com.softwaredesign.project.kitchen;
 
 import com.softwaredesign.project.engine.Entity;
+import java.util.LinkedList;
+import java.util.Queue;
 
-public abstract class Station implements Entity {
-    private Recipe currentRecipe;
-    private Recipe nextRecipe;
+public abstract class Station extends Entity {
+    protected Queue<Order> orderQueue;
+    protected Order currentOrder;
+    protected int processingTime;
+    protected int currentProcessingTime;
 
-    public Station() {
-        StationManager.getInstance().registerStation(this);
+    public Station(int processingTime) {
+        this.orderQueue = new LinkedList<>();
+        this.processingTime = processingTime;
+        this.currentProcessingTime = 0;
     }
 
     @Override
     public void readState() {
-        // During read phase, check if current recipe is done with this station
-        if (currentRecipe != null && !currentRecipe.canAssignToStation(this)) {
-            nextRecipe = null;  // Release the recipe
+        if (currentOrder == null && !orderQueue.isEmpty()) { // if there is an order ready to be processed
+            currentOrder = orderQueue.poll(); // read it in
+            currentProcessingTime = 0;        // reset tick
+        }
+
+        if (currentOrder != null) { // if there is an order being processed
+            currentProcessingTime++; // tick up
+            if (currentProcessingTime >= processingTime) { // if the tick count reaches the processing time
+                processOrder(currentOrder);                // process the order (i.e. finish up!)
+                currentOrder = null;
+            }
         }
     }
 
     @Override
     public void writeState() {
-        // During write phase, update the current recipe
-        currentRecipe = nextRecipe;
+        // No state updates needed in write phase
     }
 
-    public boolean canAcceptRecipe() {
-        return currentRecipe == null;
+    public void addOrder(Order order) {
+        orderQueue.offer(order);
     }
 
-    public void assignRecipe(Recipe recipe) {
-        if (canAcceptRecipe() && recipe.canAssignToStation(this)) {
-            this.nextRecipe = recipe;
-            recipe.assignToStation(this);
-        }
-    }
-
-    protected Recipe getCurrentRecipe() {
-        return currentRecipe;
-    }
+    protected abstract void processOrder(Order order);
 }
