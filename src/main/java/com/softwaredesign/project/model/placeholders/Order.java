@@ -17,4 +17,7 @@ public class Order {
     public void addRecipe(Recipe recipe) {
         // PLACEHOLDER TO AVOID ERRORS
     }
+    public void addModification(Recipe recipe, Ingredient ingredient, boolean isAddition) {
+        // PLACEHOLDER TO AVOID ERRORS
+    }
 }

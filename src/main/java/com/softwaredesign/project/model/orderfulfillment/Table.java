@@ -8,18 +8,23 @@ import com.softwaredesign.project.model.placeholders.Recipe;
 
 public class Table {
     private int tableNumber;
+    private int tableCapacity;
     private List<DineInCustomer> customers;
-    private boolean isReadyToOrder;
     private Menu menu;
 
-    public Table(int tableNumber, Menu menu) {
+    public Table(int tableNumber, Menu menu, int tableCapacity) {
         this.tableNumber = tableNumber;
         this.customers = new ArrayList<>();
         this.menu = menu;
+        this.tableCapacity = tableCapacity;
     }
 
     public void addCustomer(DineInCustomer customer) {
         customers.add(customer);
+    }
+
+    public List<DineInCustomer> getCustomers() {
+        return new ArrayList<>(customers);
     }
 
     public boolean isEveryoneReadyToOrder() {
@@ -32,8 +37,14 @@ public class Table {
         }
         List<Recipe> tableOrders = new ArrayList<>();
         for (DineInCustomer customer : customers) {
-            tableOrders.add(customer.getOrder(menu));
+            tableOrders.add(customer.selectRecipeFromMenu(menu));
         }
         return tableOrders;
+    }
+    public int getTableNumber() {
+        return tableNumber;
+    }
+    public int getTableCapacity() {
+        return tableCapacity;
     }
 }

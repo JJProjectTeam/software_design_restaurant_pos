@@ -8,7 +8,18 @@ import com.softwaredesign.project.model.placeholders.ConcreteRecipe;
 import com.softwaredesign.project.model.placeholders.Recipe;
 import com.softwaredesign.project.model.placeholders.Ingredient;
 
-
+/*
+ * Notes about the menu class
+ * In the next iteration, availableRecipes will be populated from some sort of 'database' or storage
+ * Eventually this will either be completely assembled by the user, or we will have premade ones which they can choose from
+ * (I think)
+ * 
+ * getRandomAdditionalIngredient and getRandomIngredientFromRecipe will eventually be replaced with calls to the inventory
+ * 
+ * 
+ * 
+ * 
+ */
 public class Menu {
     private List<Recipe> availableRecipes;
     
@@ -35,29 +46,22 @@ public class Menu {
         Recipe selectedRecipe = availableRecipes.get(random.nextInt(availableRecipes.size()));
         
         // Randomly customize the recipe
-        customizeRecipe(selectedRecipe);
-        
-        // TODO: Implement Interceptor Pattern
-        // RecipeValidator.getInstance().validateRecipe(selectedRecipe);
-        // This will check if recipe with customizations can be made with current inventory
-        
         return selectedRecipe;
     }
 
-    private void customizeRecipe(Recipe recipe) {
-        Random random = new Random();
-        int numberOfModifications = random.nextInt(4); // 0 to 3 modifications
+    public Ingredient getRandomAdditionalIngredient() {
+        // TODO: This should eventually check Inventory for available ingredients
+        return getRandomIngredient();
+    }
 
-        for (int i = 0; i < numberOfModifications; i++) {
-            boolean isAddition = random.nextBoolean();
-            Ingredient randomIngredient = getRandomIngredient();
-
-            if (isAddition) {
-                recipe.addIngredient(randomIngredient);
-            } else {
-                recipe.removeIngredient(randomIngredient);
-            }
+    public Ingredient getRandomIngredientFromRecipe(Recipe recipe) {
+        if (recipe == null || recipe.getIngredients().isEmpty()) {
+            return null;
         }
+
+        Random random = new Random();
+        List<Ingredient> recipeIngredients = recipe.getIngredients();
+        return recipeIngredients.get(random.nextInt(recipeIngredients.size()));
     }
 
     private Ingredient getRandomIngredient() {

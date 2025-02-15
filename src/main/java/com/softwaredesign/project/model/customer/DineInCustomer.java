@@ -1,44 +1,91 @@
 package com.softwaredesign.project.model.customer;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import com.softwaredesign.project.model.placeholders.Recipe;
+import com.softwaredesign.project.model.placeholders.Ingredient;
 import com.softwaredesign.project.model.exceptions.RecipeValidationException;
 import com.softwaredesign.project.model.menu.Menu;
 
 public class DineInCustomer extends Customer {
     private boolean isBrowsing;
     private Recipe selectedRecipe;
+    private List<Ingredient> addedIngredients;
+    private List<Ingredient> removedIngredients;
 
     public DineInCustomer() {
         this.isBrowsing = true;
+        this.selectedRecipe = null;
+        this.addedIngredients = new ArrayList<>();
+        this.removedIngredients = new ArrayList<>();
     }
 
     @Override
-    public Recipe getOrder(Menu menu) {
+    public Recipe selectRecipeFromMenu(Menu menu) {
         if (isBrowsing) {
-            throw new IllegalStateException("Customer is still browsing or hasn't selected a recipe");
+            throw new IllegalStateException("Customer is still browsing!");
         }
 
-        Recipe selectedRecipe = null;
-        boolean validOrder = false;
-
-        while (!validOrder) {
+        boolean validChoice = false;
+        while (!validChoice) {
             selectedRecipe = menu.getRandomRecipe();
             try {
-                // RecipeValidator.getInstance().validateRecipe(selectedRecipe);
-                validOrder = true;
+                // Validate base recipe ingredients
+                // RecipeValidator.getInstance().validateIngredients(selectedRecipe.getIngredients());
+                validChoice = true;
             } catch (RecipeValidationException e) {
-                // If validation fails, loop will continue and customer will pick again
                 System.out.println("Sorry, that item is unavailable. Selecting something else...");
             }
         }
-
         return selectedRecipe;
     }
 
-    public void selectRecipe(Recipe recipe) {
-        this.selectedRecipe = recipe;
+    @Override
+    public void requestRecipeModification(Menu menu) {
+        if (selectedRecipe == null) {
+            throw new IllegalArgumentException("Can't modify a recipe that hasn't been selected yet!");
+        }
+        
+        Random random = new Random();
+        //this could be bad magic numbers, TODO should player set this?
+        int numberOfModifications = random.nextInt(4); // 0-3 modifications
+        
+        
+        for (int i = 0; i < numberOfModifications; i++) {
+            // 50/50 chance of if the choice is to remove or add ingredient
+            if (random.nextBoolean()) {
+                Ingredient addIngredient = menu.getRandomAdditionalIngredient();
+                if (addIngredient != null) {
+                    try {
+                        // Validate single new ingredient
+                        // RecipeValidator.getInstance().validateIngredients(List.of(addIngredient));
+                        addedIngredients.add(addIngredient);
+                    } catch (RecipeValidationException e) {
+                        System.out.println("Can't add " + addIngredient.getName() + ". Skipping...");
+                    }
+                }
+            } else {
+                Ingredient removeIngredient = menu.getRandomIngredientFromRecipe(selectedRecipe);
+                if (removeIngredient != null && !selectedRecipe.getIngredients().contains(removeIngredient)) {
+                    removedIngredients.add(removeIngredient);
+                }
+            }
+        }
+        
+    }
+
+    public List<Ingredient> getAddedIngredients() {
+        return addedIngredients;
+    }
+
+    public List<Ingredient> getRemovedIngredients() {
+        return removedIngredients;
+    }
+
+    public Recipe getSelectedRecipe() {
+        return selectedRecipe;
     }
 
     public void finishBrowsing() {
