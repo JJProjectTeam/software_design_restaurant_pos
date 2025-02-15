@@ -1,5 +1,50 @@
 package com.softwaredesign.project.orderfulfillment;
 
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+import com.softwaredesign.project.model.orderfulfillment.SeatingPlan;
+import com.softwaredesign.project.model.orderfulfillment.Table;
+import com.softwaredesign.project.model.customer.DineInCustomer;
+import com.softwaredesign.project.model.menu.Menu;
+import java.util.ArrayList;
+import java.util.List;
+
 public class OrderFulfilmentTests {
-    
+    private SeatingPlan seatingPlan;
+    private Menu menu;
+
+    @Before
+    public void setUp() {
+        menu = new Menu();
+        seatingPlan = new SeatingPlan(5, 15, menu);
+    }
+
+    @Test
+    public void testValidSeatingPlanCreation() {
+        assertNotNull(seatingPlan.getAllTables());
+        assertEquals(5, seatingPlan.getAllTables().size());
+    }
+
+    @Test
+    public void testFindTableForValidGroup() {
+        List<DineInCustomer> group = new ArrayList<>();
+        group.add(new DineInCustomer());
+        group.add(new DineInCustomer());
+        
+        Table assignedTable = seatingPlan.findTableForGroup(group);
+        assertNotNull(assignedTable);
+        assertEquals(2, assignedTable.getCustomers().size());
+    }
+
+    @Test
+    public void testRejectOversizedGroup() {
+        List<DineInCustomer> largeGroup = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            largeGroup.add(new DineInCustomer());
+        }
+        
+        Table assignedTable = seatingPlan.findTableForGroup(largeGroup);
+        assertNull(assignedTable);
+    }
 }
