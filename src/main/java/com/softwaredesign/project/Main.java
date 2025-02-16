@@ -1,11 +1,11 @@
 package com.softwaredesign.project;
 
-import com.softwaredesign.project.Kitchen.Kitchen;
-import com.softwaredesign.project.Order.*;
 import com.softwaredesign.project.inventory.Ingredient;
 import com.softwaredesign.project.inventory.Inventory;
 import com.softwaredesign.project.inventory.InventoryAlert;
 import com.softwaredesign.project.inventory.InventoryService;
+import com.softwaredesign.project.order.*;
+import com.softwaredesign.project.kitchen.Kitchen;
 
 import java.util.List;
 

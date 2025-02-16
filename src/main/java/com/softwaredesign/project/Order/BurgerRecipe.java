@@ -1,4 +1,4 @@
-package com.softwaredesign.project.Order;
+package com.softwaredesign.project.order;
 
 import com.softwaredesign.project.inventory.Ingredient;
 import com.softwaredesign.project.inventory.InventoryService;

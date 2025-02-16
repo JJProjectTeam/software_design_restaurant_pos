@@ -1,7 +1,8 @@
 package com.softwaredesign.project.inventory;
 
-import com.softwaredesign.project.Order.Station;
 import java.util.Set;
+
+import com.softwaredesign.project.order.Station;
 
 public class Ingredient {
     private String name;

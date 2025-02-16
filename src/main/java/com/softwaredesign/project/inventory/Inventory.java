@@ -1,11 +1,11 @@
 package com.softwaredesign.project.inventory;
 
-import com.softwaredesign.project.Order.Station;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.softwaredesign.project.order.Station;
 
 public class Inventory implements InventoryService, ISubject {
     private final Map<String, IngredientStore> ingredients;

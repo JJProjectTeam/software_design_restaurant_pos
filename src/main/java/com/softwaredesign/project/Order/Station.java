@@ -1,4 +1,4 @@
-package com.softwaredesign.project.Order;
+package com.softwaredesign.project.order;
 
 public enum Station {
     PREP, 

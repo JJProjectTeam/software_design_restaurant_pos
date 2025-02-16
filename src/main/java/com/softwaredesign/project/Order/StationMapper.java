@@ -1,4 +1,4 @@
-package com.softwaredesign.project.Order;
+package com.softwaredesign.project.order;
 
 import java.util.HashSet;
 import java.util.Set;

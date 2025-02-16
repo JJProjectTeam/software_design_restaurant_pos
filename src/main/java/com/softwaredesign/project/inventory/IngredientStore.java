@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.softwaredesign.project.Order.Station;
+import com.softwaredesign.project.order.Station;
 
 public class IngredientStore {
     private String name;
