@@ -8,13 +8,16 @@ import com.softwaredesign.project.Order.Meal;
 import com.softwaredesign.project.Order.OrderManager;
 import com.softwaredesign.project.Order.Recipe;
 import com.softwaredesign.project.Order.Station;
+import com.softwaredesign.project.inventory.InventoryService;
 
 public class Kitchen {
     private OrderManager orderManager;
+    private InventoryService inventoryService;
     private List<Recipe> recipes = new ArrayList<>();
 
-    public Kitchen(OrderManager orderManager) {
+    public Kitchen(OrderManager orderManager, InventoryService inventoryService) {
         this.orderManager = orderManager;
+        this.inventoryService = inventoryService;
     }
 
     public void getRecipes() {

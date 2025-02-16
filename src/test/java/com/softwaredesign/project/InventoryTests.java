@@ -13,7 +13,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.lang.reflect.Field;
 
 public class InventoryTests {
     private Inventory inventory;
@@ -23,8 +22,7 @@ public class InventoryTests {
 
     @Before
     public void setUp() {
-        resetSingleton(); // Reset the singleton instance before each test
-        inventory = Inventory.getInstance();
+        inventory = new Inventory();
         alert = new InventoryAlert(5); // Set threshold to 5
         inventory.attach(alert);
 
@@ -37,18 +35,6 @@ public class InventoryTests {
     @After
     public void tearDown() {
         System.setOut(originalOut);
-        resetSingleton(); // Clean up after each test
-    }
-
-    // Helper method to reset singleton instance between tests
-    private void resetSingleton() {
-        try {
-            Field instance = Inventory.class.getDeclaredField("instance");
-            instance.setAccessible(true);
-            instance.set(null, null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Test
@@ -134,16 +120,9 @@ public class InventoryTests {
     }
 
     @Test
-    public void testSingletonPattern() {
-        Inventory instance1 = Inventory.getInstance();
-        Inventory instance2 = Inventory.getInstance();
-        assertSame("Singleton instances should be the same", instance1, instance2);
-    }
-
-    @Test
     public void testAddIngredientBasic() {
-        Inventory.getInstance().addIngredient("Beef", 20, 5.00);
-        IngredientStore store = Inventory.getInstance().getIngredientStore("Beef");
+        inventory.addIngredient("Beef", 20, 5.00);
+        IngredientStore store = inventory.getIngredientStore("Beef");
         assertNotNull("IngredientStore should not be null", store);
         assertEquals("Stock should be 20", 20, store.getQuantity());
         assertEquals("Price should be 5.00", 5.00, store.getPrice(), 0.001);
@@ -176,7 +155,6 @@ public class InventoryTests {
 
     @Test
     public void testUpdateInventory() {
-        Inventory inventory = Inventory.getInstance();
         inventory.addIngredient("Cheese", 10, 3.00);
         inventory.addIngredient("Lettuce", 15, 1.50);
         
@@ -192,7 +170,6 @@ public class InventoryTests {
 
     @Test
     public void testNonExistentIngredients() {
-        Inventory inventory = Inventory.getInstance();
         assertEquals("Non-existent ingredient should return 0 stock", 
                     0, inventory.getStock("NonExistent"));
         assertEquals("Non-existent ingredient should return 0.0 price", 
@@ -203,7 +180,6 @@ public class InventoryTests {
 
     @Test(expected = IllegalArgumentException.class)
     public void testUpdateInventoryWithNonExistentIngredient() {
-        Inventory inventory = Inventory.getInstance();
         Map<String, Integer> updates = new HashMap<>();
         updates.put("NonExistent", 5);
         inventory.updateInventory(updates);

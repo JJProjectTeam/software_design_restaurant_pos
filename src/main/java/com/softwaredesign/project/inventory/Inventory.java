@@ -7,21 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Inventory implements ISubject {
-    private static Inventory instance;
+public class Inventory implements InventoryService, ISubject {
     private final Map<String, IngredientStore> ingredients;
     private final List<IObserver> observers;
 
-    private Inventory() {
+    public Inventory() {
         this.ingredients = new HashMap<>();
         this.observers = new ArrayList<>();
-    }
-
-    public static synchronized Inventory getInstance() {
-        if (instance == null) {
-            instance = new Inventory();
-        }
-        return instance;
     }
 
     @Override

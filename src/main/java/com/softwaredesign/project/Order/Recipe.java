@@ -7,15 +7,18 @@ import java.util.Objects;
 import java.util.Queue;
 
 import com.softwaredesign.project.inventory.Ingredient;
+import com.softwaredesign.project.inventory.InventoryService;
 
 public abstract class Recipe {
     protected String name;
     protected List<Ingredient> ingredients;
     protected Queue<Station> stationsToVisit;
+    protected InventoryService inventoryService;
 
-    protected Recipe(String name) {
+    protected Recipe(String name, InventoryService inventoryService) {
         this.name = name;
         this.ingredients = new ArrayList<>();
+        this.inventoryService = inventoryService;
         initializeBaseIngredients();
         stationsToVisit = new LinkedList<>();
     }
@@ -65,6 +68,6 @@ public abstract class Recipe {
     }
 
     public Meal buildMeal() {
-        return new Meal(name, ingredients);
+        return new Meal(name, ingredients, inventoryService);
     }
 }

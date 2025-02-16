@@ -2,25 +2,28 @@ package com.softwaredesign.project.Order;
 import java.util.List;
 
 import com.softwaredesign.project.inventory.Ingredient;
+import com.softwaredesign.project.inventory.InventoryService;
+
 public class Meal {
     private String name;
     private final List<Ingredient> ingredients;
+    private final InventoryService inventory;
 
-    public Meal(String name, List<Ingredient> ingredients) {
+    public Meal(String name, List<Ingredient> ingredients, InventoryService inventory) {
         this.name = name;
         this.ingredients = ingredients;
+        this.inventory = inventory;
     }
 
     public double getPrice() {
         double price = 0;
         for (Ingredient ingredient : ingredients) {
             // Retrieve the price from the IngredientStore
-            double ingredientPrice = Inventory.getInstance().getIngredientStore(ingredient.getName()).getPrice();
+            double ingredientPrice = inventory.getIngredientStore(ingredient.getName()).getPrice();
             price += ingredientPrice;
         }
         return price;
     }
-
 
     @Override
     public String toString() {
