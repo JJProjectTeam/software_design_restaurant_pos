@@ -1,4 +1,4 @@
-package com.softwaredesign.project.model.staff;
+package com.softwaredesign.project.staff;
 
 public abstract class StaffMember {
     private double payPerHour;

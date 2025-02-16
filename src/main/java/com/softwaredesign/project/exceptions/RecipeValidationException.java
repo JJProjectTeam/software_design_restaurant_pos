@@ -1,4 +1,4 @@
-package com.softwaredesign.project.model.exceptions;
+package com.softwaredesign.project.exceptions;
 
 public class RecipeValidationException extends RuntimeException {
     

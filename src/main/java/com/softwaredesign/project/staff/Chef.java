@@ -1,10 +1,10 @@
-package com.softwaredesign.project.model.staff;
+package com.softwaredesign.project.staff;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.softwaredesign.project.model.placeholders.Station;
-import com.softwaredesign.project.model.staff.chefstrategies.ChefStrategy;
+import com.softwaredesign.project.placeholders.Station;
+import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 
 
 

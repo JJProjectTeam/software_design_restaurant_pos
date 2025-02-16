@@ -1,4 +1,4 @@
-package com.softwaredesign.project.model.placeholders;
+package com.softwaredesign.project.placeholders;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,15 +1,16 @@
-package com.softwaredesign.project.model.staff;
+package com.softwaredesign.project.staff;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.softwaredesign.project.model.orderfulfillment.Table;
 import java.time.LocalDateTime;
-import com.softwaredesign.project.model.placeholders.Recipe;
-import com.softwaredesign.project.model.placeholders.OrderManager;
-import com.softwaredesign.project.model.placeholders.Order;
-import com.softwaredesign.project.model.customer.DineInCustomer;
-import com.softwaredesign.project.model.placeholders.Ingredient;
-import com.softwaredesign.project.model.menu.Menu;
+
+import com.softwaredesign.project.orderfulfillment.Table;
+import com.softwaredesign.project.placeholders.Ingredient;
+import com.softwaredesign.project.placeholders.Order;
+import com.softwaredesign.project.placeholders.OrderManager;
+import com.softwaredesign.project.placeholders.Recipe;
+import com.softwaredesign.project.customer.DineInCustomer;
+import com.softwaredesign.project.menu.Menu;
 
 public class Waiter extends StaffMember {
     private List<Table> assignedTables;

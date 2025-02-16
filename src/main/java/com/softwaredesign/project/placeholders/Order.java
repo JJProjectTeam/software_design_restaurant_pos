@@ -1,4 +1,4 @@
-package com.softwaredesign.project.model.placeholders;
+package com.softwaredesign.project.placeholders;
 
 import java.time.LocalDateTime;
 

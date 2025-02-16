@@ -1,10 +1,11 @@
-package com.softwaredesign.project.model.orderfulfillment;
+package com.softwaredesign.project.orderfulfillment;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.softwaredesign.project.model.customer.DineInCustomer;
-import com.softwaredesign.project.model.menu.Menu;
-import com.softwaredesign.project.model.placeholders.Recipe;
+
+import com.softwaredesign.project.customer.DineInCustomer;
+import com.softwaredesign.project.menu.Menu;
+import com.softwaredesign.project.placeholders.Recipe;
 
 public class Table {
     private int tableNumber;

@@ -1,8 +1,8 @@
-package com.softwaredesign.project.model.staff.chefstrategies;
+package com.softwaredesign.project.staff.chefstrategies;
 
 import java.util.List;
 
-import com.softwaredesign.project.model.placeholders.Station;
+import com.softwaredesign.project.placeholders.Station;
 
 public class ShortestQueueFirst implements ChefStrategy {
     @Override

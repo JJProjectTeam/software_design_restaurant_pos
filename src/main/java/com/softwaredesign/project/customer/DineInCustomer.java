@@ -1,13 +1,13 @@
-package com.softwaredesign.project.model.customer;
+package com.softwaredesign.project.customer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import com.softwaredesign.project.model.placeholders.Recipe;
-import com.softwaredesign.project.model.placeholders.Ingredient;
-import com.softwaredesign.project.model.exceptions.RecipeValidationException;
-import com.softwaredesign.project.model.menu.Menu;
+import com.softwaredesign.project.exceptions.RecipeValidationException;
+import com.softwaredesign.project.menu.Menu;
+import com.softwaredesign.project.placeholders.Ingredient;
+import com.softwaredesign.project.placeholders.Recipe;
 
 public class DineInCustomer extends Customer {
     private boolean isBrowsing;

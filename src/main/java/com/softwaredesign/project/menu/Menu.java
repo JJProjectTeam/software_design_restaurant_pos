@@ -1,12 +1,12 @@
-package com.softwaredesign.project.model.menu;
+package com.softwaredesign.project.menu;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import com.softwaredesign.project.model.placeholders.ConcreteRecipe;
-import com.softwaredesign.project.model.placeholders.Recipe;
-import com.softwaredesign.project.model.placeholders.Ingredient;
+import com.softwaredesign.project.placeholders.ConcreteRecipe;
+import com.softwaredesign.project.placeholders.Ingredient;
+import com.softwaredesign.project.placeholders.Recipe;
 
 /*
  * Notes about the menu class
