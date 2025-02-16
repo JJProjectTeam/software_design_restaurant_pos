@@ -1,4 +1,4 @@
-package com.softwaredesign.project.model.inventory;
+package com.softwaredesign.project.inventory;
 
 public interface ISubject {
     void attach(IObserver observer);

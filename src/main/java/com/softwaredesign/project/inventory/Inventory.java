@@ -1,4 +1,4 @@
-package com.softwaredesign.project.model.inventory;
+package com.softwaredesign.project.inventory;
 
 import java.util.ArrayList;
 import java.util.HashMap;

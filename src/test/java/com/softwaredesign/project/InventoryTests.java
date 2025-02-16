@@ -4,28 +4,22 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.softwaredesign.project.model.inventory.Inventory;
-import com.softwaredesign.project.model.inventory.InventoryAlert;
-import com.softwaredesign.project.views.InventoryAlertView;
-import com.softwaredesign.project.controller.InventoryController;
+import com.softwaredesign.project.inventory.Inventory;
+import com.softwaredesign.project.inventory.InventoryAlert;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 public class InventoryTests {
     private Inventory inventory;
-    private InventoryController controller;
     private InventoryAlert alert;
-    private InventoryAlertView alertView;
     private ByteArrayOutputStream outputStream;
     private PrintStream originalOut;
 
     @Before
     public void setUp() {
         inventory = new Inventory();
-        controller = new InventoryController(inventory);
-        alertView = new InventoryAlertView();
-        alert = new InventoryAlert(5, alertView); // Set threshold to 5
+        alert = new InventoryAlert(5); // Set threshold to 5
         inventory.attach(alert);
 
         // Capture console output for testing alerts
@@ -36,44 +30,47 @@ public class InventoryTests {
 
     @Test
     public void testAddIngredient() {
-        controller.addIngredient("Tomatoes", 10, 2.50);
+        inventory.addIngredient("Tomatoes", 10, 2.50);
         assertEquals(10, inventory.getStock("Tomatoes"));
         assertEquals(2.50, inventory.getPrice("Tomatoes"), 0.001);
+        assertTrue(outputStream.toString().contains("Stock update: Tomatoes - 10 units in stock"));
     }
 
     @Test
     public void testUseIngredient() {
-        controller.addIngredient("Garlic", 8, 1.00);
-        controller.useIngredient("Garlic", 3);
+        inventory.addIngredient("Garlic", 8, 1.00);
+        inventory.useIngredient("Garlic", 3);
         assertEquals(5, inventory.getStock("Garlic"));
+        assertTrue(outputStream.toString().contains("Stock update: Garlic - 5 units in stock"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testUseNonexistentIngredient() {
-        controller.useIngredient("Onions", 2);
+        inventory.useIngredient("Onions", 2);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testUseMoreThanAvailable() {
-        controller.addIngredient("Tomatoes", 5, 2.50);
-        controller.useIngredient("Tomatoes", 6);
+        inventory.addIngredient("Tomatoes", 5, 2.50);
+        inventory.useIngredient("Tomatoes", 6);
     }
 
     @Test
     public void testLowStockAlert() {
-        controller.addIngredient("Carrots", 6, 1.50);
-        controller.useIngredient("Carrots", 2); // Stock becomes 4, should warn
+        inventory.addIngredient("Carrots", 6, 1.50);
+        outputStream.reset(); // Clear previous output
+        inventory.useIngredient("Carrots", 2); // Stock becomes 4, should warn
         
         String output = outputStream.toString();
         assertTrue(output.contains("WARNING: Low stock alert for Carrots"));
-        assertTrue(output.contains("Only 4 units remaining"));
+        assertTrue(output.contains("only 4 remaining"));
     }
 
     @Test
     public void testMultipleIngredients() {
-        controller.addIngredient("Tomatoes", 10, 2.50);
-        controller.addIngredient("Garlic", 8, 1.00);
-        controller.addIngredient("Onions", 15, 1.50);
+        inventory.addIngredient("Tomatoes", 10, 2.50);
+        inventory.addIngredient("Garlic", 8, 1.00);
+        inventory.addIngredient("Onions", 15, 1.50);
 
         assertEquals(10, inventory.getStock("Tomatoes"));
         assertEquals(8, inventory.getStock("Garlic"));
@@ -82,8 +79,9 @@ public class InventoryTests {
 
     @Test
     public void testNoAlertForSufficientStock() {
-        controller.addIngredient("Potatoes", 10, 3.00);
-        controller.useIngredient("Potatoes", 2); // Stock becomes 8, no trigger warning
+        inventory.addIngredient("Potatoes", 10, 3.00);
+        outputStream.reset(); // Clear previous output
+        inventory.useIngredient("Potatoes", 2); // Stock becomes 8, no warning
         
         String output = outputStream.toString();
         assertFalse(output.contains("WARNING: Low stock alert for Potatoes"));
@@ -91,23 +89,24 @@ public class InventoryTests {
 
     @Test
     public void testConsecutiveStockUpdates() {
-        controller.addIngredient("Tomatoes", 10, 2.50);
-        controller.useIngredient("Tomatoes", 3); // 7 remaining, no warning
-        controller.useIngredient("Tomatoes", 3); // 4 remaining, should warn
+        inventory.addIngredient("Tomatoes", 10, 2.50);
+        outputStream.reset(); // Clear previous output
+        inventory.useIngredient("Tomatoes", 3); // 7 remaining, no warning
+        inventory.useIngredient("Tomatoes", 3); // 4 remaining, should warn
         
         String output = outputStream.toString();
         assertTrue(output.contains("WARNING: Low stock alert for Tomatoes"));
-        assertTrue(output.contains("Only 4 units remaining"));
+        assertTrue(output.contains("only 4 remaining"));
     }
 
     @Test
     public void testZeroStock() {
-        controller.addIngredient("Garlic", 5, 1.00);
-        controller.useIngredient("Garlic", 5); // Using all stock
+        inventory.addIngredient("Garlic", 5, 1.00);
+        inventory.useIngredient("Garlic", 5); // Using all stock
         
         String output = outputStream.toString();
         assertTrue(output.contains("WARNING: Low stock alert for Garlic"));
-        assertTrue(output.contains("Only 0 units remaining"));
+        assertTrue(output.contains("only 0 remaining"));
         assertEquals(0, inventory.getStock("Garlic"));
     }
 }
