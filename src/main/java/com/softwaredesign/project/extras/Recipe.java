@@ -1,6 +1,7 @@
 package com.softwaredesign.project.extras;
 import java.util.List;
 
+import com.softwaredesign.project.inventory.Ingredient;
 import com.softwaredesign.project.Order.Meal;
 
 public abstract class Recipe {

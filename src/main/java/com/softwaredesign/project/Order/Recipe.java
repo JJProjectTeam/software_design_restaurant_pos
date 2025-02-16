@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
 
-import com.softwaredesign.project.extras.Ingredient;
+import com.softwaredesign.project.inventory.Ingredient;
 
 public abstract class Recipe {
     protected String name;

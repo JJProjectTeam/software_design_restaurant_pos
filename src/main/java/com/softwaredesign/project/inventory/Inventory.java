@@ -1,17 +1,27 @@
 package com.softwaredesign.project.inventory;
 
+import com.softwaredesign.project.Order.Station;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Inventory implements ISubject {
-    private final Map<String, Ingredient> ingredients;
+    private static Inventory instance;
+    private final Map<String, IngredientStore> ingredients;
     private final List<IObserver> observers;
 
-    public Inventory() {
+    private Inventory() {
         this.ingredients = new HashMap<>();
         this.observers = new ArrayList<>();
+    }
+
+    public static synchronized Inventory getInstance() {
+        if (instance == null) {
+            instance = new Inventory();
+        }
+        return instance;
     }
 
     @Override
@@ -31,13 +41,13 @@ public class Inventory implements ISubject {
         }
     }
 
-    public void addIngredient(String name, int quantity, double price) {
-        ingredients.put(name, new Ingredient(name, quantity, price));
+    public void addIngredient(String name, int quantity, double price, Station... stations) {
+        ingredients.put(name, new IngredientStore(name, quantity, price, stations));
         notifyObservers(name, quantity);
     }
 
     public void useIngredient(String name, int amount) throws IllegalArgumentException {
-        Ingredient ingredient = ingredients.get(name);
+        IngredientStore ingredient = ingredients.get(name);
         if (ingredient == null) {
             throw new IllegalArgumentException("Ingredient " + name + " not found in inventory");
         }
@@ -55,7 +65,7 @@ public class Inventory implements ISubject {
             String name = entry.getKey();
             int amount = entry.getValue();
             
-            Ingredient ingredient = ingredients.get(name);
+            IngredientStore ingredient = ingredients.get(name);
             if (ingredient == null) {
                 throw new IllegalArgumentException("Ingredient " + name + " not found in inventory");
             }
@@ -66,12 +76,16 @@ public class Inventory implements ISubject {
     }
 
     public int getStock(String name) {
-        Ingredient ingredient = ingredients.get(name);
+        IngredientStore ingredient = ingredients.get(name);
         return ingredient != null ? ingredient.getQuantity() : 0;
     }
 
     public double getPrice(String name) {
-        Ingredient ingredient = ingredients.get(name);
+        IngredientStore ingredient = ingredients.get(name);
         return ingredient != null ? ingredient.getPrice() : 0.0;
+    }
+
+    public IngredientStore getIngredientStore(String name) {
+        return ingredients.get(name);
     }
 }

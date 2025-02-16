@@ -6,7 +6,7 @@ import com.softwaredesign.project.Order.KebabRecipe;
 import com.softwaredesign.project.Order.Meal;
 import com.softwaredesign.project.Order.Order;
 import com.softwaredesign.project.Order.OrderManager;
-import com.softwaredesign.project.extras.Ingredient;
+import com.softwaredesign.project.inventory.Ingredient;
 
 import java.util.List;
 
@@ -24,8 +24,8 @@ public class Driver {
         }
 
         // 2. Create ingredients for modifications
-        Ingredient cheese = new Ingredient("Cheese", 0.75);
-        Ingredient sauce = new Ingredient("Garlic Sauce", 0.50);
+        Ingredient cheese = new Ingredient("Cheese");
+        Ingredient sauce = new Ingredient("Garlic Sauce");
 
         // 3. Create and populate order
         Order order = new Order();

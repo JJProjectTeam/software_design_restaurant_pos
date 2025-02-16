@@ -1,6 +1,6 @@
 package com.softwaredesign.project.Order;
 
-import com.softwaredesign.project.extras.Ingredient;
+import com.softwaredesign.project.inventory.Ingredient;
 
 public class BurgerRecipe extends Recipe {
     public BurgerRecipe() {
@@ -9,10 +9,10 @@ public class BurgerRecipe extends Recipe {
 
     @Override
     protected void initializeBaseIngredients() {
-        addIngredient(new Ingredient("Beef Patty", 3.99, Station.PREP, Station.GRILL));
-        addIngredient(new Ingredient("Bun", 0.99, Station.PREP));
-        addIngredient(new Ingredient("Lettuce", 0.99, Station.PREP));
-        addIngredient(new Ingredient("Tomato", 0.50, Station.PREP));
-        addIngredient(new Ingredient("Cheese", 0.75));
+        addIngredient(new Ingredient("Beef Patty"));
+        addIngredient(new Ingredient("Bun"));
+        addIngredient(new Ingredient("Lettuce"));
+        addIngredient(new Ingredient("Tomato"));
+        addIngredient(new Ingredient("Cheese"));
     }
 }

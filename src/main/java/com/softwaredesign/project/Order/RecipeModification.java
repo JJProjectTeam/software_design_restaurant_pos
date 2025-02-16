@@ -3,7 +3,7 @@ package com.softwaredesign.project.Order;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.softwaredesign.project.extras.Ingredient;
+import com.softwaredesign.project.inventory.Ingredient;
 
 public class RecipeModification {
     private List<Ingredient> addedIngredients;

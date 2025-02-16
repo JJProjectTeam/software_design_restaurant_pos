@@ -1,33 +1,29 @@
 package com.softwaredesign.project.inventory;
 
+import com.softwaredesign.project.Order.Station;
+import java.util.Collections;
+import java.util.Set;
+
 public class Ingredient {
     private String name;
-    private int quantity;
-    private double price;
 
-    public Ingredient(String name, int quantity, double price) {
+    public Ingredient(String name) {
         this.name = name;
-        this.quantity = quantity;
-        this.price = price;
+        // Reduce the quantity in the IngredientStore by 1 when an Ingredient is created
+        Inventory.getInstance().useIngredient(name, 1);
     }
 
     public String getName() {
         return name;
     }
 
-    public int getQuantity() {
-        return quantity;
+    // This is so so dodge TODO find a better solution for this
+    public Set<Station> getStations() {
+        return Inventory.getInstance().getIngredientStore(name).getStations();
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
+    @Override
+    public String toString() {
+        return name;
     }
 }

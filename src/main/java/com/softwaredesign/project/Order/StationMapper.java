@@ -3,7 +3,7 @@ package com.softwaredesign.project.Order;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.softwaredesign.project.extras.Ingredient;
+import com.softwaredesign.project.inventory.Ingredient;
 
 public class StationMapper {
 

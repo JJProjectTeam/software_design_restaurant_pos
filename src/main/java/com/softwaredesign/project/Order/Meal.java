@@ -1,7 +1,7 @@
 package com.softwaredesign.project.Order;
 import java.util.List;
 
-import com.softwaredesign.project.extras.Ingredient;
+import com.softwaredesign.project.inventory.Ingredient;
 public class Meal {
     private String name;
     private final List<Ingredient> ingredients;
@@ -14,7 +14,9 @@ public class Meal {
     public double getPrice() {
         double price = 0;
         for (Ingredient ingredient : ingredients) {
-            price += ingredient.getPrice();
+            // Retrieve the price from the IngredientStore
+            double ingredientPrice = Inventory.getInstance().getIngredientStore(ingredient.getName()).getPrice();
+            price += ingredientPrice;
         }
         return price;
     }
@@ -37,4 +39,3 @@ public class Meal {
         return result.toString();
     }
 }
-
