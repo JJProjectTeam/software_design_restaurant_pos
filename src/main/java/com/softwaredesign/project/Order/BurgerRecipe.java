@@ -11,10 +11,10 @@ public class BurgerRecipe extends Recipe {
 
     @Override
     protected void initializeBaseIngredients() {
-        addIngredient(new Ingredient("Beef Patty", inventoryService));
-        addIngredient(new Ingredient("Bun", inventoryService));
-        addIngredient(new Ingredient("Lettuce", inventoryService));
-        addIngredient(new Ingredient("Tomato", inventoryService));
-        addIngredient(new Ingredient("Cheese", inventoryService));
+        addIngredient(new Ingredient("Beef Patty", this.inventoryService));
+        addIngredient(new Ingredient("Bun", this.inventoryService));
+        addIngredient(new Ingredient("Lettuce", this.inventoryService));
+        addIngredient(new Ingredient("Tomato", this.inventoryService));
+        addIngredient(new Ingredient("Cheese", this.inventoryService));
     }
 }

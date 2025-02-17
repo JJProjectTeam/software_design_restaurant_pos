@@ -9,6 +9,8 @@ import com.softwaredesign.project.order.Station;
 import com.softwaredesign.project.staff.Chef;
 import com.softwaredesign.project.staff.Waiter;
 import com.softwaredesign.project.staff.chefstrategies.*;
+import com.softwaredesign.project.inventory.InventoryService;
+import com.softwaredesign.project.inventory.Inventory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +18,20 @@ import java.util.List;
 public class App {
     public static void main(String[] args) {
         // Initialize core components
-        Menu menu = new Menu();
+        InventoryService inventoryService = new Inventory();
+        // adding ingredients to the inventory
+        // creating stations 
+        Station grillStation = new Station();
+        Station prepStation = new Station();
+        inventoryService.addIngredient("Beef Patty", 10, 1.0, grillStation);
+        inventoryService.addIngredient("Bun", 10, 1.0, prepStation);
+        inventoryService.addIngredient("Lettuce", 10, 1.0, prepStation);
+        inventoryService.addIngredient("Tomato", 10, 1.0, prepStation);
+        inventoryService.addIngredient("Cheese", 10, 1.0, prepStation);
+
+        System.out.println("Inventory: " + inventoryService.getStock("Beef Patty"));
+
+        Menu menu = new Menu(inventoryService);
         OrderManager orderManager = new OrderManager();
         
         // Create seating plan (15 seats across 5 tables)
@@ -82,11 +97,6 @@ public class App {
         chefs.add(new Chef(20.0, 1.5, new ShortestQueueFirst()));
         chefs.add(new Chef(20.0, 1.5, new LongestQueueFirstStrategy()));
         chefs.add(new Chef(20.0, 1.5, new OldestOrderFirstStrategy()));
-        
-        // Create and assign stations
-        Station grillStation = new Station();
-        Station prepStation = new Station();
-        Station plateStation = new Station();
         
         // Assign stations to chefs
         for (Chef chef : chefs) {

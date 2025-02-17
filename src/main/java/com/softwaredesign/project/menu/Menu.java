@@ -25,14 +25,13 @@ import com.softwaredesign.project.inventory.Ingredient;
  */
 public class Menu {
     private List<Recipe> availableRecipes;
+    private InventoryService inventoryService;
     
-    public Menu() {
+    public Menu(InventoryService inventoryService) {
         availableRecipes = new ArrayList<>();
         initializeSampleMenu();
+        this.inventoryService = inventoryService;
     }
-    
-    // TODO: I'm not familiar with the inventory service, so I'm not sure if this is correct. Maybe you should pass in the inventory service to the menu constructor?
-    private InventoryService inventoryService;
 
     private void initializeSampleMenu() {
         // Placeholder recipes for testing

@@ -10,6 +10,8 @@ import com.softwaredesign.project.staff.*;
 import com.softwaredesign.project.staff.chefstrategies.*;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.order.Station;
+import com.softwaredesign.project.inventory.InventoryService;
+import com.softwaredesign.project.inventory.Inventory;
 
 public class StaffTests {
     private Waiter waiter;
@@ -19,7 +21,8 @@ public class StaffTests {
 
     @Before
     public void setUp() {
-        menu = new Menu();
+        InventoryService inventoryService = new Inventory();
+        menu = new Menu(inventoryService);
         orderManager = new OrderManager();
         waiter = new Waiter(15.0, 1.0, orderManager, menu);
         chef = new Chef(20.0, 1.5, new ShortestQueueFirst());

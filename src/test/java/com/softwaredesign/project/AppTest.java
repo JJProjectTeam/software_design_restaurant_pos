@@ -7,11 +7,14 @@ import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.orderfulfillment.SeatingPlan;
 import com.softwaredesign.project.order.OrderManager;
 import com.softwaredesign.project.staff.Waiter;
+import com.softwaredesign.project.inventory.InventoryService;
+import com.softwaredesign.project.inventory.Inventory;
 
 public class AppTest {
     @Test
     public void testSystemInitialization() {
-        Menu menu = new Menu();
+        InventoryService inventoryService = new Inventory();
+        Menu menu = new Menu(inventoryService);
         OrderManager orderManager = new OrderManager();
         SeatingPlan seatingPlan = new SeatingPlan(5, 15, menu);
         Waiter waiter = new Waiter(15.0, 1.0, orderManager, menu);
@@ -26,7 +29,8 @@ public class AppTest {
 
     @Test
     public void testValidSeatingPlanConfiguration() {
-        Menu menu = new Menu();
+        InventoryService inventoryService = new Inventory();
+        Menu menu = new Menu(inventoryService);
         SeatingPlan seatingPlan = new SeatingPlan(5, 15, menu);
         
         for (var table : seatingPlan.getAllTables()) {

@@ -8,6 +8,8 @@ import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.orderfulfillment.SeatingPlan;
 import com.softwaredesign.project.orderfulfillment.Table;
+import com.softwaredesign.project.inventory.InventoryService;
+import com.softwaredesign.project.inventory.Inventory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +20,8 @@ public class OrderFulfilmentTests {
 
     @Before
     public void setUp() {
-        menu = new Menu();
+        InventoryService inventoryService = new Inventory();
+        menu = new Menu(inventoryService);
         seatingPlan = new SeatingPlan(5, 15, menu);
     }
 

@@ -6,7 +6,7 @@ import com.softwaredesign.project.order.Station;
 
 public class Ingredient {
     private String name;
-    private final InventoryService inventory;
+    private final InventoryService inventory ;
 
     public Ingredient(String name, InventoryService inventory) {
         this.name = name;

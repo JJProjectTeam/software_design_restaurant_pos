@@ -7,6 +7,9 @@ import org.junit.Test;
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.order.Recipe;
+import com.softwaredesign.project.inventory.InventoryService;
+import com.softwaredesign.project.inventory.Inventory;
+
 public class CustomerTests {
     private DineInCustomer customer;
     private Menu menu;
@@ -14,7 +17,8 @@ public class CustomerTests {
     @Before
     public void setUp() {
         customer = new DineInCustomer();
-        menu = new Menu();
+        InventoryService inventoryService = new Inventory();
+        menu = new Menu(inventoryService);
     }
 
     @Test
