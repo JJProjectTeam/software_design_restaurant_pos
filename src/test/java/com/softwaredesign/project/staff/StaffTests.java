@@ -3,12 +3,13 @@ package com.softwaredesign.project.staff;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-import com.softwaredesign.project.model.staff.*;
-import com.softwaredesign.project.model.staff.chefstrategies.*;
-import com.softwaredesign.project.model.orderfulfillment.Table;
-import com.softwaredesign.project.model.menu.Menu;
-import com.softwaredesign.project.model.placeholders.OrderManager;
-import com.softwaredesign.project.model.placeholders.Station;
+
+import com.softwaredesign.project.orderfulfillment.Table;
+import com.softwaredesign.project.placeholders.OrderManager;
+import com.softwaredesign.project.placeholders.Station;
+import com.softwaredesign.project.staff.*;
+import com.softwaredesign.project.staff.chefstrategies.*;
+import com.softwaredesign.project.menu.Menu;
 
 public class StaffTests {
     private Waiter waiter;

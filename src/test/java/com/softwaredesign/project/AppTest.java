@@ -2,10 +2,11 @@ package com.softwaredesign.project;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
-import com.softwaredesign.project.model.menu.Menu;
-import com.softwaredesign.project.model.orderfulfillment.SeatingPlan;
-import com.softwaredesign.project.model.staff.Waiter;
-import com.softwaredesign.project.model.placeholders.OrderManager;
+
+import com.softwaredesign.project.menu.Menu;
+import com.softwaredesign.project.orderfulfillment.SeatingPlan;
+import com.softwaredesign.project.placeholders.OrderManager;
+import com.softwaredesign.project.staff.Waiter;
 
 public class AppTest {
     @Test

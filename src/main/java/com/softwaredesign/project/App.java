@@ -1,14 +1,14 @@
 package com.softwaredesign.project;
 
-import com.softwaredesign.project.model.orderfulfillment.SeatingPlan;
-import com.softwaredesign.project.model.staff.Waiter;
-import com.softwaredesign.project.model.staff.Chef;
-import com.softwaredesign.project.model.customer.DineInCustomer;
-import com.softwaredesign.project.model.menu.Menu;
-import com.softwaredesign.project.model.orderfulfillment.Table;
-import com.softwaredesign.project.model.placeholders.OrderManager;
-import com.softwaredesign.project.model.staff.chefstrategies.*;
-import com.softwaredesign.project.model.placeholders.Station;
+import com.softwaredesign.project.customer.DineInCustomer;
+import com.softwaredesign.project.menu.Menu;
+import com.softwaredesign.project.orderfulfillment.SeatingPlan;
+import com.softwaredesign.project.orderfulfillment.Table;
+import com.softwaredesign.project.placeholders.OrderManager;
+import com.softwaredesign.project.placeholders.Station;
+import com.softwaredesign.project.staff.Chef;
+import com.softwaredesign.project.staff.Waiter;
+import com.softwaredesign.project.staff.chefstrategies.*;
 
 import java.util.ArrayList;
 import java.util.List;

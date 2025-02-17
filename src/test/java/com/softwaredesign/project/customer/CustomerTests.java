@@ -3,9 +3,10 @@ package com.softwaredesign.project.customer;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-import com.softwaredesign.project.model.customer.DineInCustomer;
-import com.softwaredesign.project.model.menu.Menu;
-import com.softwaredesign.project.model.placeholders.Recipe;
+
+import com.softwaredesign.project.customer.DineInCustomer;
+import com.softwaredesign.project.menu.Menu;
+import com.softwaredesign.project.placeholders.Recipe;
 
 public class CustomerTests {
     private DineInCustomer customer;
