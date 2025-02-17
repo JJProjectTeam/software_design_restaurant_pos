@@ -5,11 +5,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.softwaredesign.project.orderfulfillment.Table;
-import com.softwaredesign.project.placeholders.OrderManager;
-import com.softwaredesign.project.placeholders.Station;
+import com.softwaredesign.project.order.OrderManager;
 import com.softwaredesign.project.staff.*;
 import com.softwaredesign.project.staff.chefstrategies.*;
 import com.softwaredesign.project.menu.Menu;
+import com.softwaredesign.project.order.Station;
 
 public class StaffTests {
     private Waiter waiter;

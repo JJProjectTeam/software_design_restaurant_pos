@@ -6,8 +6,8 @@ import java.util.Random;
 
 import com.softwaredesign.project.exceptions.RecipeValidationException;
 import com.softwaredesign.project.menu.Menu;
-import com.softwaredesign.project.placeholders.Ingredient;
-import com.softwaredesign.project.placeholders.Recipe;
+import com.softwaredesign.project.inventory.Ingredient;
+import com.softwaredesign.project.order.Recipe;
 
 public class DineInCustomer extends Customer {
     private boolean isBrowsing;

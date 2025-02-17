@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import com.softwaredesign.project.placeholders.ConcreteRecipe;
-import com.softwaredesign.project.placeholders.Ingredient;
-import com.softwaredesign.project.placeholders.Recipe;
+import com.softwaredesign.project.order.BurgerRecipe;
+import com.softwaredesign.project.order.KebabRecipe;
+
+import com.softwaredesign.project.order.Recipe;
+import com.softwaredesign.project.inventory.InventoryService;
+import com.softwaredesign.project.inventory.Ingredient;
 
 /*
  * Notes about the menu class
@@ -28,12 +31,13 @@ public class Menu {
         initializeSampleMenu();
     }
     
+    // TODO: I'm not familiar with the inventory service, so I'm not sure if this is correct. Maybe you should pass in the inventory service to the menu constructor?
+    private InventoryService inventoryService;
+
     private void initializeSampleMenu() {
         // Placeholder recipes for testing
-        availableRecipes.add(new ConcreteRecipe());
-        availableRecipes.add(new ConcreteRecipe());
-        availableRecipes.add(new ConcreteRecipe());
-        availableRecipes.add(new ConcreteRecipe());
+        availableRecipes.add(new BurgerRecipe(inventoryService));
+        availableRecipes.add(new KebabRecipe(inventoryService)); 
     }
 
     
@@ -68,6 +72,6 @@ public class Menu {
         // Placeholder ingredients - will be replaced with actual inventory items
         String[] sampleIngredients = {"Cheese", "Tomato", "Lettuce", "Onion", "Pickles", "Mayo", "Mustard"};
         Random random = new Random();
-        return new Ingredient(sampleIngredients[random.nextInt(sampleIngredients.length)]);
+        return new Ingredient(sampleIngredients[random.nextInt(sampleIngredients.length)], inventoryService);
     }
 }

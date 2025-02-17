@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.orderfulfillment.SeatingPlan;
-import com.softwaredesign.project.placeholders.OrderManager;
+import com.softwaredesign.project.order.OrderManager;
 import com.softwaredesign.project.staff.Waiter;
 
 public class AppTest {

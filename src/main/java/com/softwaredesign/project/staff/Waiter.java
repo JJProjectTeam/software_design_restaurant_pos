@@ -5,10 +5,10 @@ import java.util.List;
 import java.time.LocalDateTime;
 
 import com.softwaredesign.project.orderfulfillment.Table;
-import com.softwaredesign.project.placeholders.Ingredient;
-import com.softwaredesign.project.placeholders.Order;
-import com.softwaredesign.project.placeholders.OrderManager;
-import com.softwaredesign.project.placeholders.Recipe;
+import com.softwaredesign.project.inventory.Ingredient;
+import com.softwaredesign.project.order.Order;
+import com.softwaredesign.project.order.OrderManager;
+import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
 
@@ -37,12 +37,12 @@ public class Waiter extends StaffMember {
             throw new IllegalStateException("Not everyone at the table is ready to order");
         }
 
-        Order tableOrder = new Order(LocalDateTime.now());
+        Order tableOrder = new Order();
         
         for (DineInCustomer customer : table.getCustomers()) {
             Recipe customerRecipe = customer.selectRecipeFromMenu(menu);
             customer.requestRecipeModification(menu);
-            tableOrder.addRecipe(customerRecipe);
+            tableOrder.addRecipes(customerRecipe);
             for (Ingredient ingredient : customer.getRemovedIngredients()) {
                 tableOrder.addModification(customerRecipe, ingredient, false);
             }
@@ -52,7 +52,7 @@ public class Waiter extends StaffMember {
         }
     
 
-        orderManager.submitOrder(tableOrder);
+        orderManager.addOrder(tableOrder);
     }
 
     public List<Table> getAssignedTables() {

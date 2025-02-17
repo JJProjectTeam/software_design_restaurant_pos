@@ -6,8 +6,7 @@ import org.junit.Test;
 
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
-import com.softwaredesign.project.placeholders.Recipe;
-
+import com.softwaredesign.project.order.Recipe;
 public class CustomerTests {
     private DineInCustomer customer;
     private Menu menu;

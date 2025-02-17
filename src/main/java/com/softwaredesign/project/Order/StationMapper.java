@@ -15,15 +15,18 @@ public class StationMapper {
             requiredStations.addAll(ingredient.getStations());
         }
         
-        // Add stations in specific order (PREP -> GRILL -> PLATE)
-        if (requiredStations.contains(Station.PREP)) {
-            recipe.addStation(Station.PREP);
+        // Add stations in specific order based on backlog size
+        Station prepStation = new Station();
+        Station grillStation = new Station();
+        Station plateStation = new Station();
+
+        if (requiredStations.contains(prepStation)) {
+            recipe.addStation(prepStation);
         }
-        if (requiredStations.contains(Station.GRILL)) {
-            recipe.addStation(Station.GRILL);
+        if (requiredStations.contains(grillStation)) {
+            recipe.addStation(grillStation); 
         }
-        // Always add PLATE station last
-        recipe.addStation(Station.PLATE);
+        // Always add plate station last
+        recipe.addStation(plateStation);
     }
-    
 }

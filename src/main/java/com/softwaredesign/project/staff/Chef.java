@@ -3,7 +3,7 @@ package com.softwaredesign.project.staff;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.softwaredesign.project.placeholders.Station;
+import com.softwaredesign.project.order.Station;
 import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 
 
