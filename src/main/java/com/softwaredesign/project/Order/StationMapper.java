@@ -6,27 +6,21 @@ import java.util.Set;
 import com.softwaredesign.project.inventory.Ingredient;
 
 public class StationMapper {
-
     public void mapStationsToRecipe(Recipe recipe) {
-        Set<Station> requiredStations = new HashSet<>();
+        Set<StationType> requiredStationTypes = new HashSet<>();
         
-        // Check each ingredient's required stations
         for (Ingredient ingredient : recipe.getIngredients()) {
-            requiredStations.addAll(ingredient.getStations());
+            requiredStationTypes.addAll(ingredient.getStationTypes());
         }
         
-        // Add stations in specific order based on backlog size
-        Station prepStation = new Station();
-        Station grillStation = new Station();
-        Station plateStation = new Station();
-
-        if (requiredStations.contains(prepStation)) {
-            recipe.addStation(prepStation);
+        // Add required stations in specific order
+        if (requiredStationTypes.contains(StationType.PREP)) {
+            recipe.addStation(Station.getInstance(StationType.PREP));
         }
-        if (requiredStations.contains(grillStation)) {
-            recipe.addStation(grillStation); 
+        if (requiredStationTypes.contains(StationType.GRILL)) {
+            recipe.addStation(Station.getInstance(StationType.GRILL));
         }
         // Always add plate station last
-        recipe.addStation(plateStation);
+        recipe.addStation(Station.getInstance(StationType.PLATE));
     }
 }

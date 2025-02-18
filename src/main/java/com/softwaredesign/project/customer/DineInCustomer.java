@@ -76,6 +76,14 @@ public class DineInCustomer extends Customer {
         
     }
 
+    public void requestRecipeModification(Recipe recipe, Menu menu) {
+        Ingredient additionalIngredient = menu.getRandomAdditionalIngredient();
+        if (additionalIngredient != null) {
+            recipe.addIngredient(additionalIngredient);
+            System.out.println("Customer requested additional " + additionalIngredient.getName());
+        }
+    }
+
     public List<Ingredient> getAddedIngredients() {
         return addedIngredients;
     }

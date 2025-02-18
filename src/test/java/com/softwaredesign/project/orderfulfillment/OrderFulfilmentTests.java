@@ -6,8 +6,6 @@ import org.junit.Test;
 
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
-import com.softwaredesign.project.orderfulfillment.SeatingPlan;
-import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.inventory.Inventory;
 

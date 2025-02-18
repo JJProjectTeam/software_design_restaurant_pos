@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.inventory.InventoryService;
@@ -13,7 +12,7 @@ import com.softwaredesign.project.inventory.Inventory;
 public class CustomerTests {
     private DineInCustomer customer;
     private Menu menu;
-
+    //TODO test if a customer orders something that is out of stock (recipe or ingredient)
     @Before
     public void setUp() {
         customer = new DineInCustomer();

@@ -6,15 +6,15 @@ import com.softwaredesign.project.inventory.InventoryService;
 public class BurgerRecipe extends Recipe {
     public BurgerRecipe(InventoryService inventoryService) {
         super("Burger", inventoryService);
-
     }
 
     @Override
     protected void initializeBaseIngredients() {
-        addIngredient(new Ingredient("Beef Patty", this.inventoryService));
-        addIngredient(new Ingredient("Bun", this.inventoryService));
-        addIngredient(new Ingredient("Lettuce", this.inventoryService));
-        addIngredient(new Ingredient("Tomato", this.inventoryService));
-        addIngredient(new Ingredient("Cheese", this.inventoryService));
+        // Make sure we use the inventoryService passed from the constructor
+        ingredients.add(new Ingredient("Beef Patty", inventoryService));
+        ingredients.add(new Ingredient("Bun", inventoryService));
+        ingredients.add(new Ingredient("Lettuce", inventoryService));
+        ingredients.add(new Ingredient("Tomato", inventoryService));
+        ingredients.add(new Ingredient("Cheese", inventoryService));
     }
 }
