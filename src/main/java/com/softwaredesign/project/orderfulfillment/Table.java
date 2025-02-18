@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
-import com.softwaredesign.project.placeholders.Recipe;
+import com.softwaredesign.project.order.Recipe;
 
 public class Table {
     private int tableNumber;

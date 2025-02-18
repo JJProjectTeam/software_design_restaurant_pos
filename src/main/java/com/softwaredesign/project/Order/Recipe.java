@@ -8,17 +8,22 @@ import java.util.Queue;
 
 import com.softwaredesign.project.inventory.Ingredient;
 import com.softwaredesign.project.inventory.InventoryService;
+import com.softwaredesign.project.kitchen.Station;
 
 public abstract class Recipe {
     protected String name;
     protected List<Ingredient> ingredients;
     protected Queue<Station> stationsToVisit;
-    protected InventoryService inventoryService;
+    protected String orderId;
+    protected final InventoryService inventoryService;
 
     protected Recipe(String name, InventoryService inventoryService) {
+        if (inventoryService == null) {
+            throw new IllegalArgumentException("InventoryService cannot be null");
+        }
         this.name = name;
-        this.ingredients = new ArrayList<>();
         this.inventoryService = inventoryService;
+        this.ingredients = new ArrayList<>();
         initializeBaseIngredients();
         stationsToVisit = new LinkedList<>();
     }
@@ -47,17 +52,30 @@ public abstract class Recipe {
 
     public void addStation(Station station) {
         stationsToVisit.add(station);
-    }   
+    }
 
     public void removeStation(Station station) {
         stationsToVisit.remove(station);
     }
 
+    public boolean isComplete() {
+        return stationsToVisit.isEmpty();
+    }
+
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
+
+    public String getOrderId() {
+        return orderId;
+    }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Recipe recipe = (Recipe) o;
         return name.equals(recipe.name);
     }
@@ -68,6 +86,6 @@ public abstract class Recipe {
     }
 
     public Meal buildMeal() {
-        return new Meal(name, ingredients, inventoryService);
+        return new Meal(name, ingredients, inventoryService, orderId);
     }
 }

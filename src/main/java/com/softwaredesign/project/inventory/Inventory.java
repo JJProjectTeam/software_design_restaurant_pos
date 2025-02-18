@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.softwaredesign.project.order.Station;
+import com.softwaredesign.project.kitchen.Station;
+import com.softwaredesign.project.kitchen.StationType;
 
 public class Inventory implements InventoryService, ISubject {
     private final Map<String, IngredientStore> ingredients;
@@ -33,7 +34,7 @@ public class Inventory implements InventoryService, ISubject {
         }
     }
 
-    public void addIngredient(String name, int quantity, double price, Station... stations) {
+    public void addIngredient(String name, int quantity, double price, StationType... stations) {
         ingredients.put(name, new IngredientStore(name, quantity, price, stations));
         notifyObservers(name, quantity);
     }

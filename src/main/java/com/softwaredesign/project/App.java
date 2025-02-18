@@ -2,13 +2,18 @@ package com.softwaredesign.project;
 
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
+import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 import com.softwaredesign.project.orderfulfillment.SeatingPlan;
 import com.softwaredesign.project.orderfulfillment.Table;
-import com.softwaredesign.project.placeholders.OrderManager;
-import com.softwaredesign.project.placeholders.Station;
+import com.softwaredesign.project.order.OrderManager;
 import com.softwaredesign.project.staff.Chef;
 import com.softwaredesign.project.staff.Waiter;
 import com.softwaredesign.project.staff.chefstrategies.*;
+import com.softwaredesign.project.inventory.InventoryService;
+import com.softwaredesign.project.inventory.Inventory;
+import com.softwaredesign.project.kitchen.Station;
+import com.softwaredesign.project.kitchen.StationManager;
+import com.softwaredesign.project.kitchen.StationType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,12 +21,30 @@ import java.util.List;
 public class App {
     public static void main(String[] args) {
         // Initialize core components
-        Menu menu = new Menu();
-        OrderManager orderManager = new OrderManager();
+        InventoryService inventoryService = new Inventory();
         
-        // Create seating plan (15 seats across 5 tables)
+        // Add ALL possible ingredients to inventory
+        inventoryService.addIngredient("Beef Patty", 10, 1.0, StationType.GRILL);
+        inventoryService.addIngredient("Bun", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Lettuce", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Tomato", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Cheese", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Mustard", 10, 0.5, StationType.PREP);
+        inventoryService.addIngredient("Ketchup", 10, 0.5, StationType.PREP);
+        inventoryService.addIngredient("Onion", 10, 0.5, StationType.PREP);
+        inventoryService.addIngredient("Pickle", 10, 0.5, StationType.PREP);
+        inventoryService.addIngredient("Mayo", 10, 0.5, StationType.PREP);
+
+        System.out.println("Inventory: " + inventoryService.getStock("Beef Patty"));
+
+        Menu menu = new Menu(inventoryService);
+        CollectionPoint collectionPoint = new CollectionPoint();
+        StationManager stationManager = new StationManager();
+        OrderManager orderManager = new OrderManager(collectionPoint, stationManager);
+        
+        // Create seating plan with enough capacity
         System.out.println("Creating seating plan...");
-        SeatingPlan seatingPlan = new SeatingPlan(4, 10, menu);
+        SeatingPlan seatingPlan = new SeatingPlan(5, 10, menu); 
         
         // Create and assign waiters
         System.out.println("\nCreating waiters...");
@@ -44,7 +67,12 @@ public class App {
         group1.add(new DineInCustomer());
         group1.add(new DineInCustomer());
         Table table1 = seatingPlan.findTableForGroup(group1);
-        System.out.println("Group of 2 seated at table " + table1.getTableNumber());
+        if (table1 != null) {
+            System.out.println("Group of 2 seated at table " + table1.getTableNumber());
+        } else {
+            System.out.println("No table available for group of 2");
+            return;
+        }
         
         // Group of 4
         List<DineInCustomer> group2 = new ArrayList<>();
@@ -52,7 +80,12 @@ public class App {
             group2.add(new DineInCustomer());
         }
         Table table2 = seatingPlan.findTableForGroup(group2);
-        System.out.println("Group of 4 seated at table " + table2.getTableNumber());
+        if (table2 != null) {
+            System.out.println("Group of 4 seated at table " + table2.getTableNumber());
+        } else {
+            System.out.println("No table available for group of 4");
+            return;
+        }
         
         // Have customers finish browsing
         System.out.println("\nCustomers browsing menus...");
@@ -79,19 +112,14 @@ public class App {
         
         // Create chefs with different strategies
         List<Chef> chefs = new ArrayList<>();
-        chefs.add(new Chef(20.0, 1.5, new ShortestQueueFirst()));
-        chefs.add(new Chef(20.0, 1.5, new LongestQueueFirstStrategy()));
-        chefs.add(new Chef(20.0, 1.5, new OldestOrderFirstStrategy()));
-        
-        // Create and assign stations
-        Station grillStation = new Station();
-        Station prepStation = new Station();
-        Station plateStation = new Station();
+        chefs.add(new Chef(20.0, 1.5, new ShortestQueueFirst(), stationManager));
+        chefs.add(new Chef(20.0, 1.5, new LongestQueueFirstStrategy(), stationManager));
+        chefs.add(new Chef(20.0, 1.5, new OldestOrderFirstStrategy(), stationManager));
         
         // Assign stations to chefs
         for (Chef chef : chefs) {
-            chef.getAssignedStations().add(grillStation);
-            chef.getAssignedStations().add(prepStation);
+            chef.assignToStation(StationType.GRILL);
+            chef.assignToStation(StationType.PREP);
             System.out.println("Chef assigned to grill and prep stations");
             
             // Demonstrate different working strategies

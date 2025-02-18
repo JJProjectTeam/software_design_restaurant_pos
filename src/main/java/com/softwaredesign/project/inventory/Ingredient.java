@@ -2,11 +2,11 @@ package com.softwaredesign.project.inventory;
 
 import java.util.Set;
 
-import com.softwaredesign.project.order.Station;
+import com.softwaredesign.project.kitchen.StationType;
 
 public class Ingredient {
     private String name;
-    private final InventoryService inventory;
+    private final InventoryService inventory ;
 
     public Ingredient(String name, InventoryService inventory) {
         this.name = name;
@@ -19,9 +19,8 @@ public class Ingredient {
         return name;
     }
 
-    // This is so so dodge TODO find a better solution for this
-    public Set<Station> getStations() {
-        return inventory.getIngredientStore(name).getStations();
+    public Set<StationType> getStationTypes() {
+        return inventory.getIngredientStore(name).getStationTypes();
     }
 
     @Override

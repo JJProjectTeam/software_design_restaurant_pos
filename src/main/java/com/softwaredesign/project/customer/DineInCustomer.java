@@ -6,8 +6,8 @@ import java.util.Random;
 
 import com.softwaredesign.project.exceptions.RecipeValidationException;
 import com.softwaredesign.project.menu.Menu;
-import com.softwaredesign.project.placeholders.Ingredient;
-import com.softwaredesign.project.placeholders.Recipe;
+import com.softwaredesign.project.inventory.Ingredient;
+import com.softwaredesign.project.order.Recipe;
 
 public class DineInCustomer extends Customer {
     private boolean isBrowsing;
@@ -74,6 +74,14 @@ public class DineInCustomer extends Customer {
             }
         }
         
+    }
+
+    public void requestRecipeModification(Recipe recipe, Menu menu) {
+        Ingredient additionalIngredient = menu.getRandomAdditionalIngredient();
+        if (additionalIngredient != null) {
+            recipe.addIngredient(additionalIngredient);
+            System.out.println("Customer requested additional " + additionalIngredient.getName());
+        }
     }
 
     public List<Ingredient> getAddedIngredients() {

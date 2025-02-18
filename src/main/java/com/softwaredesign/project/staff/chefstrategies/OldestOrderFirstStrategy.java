@@ -2,7 +2,7 @@ package com.softwaredesign.project.staff.chefstrategies;
 
 import java.util.List;
 
-import com.softwaredesign.project.placeholders.Station;
+import com.softwaredesign.project.kitchen.Station;
 
 public class OldestOrderFirstStrategy implements ChefStrategy {
     @Override

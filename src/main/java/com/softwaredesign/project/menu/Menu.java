@@ -3,10 +3,11 @@ package com.softwaredesign.project.menu;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Arrays;
 
-import com.softwaredesign.project.placeholders.ConcreteRecipe;
-import com.softwaredesign.project.placeholders.Ingredient;
-import com.softwaredesign.project.placeholders.Recipe;
+import com.softwaredesign.project.order.Recipe;
+import com.softwaredesign.project.inventory.InventoryService;
+import com.softwaredesign.project.inventory.Ingredient;
 
 /*
  * Notes about the menu class
@@ -21,19 +22,21 @@ import com.softwaredesign.project.placeholders.Recipe;
  * 
  */
 public class Menu {
+    private final InventoryService inventoryService;
     private List<Recipe> availableRecipes;
-    
-    public Menu() {
-        availableRecipes = new ArrayList<>();
+
+    public Menu(InventoryService inventoryService) {
+        if (inventoryService == null) {
+            throw new IllegalArgumentException("InventoryService cannot be null");
+        }
+        this.inventoryService = inventoryService;
+        this.availableRecipes = new ArrayList<>();
         initializeSampleMenu();
     }
-    
+
     private void initializeSampleMenu() {
-        // Placeholder recipes for testing
-        availableRecipes.add(new ConcreteRecipe());
-        availableRecipes.add(new ConcreteRecipe());
-        availableRecipes.add(new ConcreteRecipe());
-        availableRecipes.add(new ConcreteRecipe());
+        // Pass inventoryService to recipe constructor
+        availableRecipes.add(new BurgerRecipe(inventoryService));
     }
 
     
@@ -50,8 +53,21 @@ public class Menu {
     }
 
     public Ingredient getRandomAdditionalIngredient() {
-        // TODO: This should eventually check Inventory for available ingredients
-        return getRandomIngredient();
+        // Get list of available ingredients from inventory
+        List<String> availableIngredients = new ArrayList<>();
+        for (String ingredient : Arrays.asList("Mustard", "Ketchup", "Onion", "Pickle", "Mayo")) {
+            if (inventoryService.getStock(ingredient) > 0) {
+                availableIngredients.add(ingredient);
+            }
+        }
+        
+        if (availableIngredients.isEmpty()) {
+            return null;
+        }
+        
+        // Pick a random available ingredient
+        String randomIngredient = availableIngredients.get(new Random().nextInt(availableIngredients.size()));
+        return new Ingredient(randomIngredient, inventoryService);
     }
 
     public Ingredient getRandomIngredientFromRecipe(Recipe recipe) {
@@ -68,6 +84,6 @@ public class Menu {
         // Placeholder ingredients - will be replaced with actual inventory items
         String[] sampleIngredients = {"Cheese", "Tomato", "Lettuce", "Onion", "Pickles", "Mayo", "Mustard"};
         Random random = new Random();
-        return new Ingredient(sampleIngredients[random.nextInt(sampleIngredients.length)]);
+        return new Ingredient(sampleIngredients[random.nextInt(sampleIngredients.length)], inventoryService);
     }
 }

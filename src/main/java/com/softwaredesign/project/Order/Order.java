@@ -9,16 +9,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Order {
+    private String orderId;
     private List<Recipe> recipes;
     private Map<Recipe, RecipeModification> modifications;
 
-    public Order() {
+    public Order(String orderId) {
+        this.orderId = orderId;
         this.recipes = new ArrayList<>();
         this.modifications = new HashMap<>();
     }
 
     public void addRecipes(Recipe... recipes) {
         for (Recipe recipe : recipes) {
+            recipe.setOrderId(this.orderId);
             this.recipes.add(recipe);
             modifications.put(recipe, new RecipeModification());
         }
@@ -39,5 +42,13 @@ public class Order {
 
     public RecipeModification getModificationsForRecipe(Recipe recipe) {
         return modifications.get(recipe);
+    }
+
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public boolean isComplete() {
+        return recipes.stream().allMatch(Recipe::isComplete);
     }
 }
