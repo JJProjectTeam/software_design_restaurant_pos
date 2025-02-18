@@ -19,9 +19,12 @@ public class AppTest {
     public void testSystemInitialization() {
         InventoryService inventoryService = new Inventory();
         // Null pointer exception on menu if we pass empty inventoryService
-        inventoryService.addIngredient("burger", 10, 5.0, StationType.GRILL);
-        inventoryService.addIngredient("bun", 20, 1.0, StationType.PREP);
-        inventoryService.addIngredient("lettuce", 15, 0.5, StationType.PREP);
+        inventoryService.addIngredient("Beef Patty", 10, 1.0, StationType.GRILL);
+        inventoryService.addIngredient("Bun", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Lettuce", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Tomato", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Cheese", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Mustard", 10, 0.5, StationType.PREP);
         
         
         Menu menu = new Menu(inventoryService);
@@ -32,7 +35,7 @@ public class AppTest {
         Waiter waiter = new Waiter(15.0, 1.0, orderManager, menu);
 
         assertNotNull("Inventory service should not be null", inventoryService);
-        assertTrue("Burger stock should be positive", inventoryService.getStock("burger") > 0);
+        assertTrue("Bun stock should be positive", inventoryService.getStock("Bun") > 0);
         
         assertNotNull("Menu should not be null", menu);
         assertNotNull("Order manager should not be null", orderManager);
@@ -46,9 +49,12 @@ public class AppTest {
     public void testValidSeatingPlanConfiguration() {
         InventoryService inventoryService = new Inventory();
         // Null pointer exception on menu if we pass empty inventoryService
-        inventoryService.addIngredient("burger", 10, 5.0, StationType.GRILL);
-        inventoryService.addIngredient("bun", 20, 1.0, StationType.PREP);
-        inventoryService.addIngredient("lettuce", 15, 0.5, StationType.PREP);
+        inventoryService.addIngredient("Beef Patty", 10, 1.0, StationType.GRILL);
+        inventoryService.addIngredient("Bun", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Lettuce", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Tomato", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Cheese", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Mustard", 10, 0.5, StationType.PREP);
         
         
         Menu menu = new Menu(inventoryService);

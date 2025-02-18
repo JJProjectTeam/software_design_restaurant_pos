@@ -23,6 +23,13 @@ public class StaffTests {
     @Before
     public void setUp() {
         InventoryService inventoryService = new Inventory();
+        inventoryService.addIngredient("Beef Patty", 10, 1.0, StationType.GRILL);
+        inventoryService.addIngredient("Bun", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Lettuce", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Tomato", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Cheese", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Mustard", 10, 0.5, StationType.PREP);
+        
         menu = new Menu(inventoryService);
         CollectionPoint collectionPoint = new CollectionPoint();
         orderManager = new OrderManager(collectionPoint);
