@@ -12,6 +12,7 @@ import com.softwaredesign.project.staff.Waiter;
 import com.softwaredesign.project.staff.chefstrategies.*;
 import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.inventory.Inventory;
+import com.softwaredesign.project.order.CollectionPoint;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,8 @@ public class App {
         System.out.println("Inventory: " + inventoryService.getStock("Beef Patty"));
 
         Menu menu = new Menu(inventoryService);
-        OrderManager orderManager = new OrderManager();
+        CollectionPoint collectionPoint = new CollectionPoint();
+        OrderManager orderManager = new OrderManager(collectionPoint);
         
         // Create seating plan with enough capacity
         System.out.println("Creating seating plan...");

@@ -13,10 +13,10 @@ public class OrderManager {
     private StationMapper stationMapper;
     private CollectionPoint collectionPoint;
 
-    public OrderManager() {
+    public OrderManager(CollectionPoint collectionPoint) {
         orders = new LinkedList<>();
         stationMapper = new StationMapper();
-        collectionPoint = new CollectionPoint();
+        this.collectionPoint = collectionPoint;
     }
 
     public String generateOrderId() {
@@ -29,19 +29,22 @@ public class OrderManager {
     }
 
     public List<Recipe> processOrder() {
-        while (!orders.isEmpty()) {
-            Order order = orders.poll();
-            List<Recipe> recipes = order.getRecipes();
-
-            for (Recipe recipe : recipes) {
-                makeAmendments(recipe, order);
-                stationMapper.mapStationsToRecipe(recipe);
-            }
-
-            return recipes;
+        if (orders.isEmpty()) {
+            return new ArrayList<>();
         }
 
-        return new ArrayList<>();
+        // Peek instead of poll - don't remove the order yet
+        Order order = orders.peek();
+        List<Recipe> recipes = order.getRecipes();
+
+        for (Recipe recipe : recipes) {
+            makeAmendments(recipe, order);
+            stationMapper.mapStationsToRecipe(recipe);
+        }
+
+        // Now we can remove the order
+        orders.poll();
+        return recipes;
     }
 
     private void makeAmendments(Recipe recipe, Order order) {
