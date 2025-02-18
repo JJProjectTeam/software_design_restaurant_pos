@@ -7,18 +7,21 @@ import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.orderfulfillment.SeatingPlan;
 import com.softwaredesign.project.order.OrderManager;
 import com.softwaredesign.project.order.Station;
+import com.softwaredesign.project.order.StationType;
 import com.softwaredesign.project.staff.Waiter;
 import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.inventory.Inventory;
 
 public class AppTest {
+    //TODO: Tests to add - waiter assignment? Can we handle if more customers come than we can seat gracefully?
     @Test
     public void testSystemInitialization() {
         InventoryService inventoryService = new Inventory();
         // Null pointer exception on menu if we pass empty inventoryService
-        inventoryService.addIngredient("burger", 10, 5.0, Station.GRILL);
-        inventoryService.addIngredient("bun", 20, 1.0, Station.PREP);
-        inventoryService.addIngredient("lettuce", 15, 0.5, Station.PREP);
+        inventoryService.addIngredient("burger", 10, 5.0, StationType.GRILL);
+        inventoryService.addIngredient("bun", 20, 1.0, StationType.PREP);
+        inventoryService.addIngredient("lettuce", 15, 0.5, StationType.PREP);
+        
         
         Menu menu = new Menu(inventoryService);
         OrderManager orderManager = new OrderManager();
@@ -40,9 +43,10 @@ public class AppTest {
     public void testValidSeatingPlanConfiguration() {
         InventoryService inventoryService = new Inventory();
         // Null pointer exception on menu if we pass empty inventoryService
-        inventoryService.addIngredient("burger", 10, 5.0, Station.GRILL);
-        inventoryService.addIngredient("bun", 20, 1.0, Station.PREP);
-        inventoryService.addIngredient("lettuce", 15, 0.5, Station.PREP);
+        inventoryService.addIngredient("burger", 10, 5.0, StationType.GRILL);
+        inventoryService.addIngredient("bun", 20, 1.0, StationType.PREP);
+        inventoryService.addIngredient("lettuce", 15, 0.5, StationType.PREP);
+        
         
         Menu menu = new Menu(inventoryService);
         SeatingPlan seatingPlan = new SeatingPlan(5, 15, menu);

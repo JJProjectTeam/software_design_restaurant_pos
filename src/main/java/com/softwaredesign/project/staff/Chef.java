@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.softwaredesign.project.order.Station;
+import com.softwaredesign.project.order.StationType;
 import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
-
-
 
 public class Chef extends StaffMember {
     private List<Station> assignedStations;
@@ -18,12 +17,11 @@ public class Chef extends StaffMember {
         this.workStrategy = strategy;
     }
 
-    public List<Station> getAssignedStations() {
-        return assignedStations;
-    }
-
-    public void setAssignedStations(List<Station> assignedStations) {
-        this.assignedStations = assignedStations;
+    public void assignToStation(StationType stationType) {
+        Station station = Station.getInstance(stationType);
+        if (!assignedStations.contains(station)) {
+            assignedStations.add(station);
+        }
     }
 
     public void setWorkStrategy(ChefStrategy strategy) {

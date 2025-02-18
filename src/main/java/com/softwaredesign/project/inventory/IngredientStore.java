@@ -1,22 +1,23 @@
 package com.softwaredesign.project.inventory;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.softwaredesign.project.order.Station;
+import com.softwaredesign.project.order.StationType;
 
 public class IngredientStore {
     private String name;
     private int quantity;
     private double price;
-    private Set<Station> stations;
+    private Set<StationType> stationTypes;
 
-    public IngredientStore(String name, int quantity, double price, Station... stations) {
+    public IngredientStore(String name, int quantity, double price, StationType... stationTypes) {
         this.name = name;
         this.quantity = quantity;
         this.price = price;
-        this.stations = new HashSet<>(Arrays.asList(stations));
+        this.stationTypes = new HashSet<>(Arrays.asList(stationTypes));
     }
 
     public String getName() {
@@ -39,7 +40,7 @@ public class IngredientStore {
         this.price = price;
     }
 
-    public Set<Station> getStations() {
-        return stations;
+    public Set<StationType> getStationTypes() {
+        return Collections.unmodifiableSet(stationTypes);
     }
 }
