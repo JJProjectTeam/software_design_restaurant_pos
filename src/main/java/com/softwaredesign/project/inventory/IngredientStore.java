@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.softwaredesign.project.order.StationType;
+import com.softwaredesign.project.kitchen.StationType;
 
 public class IngredientStore {
     private String name;

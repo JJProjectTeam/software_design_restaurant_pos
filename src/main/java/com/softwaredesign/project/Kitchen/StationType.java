@@ -1,4 +1,4 @@
-package com.softwaredesign.project.order;
+package com.softwaredesign.project.kitchen;
 
 public enum StationType {
     PREP,

@@ -4,14 +4,16 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.order.OrderManager;
 import com.softwaredesign.project.staff.chefstrategies.*;
 import com.softwaredesign.project.menu.Menu;
-import com.softwaredesign.project.order.Station;
-import com.softwaredesign.project.order.StationType;
 import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.inventory.Inventory;
+import com.softwaredesign.project.kitchen.Station;
+import com.softwaredesign.project.kitchen.StationManager;
+import com.softwaredesign.project.kitchen.StationType;
 
 public class StaffTests {
     private Waiter waiter;
@@ -22,10 +24,19 @@ public class StaffTests {
     @Before
     public void setUp() {
         InventoryService inventoryService = new Inventory();
+        inventoryService.addIngredient("Beef Patty", 10, 1.0, StationType.GRILL);
+        inventoryService.addIngredient("Bun", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Lettuce", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Tomato", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Cheese", 10, 1.0, StationType.PREP);
+        inventoryService.addIngredient("Mustard", 10, 0.5, StationType.PREP);
+        
         menu = new Menu(inventoryService);
-        orderManager = new OrderManager();
+        CollectionPoint collectionPoint = new CollectionPoint();
+        StationManager stationManager = new StationManager();
+        orderManager = new OrderManager(collectionPoint, stationManager);
         waiter = new Waiter(15.0, 1.0, orderManager, menu);
-        chef = new Chef(20.0, 1.5, new ShortestQueueFirst());
+        chef = new Chef(20.0, 1.5, new ShortestQueueFirst(), stationManager);
     }
 
     @Test

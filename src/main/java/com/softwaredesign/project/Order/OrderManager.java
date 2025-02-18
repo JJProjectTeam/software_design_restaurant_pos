@@ -4,36 +4,50 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.UUID;
 
 import com.softwaredesign.project.inventory.Ingredient;
+import com.softwaredesign.project.kitchen.StationManager;
+import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 
 public class OrderManager {
-    Queue<Order> orders;
-    StationMapper stationMapper;
+    private Queue<Order> orders;
+    private StationMapper stationMapper;
+    private CollectionPoint collectionPoint;
 
-    public OrderManager() {
+    public OrderManager(CollectionPoint collectionPoint, StationManager stationManager) {
         orders = new LinkedList<>();
-        stationMapper = new StationMapper();
+        stationMapper = new StationMapper(stationManager);
+        this.collectionPoint = collectionPoint;
+    }
+
+    // TODO: Need to edit the formating of this to make it sequential
+    public String generateOrderId() {
+        return UUID.randomUUID().toString();
     }
 
     public void addOrder(Order order) {
+        collectionPoint.registerOrder(order.getOrderId(), order.getRecipes().size());
         orders.add(order);
     }
 
     public List<Recipe> processOrder() {
-        while (!orders.isEmpty()) {
-            Order order = orders.poll();
-            List<Recipe> recipes = order.getRecipes();
-
-            for (Recipe recipe : recipes) {
-                makeAmendments(recipe, order);
-                stationMapper.mapStationsToRecipe(recipe);
-            }
-
-            return recipes;
+        if (orders.isEmpty()) {
+            return new ArrayList<>();
         }
 
-        return new ArrayList<>();
+        // Peek instead of poll - don't remove the order yet
+        Order order = orders.peek();
+        List<Recipe> recipes = order.getRecipes();
+
+        for (Recipe recipe : recipes) {
+            makeAmendments(recipe, order);
+            stationMapper.mapStationsToRecipe(recipe);
+        }
+
+        // Now we can remove the order
+        orders.poll();
+        return recipes;
     }
 
     private void makeAmendments(Recipe recipe, Order order) {
@@ -50,4 +64,3 @@ public class OrderManager {
         }
     }
 }
-

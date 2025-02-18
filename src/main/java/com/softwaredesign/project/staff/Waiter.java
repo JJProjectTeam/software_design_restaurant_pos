@@ -36,8 +36,9 @@ public class Waiter extends StaffMember {
             throw new IllegalStateException("Not everyone at the table is ready to order");
         }
 
-        Order tableOrder = new Order();
-        
+        String orderId = orderManager.generateOrderId();
+        Order tableOrder = new Order(orderId);
+
         for (DineInCustomer customer : table.getCustomers()) {
             Recipe customerRecipe = customer.selectRecipeFromMenu(menu);
             customer.requestRecipeModification(menu);
@@ -49,7 +50,6 @@ public class Waiter extends StaffMember {
                 tableOrder.addModification(customerRecipe, ingredient, true);
             }
         }
-    
 
         orderManager.addOrder(tableOrder);
     }

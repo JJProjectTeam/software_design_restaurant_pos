@@ -2,16 +2,18 @@ package com.softwaredesign.project;
 
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
+import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 import com.softwaredesign.project.orderfulfillment.SeatingPlan;
 import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.order.OrderManager;
-import com.softwaredesign.project.order.Station;
-import com.softwaredesign.project.order.StationType;
 import com.softwaredesign.project.staff.Chef;
 import com.softwaredesign.project.staff.Waiter;
 import com.softwaredesign.project.staff.chefstrategies.*;
 import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.inventory.Inventory;
+import com.softwaredesign.project.kitchen.Station;
+import com.softwaredesign.project.kitchen.StationManager;
+import com.softwaredesign.project.kitchen.StationType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +38,9 @@ public class App {
         System.out.println("Inventory: " + inventoryService.getStock("Beef Patty"));
 
         Menu menu = new Menu(inventoryService);
-        OrderManager orderManager = new OrderManager();
+        CollectionPoint collectionPoint = new CollectionPoint();
+        StationManager stationManager = new StationManager();
+        OrderManager orderManager = new OrderManager(collectionPoint, stationManager);
         
         // Create seating plan with enough capacity
         System.out.println("Creating seating plan...");
@@ -108,9 +112,9 @@ public class App {
         
         // Create chefs with different strategies
         List<Chef> chefs = new ArrayList<>();
-        chefs.add(new Chef(20.0, 1.5, new ShortestQueueFirst()));
-        chefs.add(new Chef(20.0, 1.5, new LongestQueueFirstStrategy()));
-        chefs.add(new Chef(20.0, 1.5, new OldestOrderFirstStrategy()));
+        chefs.add(new Chef(20.0, 1.5, new ShortestQueueFirst(), stationManager));
+        chefs.add(new Chef(20.0, 1.5, new LongestQueueFirstStrategy(), stationManager));
+        chefs.add(new Chef(20.0, 1.5, new OldestOrderFirstStrategy(), stationManager));
         
         // Assign stations to chefs
         for (Chef chef : chefs) {

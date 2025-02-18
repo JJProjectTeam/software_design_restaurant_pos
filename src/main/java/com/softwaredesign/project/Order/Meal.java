@@ -1,4 +1,5 @@
 package com.softwaredesign.project.order;
+
 import java.util.List;
 
 import com.softwaredesign.project.inventory.Ingredient;
@@ -8,11 +9,17 @@ public class Meal {
     private String name;
     private final List<Ingredient> ingredients;
     private final InventoryService inventory;
+    private String orderId;
 
-    public Meal(String name, List<Ingredient> ingredients, InventoryService inventory) {
+    public Meal(String name, List<Ingredient> ingredients, InventoryService inventory, String orderId) {
         this.name = name;
         this.ingredients = ingredients;
         this.inventory = inventory;
+        this.orderId = orderId;
+    }
+
+    public String getOrderId() {
+        return orderId;
     }
 
     public double getPrice() {

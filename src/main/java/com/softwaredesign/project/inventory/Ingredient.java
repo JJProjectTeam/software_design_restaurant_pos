@@ -2,7 +2,7 @@ package com.softwaredesign.project.inventory;
 
 import java.util.Set;
 
-import com.softwaredesign.project.order.StationType;
+import com.softwaredesign.project.kitchen.StationType;
 
 public class Ingredient {
     private String name;

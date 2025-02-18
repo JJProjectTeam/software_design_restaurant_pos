@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Arrays;
 
-import com.softwaredesign.project.order.BurgerRecipe;
-import com.softwaredesign.project.order.KebabRecipe;
-
 import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.inventory.Ingredient;
