@@ -18,6 +18,7 @@ import com.softwaredesign.project.order.OrderManager;
 import com.softwaredesign.project.order.CollectionPoint;
 import com.softwaredesign.project.order.Meal;
 import com.softwaredesign.project.order.StationType;
+import com.softwaredesign.project.kitchen.StationManager;
 
 
 public class OrderFulfillmentTest {
@@ -44,7 +45,8 @@ public class OrderFulfillmentTest {
         inventoryService.addIngredient("Mayo", 10, 0.5, StationType.PREP);
 
         collectionPoint = new CollectionPoint();
-        orderManager = new OrderManager(collectionPoint);
+        StationManager stationManager = new StationManager();
+        orderManager = new OrderManager(collectionPoint, stationManager);
         kitchen = new Kitchen(orderManager, inventoryService, collectionPoint);
         menu = new Menu(inventoryService);
         waiter = new Waiter(15.0, 1.0, orderManager, menu);

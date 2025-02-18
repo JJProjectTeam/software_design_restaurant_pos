@@ -7,6 +7,7 @@ import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.order.*;
 import com.softwaredesign.project.kitchen.Kitchen;
 import com.softwaredesign.project.order.CollectionPoint;
+import com.softwaredesign.project.kitchen.StationManager;
 
 import java.util.List;
 
@@ -44,7 +45,8 @@ public class Main {
         CollectionPoint collectionPoint = new CollectionPoint();
 
         // Create OrderManager with CollectionPoint
-        OrderManager orderManager = new OrderManager(collectionPoint);
+        StationManager stationManager = new StationManager();
+        OrderManager orderManager = new OrderManager(collectionPoint, stationManager);
 
         // Create Kitchen with same CollectionPoint
         Kitchen kitchen = new Kitchen(orderManager, inventory, collectionPoint);

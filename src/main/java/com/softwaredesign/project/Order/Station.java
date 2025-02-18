@@ -7,18 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 public class Station {
-    //Only one instance of each type of station is allowed ~singleton~
-    private static Map<StationType, Station> instances = new EnumMap<>(StationType.class);
     private final StationType type;
     private List<Order> backlog;
 
-    private Station(StationType type) {
+    public Station(StationType type) {
         this.type = type;
         this.backlog = new ArrayList<>();
-    }
-
-    public static Station getInstance(StationType type) {
-        return instances.computeIfAbsent(type, k -> new Station(k));
     }
 
     public StationType getType() {

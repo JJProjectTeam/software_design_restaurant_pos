@@ -13,6 +13,7 @@ import com.softwaredesign.project.order.StationType;
 import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.inventory.Inventory;
 import com.softwaredesign.project.order.CollectionPoint;
+import com.softwaredesign.project.kitchen.StationManager;
 
 public class StaffTests {
     private Waiter waiter;
@@ -32,9 +33,10 @@ public class StaffTests {
         
         menu = new Menu(inventoryService);
         CollectionPoint collectionPoint = new CollectionPoint();
-        orderManager = new OrderManager(collectionPoint);
+        StationManager stationManager = new StationManager();
+        orderManager = new OrderManager(collectionPoint, stationManager);
         waiter = new Waiter(15.0, 1.0, orderManager, menu);
-        chef = new Chef(20.0, 1.5, new ShortestQueueFirst());
+        chef = new Chef(20.0, 1.5, new ShortestQueueFirst(), stationManager);
     }
 
     @Test

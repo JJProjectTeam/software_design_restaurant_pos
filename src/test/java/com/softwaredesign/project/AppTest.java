@@ -12,6 +12,7 @@ import com.softwaredesign.project.staff.Waiter;
 import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.inventory.Inventory;
 import com.softwaredesign.project.order.CollectionPoint;
+import com.softwaredesign.project.kitchen.StationManager;
 
 public class AppTest {
     //TODO: Tests to add - waiter assignment? Can we handle if more customers come than we can seat gracefully?
@@ -30,7 +31,8 @@ public class AppTest {
         Menu menu = new Menu(inventoryService);
 
         CollectionPoint collectionPoint = new CollectionPoint();
-        OrderManager orderManager = new OrderManager(collectionPoint);
+        StationManager stationManager = new StationManager();
+        OrderManager orderManager = new OrderManager(collectionPoint, stationManager);
         SeatingPlan seatingPlan = new SeatingPlan(5, 15, menu);
         Waiter waiter = new Waiter(15.0, 1.0, orderManager, menu);
 

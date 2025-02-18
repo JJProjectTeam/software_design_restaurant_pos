@@ -7,15 +7,16 @@ import java.util.Queue;
 import java.util.UUID;
 
 import com.softwaredesign.project.inventory.Ingredient;
+import com.softwaredesign.project.kitchen.StationManager;
 
 public class OrderManager {
     private Queue<Order> orders;
     private StationMapper stationMapper;
     private CollectionPoint collectionPoint;
 
-    public OrderManager(CollectionPoint collectionPoint) {
+    public OrderManager(CollectionPoint collectionPoint, StationManager stationManager) {
         orders = new LinkedList<>();
-        stationMapper = new StationMapper();
+        stationMapper = new StationMapper(stationManager);
         this.collectionPoint = collectionPoint;
     }
 

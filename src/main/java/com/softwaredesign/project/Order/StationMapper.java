@@ -4,8 +4,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.softwaredesign.project.inventory.Ingredient;
+import com.softwaredesign.project.kitchen.StationManager;
 
 public class StationMapper {
+    private StationManager stationManager;
+
+    public StationMapper(StationManager stationManager) {
+        this.stationManager = stationManager;
+    }
+
     public void mapStationsToRecipe(Recipe recipe) {
         Set<StationType> requiredStationTypes = new HashSet<>();
         
@@ -15,12 +22,12 @@ public class StationMapper {
         
         // Add required stations in specific order
         if (requiredStationTypes.contains(StationType.PREP)) {
-            recipe.addStation(Station.getInstance(StationType.PREP));
+            recipe.addStation(stationManager.getStation(StationType.PREP));
         }
         if (requiredStationTypes.contains(StationType.GRILL)) {
-            recipe.addStation(Station.getInstance(StationType.GRILL));
+            recipe.addStation(stationManager.getStation(StationType.GRILL));
         }
         // Always add plate station last
-        recipe.addStation(Station.getInstance(StationType.PLATE));
+        recipe.addStation(stationManager.getStation(StationType.PLATE));
     }
 }
