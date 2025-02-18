@@ -13,12 +13,15 @@ public abstract class Recipe {
     protected String name;
     protected List<Ingredient> ingredients;
     protected Queue<Station> stationsToVisit;
-    protected InventoryService inventoryService;
+    protected final InventoryService inventoryService;
 
     protected Recipe(String name, InventoryService inventoryService) {
+        if (inventoryService == null) {
+            throw new IllegalArgumentException("InventoryService cannot be null");
+        }
         this.name = name;
-        this.ingredients = new ArrayList<>();
         this.inventoryService = inventoryService;
+        this.ingredients = new ArrayList<>();
         initializeBaseIngredients();
         stationsToVisit = new LinkedList<>();
     }

@@ -6,10 +6,10 @@ import org.junit.Test;
 
 import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.order.OrderManager;
-import com.softwaredesign.project.staff.*;
 import com.softwaredesign.project.staff.chefstrategies.*;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.order.Station;
+import com.softwaredesign.project.order.StationType;
 import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.inventory.Inventory;
 
@@ -36,16 +36,19 @@ public class StaffTests {
     }
 
     @Test
+    //TODO looking at this now, this test (MINE) is kinda shit, will add more
     public void testChefStrategyChange() {
         ChefStrategy newStrategy = new LongestQueueFirstStrategy();
         chef.setWorkStrategy(newStrategy);
         
-        Station station1 = new Station();
-        Station station2 = new Station();
-        chef.getAssignedStations().add(station1);
-        chef.getAssignedStations().add(station2);
+        chef.assignToStation(StationType.GRILL);
+        chef.assignToStation(StationType.PREP);
         
-        assertNotNull(chef.chooseNextStation());
+        Station nextStation = chef.chooseNextStation();
+        assertNotNull("Chef should choose a station", nextStation);
+        assertTrue("Station should be either PREP or GRILL", 
+            nextStation.getType() == StationType.PREP || 
+            nextStation.getType() == StationType.GRILL);
     }
 
     @Test
