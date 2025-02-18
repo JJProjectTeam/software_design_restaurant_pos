@@ -1,7 +1,8 @@
-package com.softwaredesign.project.order;
+package com.softwaredesign.project.menu;
 
 import com.softwaredesign.project.inventory.Ingredient;
 import com.softwaredesign.project.inventory.InventoryService;
+import com.softwaredesign.project.order.Recipe;
 
 public class KebabRecipe extends Recipe {
     public KebabRecipe(InventoryService inventoryService) {

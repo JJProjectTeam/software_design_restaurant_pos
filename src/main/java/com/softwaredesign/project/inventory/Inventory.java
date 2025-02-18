@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.softwaredesign.project.order.Station;
-import com.softwaredesign.project.order.StationType;
+import com.softwaredesign.project.kitchen.Station;
+import com.softwaredesign.project.kitchen.StationType;
 
 public class Inventory implements InventoryService, ISubject {
     private final Map<String, IngredientStore> ingredients;

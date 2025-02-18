@@ -1,6 +1,8 @@
-package com.softwaredesign.project.order;
+package com.softwaredesign.project.orderfulfillment;
 
 import java.util.*;
+
+import com.softwaredesign.project.order.Meal;
 
 public class CollectionPoint {
     private Map<String, List<Meal>> completedMeals;

@@ -1,10 +1,12 @@
-package com.softwaredesign.project.order;
+package com.softwaredesign.project.kitchen;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+
+import com.softwaredesign.project.order.Order;
 
 public class Station {
     private final StationType type;

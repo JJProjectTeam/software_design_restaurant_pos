@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.softwaredesign.project.inventory.Ingredient;
 import com.softwaredesign.project.kitchen.StationManager;
+import com.softwaredesign.project.kitchen.StationType;
 
 public class StationMapper {
     private StationManager stationManager;

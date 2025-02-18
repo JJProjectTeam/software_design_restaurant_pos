@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import com.softwaredesign.project.inventory.Ingredient;
 import com.softwaredesign.project.kitchen.StationManager;
+import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 
 public class OrderManager {
     private Queue<Order> orders;
@@ -20,6 +21,7 @@ public class OrderManager {
         this.collectionPoint = collectionPoint;
     }
 
+    // TODO: Need to edit the formating of this to make it sequential
     public String generateOrderId() {
         return UUID.randomUUID().toString();
     }

@@ -7,8 +7,8 @@ import org.junit.Test;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.inventory.InventoryService;
+import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.order.StationType;
 public class CustomerTests {
     private DineInCustomer customer;
     private Menu menu;

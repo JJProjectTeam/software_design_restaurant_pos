@@ -3,9 +3,9 @@ package com.softwaredesign.project.staff;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.softwaredesign.project.kitchen.Station;
 import com.softwaredesign.project.kitchen.StationManager;
-import com.softwaredesign.project.order.Station;
-import com.softwaredesign.project.order.StationType;
+import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 
 public class Chef extends StaffMember {

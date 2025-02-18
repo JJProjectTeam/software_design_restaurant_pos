@@ -5,9 +5,11 @@ import com.softwaredesign.project.inventory.Inventory;
 import com.softwaredesign.project.inventory.InventoryAlert;
 import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.order.*;
+import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 import com.softwaredesign.project.kitchen.Kitchen;
-import com.softwaredesign.project.order.CollectionPoint;
 import com.softwaredesign.project.kitchen.StationManager;
+import com.softwaredesign.project.menu.BurgerRecipe;
+import com.softwaredesign.project.menu.KebabRecipe;
 
 import java.util.List;
 
@@ -64,6 +66,7 @@ public class Main {
         System.out.println("------------------------------");
 
         // Order 1: Burger with extra cheese
+        // TODO: Need to replace this with a factory maybe to make it sequential
         String orderId1 = orderManager.generateOrderId();
         Order order1 = new Order(orderId1);
         BurgerRecipe burger = new BurgerRecipe(inventory);

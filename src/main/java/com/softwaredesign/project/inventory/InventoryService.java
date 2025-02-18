@@ -1,7 +1,8 @@
 package com.softwaredesign.project.inventory;
 
 import java.util.Map;
-import com.softwaredesign.project.order.StationType;
+
+import com.softwaredesign.project.kitchen.StationType;
 
 public interface InventoryService {
     void addIngredient(String name, int quantity, double price, StationType... stationTypes);

@@ -3,7 +3,7 @@ package com.softwaredesign.project.staff.chefstrategies;
 import java.util.List;
 import java.util.Objects;
 
-import com.softwaredesign.project.order.Station;
+import com.softwaredesign.project.kitchen.Station;
 
 public class LongestQueueFirstStrategy implements ChefStrategy {
     @Override

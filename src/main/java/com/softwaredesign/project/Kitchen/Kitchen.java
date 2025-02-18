@@ -8,8 +8,7 @@ import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.order.Meal;
 import com.softwaredesign.project.order.OrderManager;
 import com.softwaredesign.project.order.Recipe;
-import com.softwaredesign.project.order.Station;
-import com.softwaredesign.project.order.CollectionPoint;
+import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 
 public class Kitchen {
     private OrderManager orderManager;

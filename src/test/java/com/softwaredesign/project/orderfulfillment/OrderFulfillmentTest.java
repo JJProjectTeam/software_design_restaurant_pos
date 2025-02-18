@@ -15,10 +15,9 @@ import com.softwaredesign.project.staff.Waiter;
 import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.order.OrderManager;
-import com.softwaredesign.project.order.CollectionPoint;
 import com.softwaredesign.project.order.Meal;
-import com.softwaredesign.project.order.StationType;
 import com.softwaredesign.project.kitchen.StationManager;
+import com.softwaredesign.project.kitchen.StationType;
 
 
 public class OrderFulfillmentTest {

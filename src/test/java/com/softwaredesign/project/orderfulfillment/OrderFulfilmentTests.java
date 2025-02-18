@@ -7,8 +7,9 @@ import org.junit.Test;
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.inventory.InventoryService;
+import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.order.StationType;
+
 import java.util.ArrayList;
 import java.util.List;
 

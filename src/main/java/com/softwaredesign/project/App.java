@@ -2,18 +2,18 @@ package com.softwaredesign.project;
 
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
+import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 import com.softwaredesign.project.orderfulfillment.SeatingPlan;
 import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.order.OrderManager;
-import com.softwaredesign.project.order.Station;
-import com.softwaredesign.project.order.StationType;
 import com.softwaredesign.project.staff.Chef;
 import com.softwaredesign.project.staff.Waiter;
 import com.softwaredesign.project.staff.chefstrategies.*;
 import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.order.CollectionPoint;
+import com.softwaredesign.project.kitchen.Station;
 import com.softwaredesign.project.kitchen.StationManager;
+import com.softwaredesign.project.kitchen.StationType;
 
 import java.util.ArrayList;
 import java.util.List;

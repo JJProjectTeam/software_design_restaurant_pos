@@ -4,15 +4,15 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import com.softwaredesign.project.menu.Menu;
+import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 import com.softwaredesign.project.orderfulfillment.SeatingPlan;
 import com.softwaredesign.project.order.OrderManager;
-import com.softwaredesign.project.order.Station;
-import com.softwaredesign.project.order.StationType;
 import com.softwaredesign.project.staff.Waiter;
 import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.order.CollectionPoint;
+import com.softwaredesign.project.kitchen.Station;
 import com.softwaredesign.project.kitchen.StationManager;
+import com.softwaredesign.project.kitchen.StationType;
 
 public class AppTest {
     //TODO: Tests to add - waiter assignment? Can we handle if more customers come than we can seat gracefully?
