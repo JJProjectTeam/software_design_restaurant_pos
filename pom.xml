@@ -25,6 +25,11 @@
       <version>4.11</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.gitlab.klamonte</groupId>
+      <artifactId>jexer</artifactId>
+      <version>1.6.0</version>
+    </dependency>
   </dependencies>
 
   <build>
