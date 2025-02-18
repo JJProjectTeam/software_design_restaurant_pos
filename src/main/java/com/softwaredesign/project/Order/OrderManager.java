@@ -4,19 +4,27 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.UUID;
 
 import com.softwaredesign.project.inventory.Ingredient;
 
 public class OrderManager {
-    Queue<Order> orders;
-    StationMapper stationMapper;
+    private Queue<Order> orders;
+    private StationMapper stationMapper;
+    private CollectionPoint collectionPoint;
 
     public OrderManager() {
         orders = new LinkedList<>();
         stationMapper = new StationMapper();
+        collectionPoint = new CollectionPoint();
+    }
+
+    public String generateOrderId() {
+        return UUID.randomUUID().toString();
     }
 
     public void addOrder(Order order) {
+        collectionPoint.registerOrder(order.getOrderId(), order.getRecipes().size());
         orders.add(order);
     }
 
@@ -50,4 +58,3 @@ public class OrderManager {
         }
     }
 }
-
