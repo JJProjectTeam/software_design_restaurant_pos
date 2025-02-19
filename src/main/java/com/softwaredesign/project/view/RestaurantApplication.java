@@ -67,6 +67,10 @@ public class RestaurantApplication extends TApplication {
         return mainWindow;
     }
 
+    public Map<ViewType, View> getViews() {
+        return views;
+    }
+
     @Override
     public boolean onMenu(TMenuEvent menu) {
         switch (menu.getId()) {
