@@ -21,11 +21,11 @@ public abstract class GamePlayView extends GeneralView {
     protected void createNavigationTabs() {
         // Add navigation tabs at the top
         if (this instanceof KitchenView) {
-            addTab("Dining Room", ViewType.DINING_ROOM, 0);
-            addTab("Inventory", ViewType.INVENTORY, 1);
+            addTab("Dining Room", ViewType.DINING_ROOM, 1);
+            addTab("Inventory", ViewType.INVENTORY, 2);
         } else if (this instanceof DiningRoomView) {
             addTab("Kitchen", ViewType.KITCHEN, 0);
-            addTab("Inventory", ViewType.INVENTORY, 1);
+            addTab("Inventory", ViewType.INVENTORY, 2);
         } else if (this instanceof InventoryView) {
             addTab("Kitchen", ViewType.KITCHEN, 0);
             addTab("Dining Room", ViewType.DINING_ROOM, 1);
