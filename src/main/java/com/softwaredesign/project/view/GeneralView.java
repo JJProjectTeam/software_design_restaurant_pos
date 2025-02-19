@@ -1,44 +1,24 @@
 package com.softwaredesign.project.view;
 
-import jexer.*;
+import jexer.TAction;
+import jexer.TWindow;
 
-public abstract class GeneralView extends TApplication {
-    protected TWindow mainWindow;
-    protected final int SIDE_BUTTON_WIDTH = 20;
-    protected final int SIDE_BUTTON_HEIGHT = 3;
-    protected final int SIDE_BUTTON_X = 2;
+public class GeneralView implements View {
     
-    public GeneralView() throws Exception {
-        super(BackendType.SWING);
-        setupMainWindow();
+    private RestaurantApplication app;
+
+    public GeneralView(RestaurantApplication restaurantApplication) {
+        this.app = restaurantApplication;
     }
-    
-    private void setupMainWindow() {
-        int screenWidth = getScreen().getWidth();
-        int screenHeight = getScreen().getHeight();
-        mainWindow = new TWindow(this, "OOPsies Bistro", 0, 0, screenWidth, screenHeight);
-        
-        // TODO this restart button doesnt work!!
-        mainWindow.addButton("Restart", screenWidth - 12, 1, new TAction() {
+
+    @Override
+    public void initialize(TWindow window) {
+        window.addLabel("Configuration Settings", 2, 2);
+        int buttonX = window.getWidth() - "Restart Game".length() - 8;
+        window.addButton("Restart Game", buttonX, 2, new TAction() {
             public void DO() {
-                restartToWelcome();
+                app.showView(new WelcomeView(app));
             }
         });
-        
-        initializeUI(mainWindow);
-        mainWindow.maximize();
-        mainWindow.show();
     }
-    
-    protected void restartToWelcome() {
-        try {
-            mainWindow.close();
-            WelcomeView welcome = new WelcomeView();
-            (new Thread(welcome)).start();
-        } catch (Exception e) {
-            messageBox("Error", "Failed to restart: " + e.getMessage());
-        }
-    }
-    
-    protected abstract void initializeUI(TWindow window);
 }
