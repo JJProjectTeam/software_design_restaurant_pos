@@ -1,24 +1,28 @@
 package com.softwaredesign.project.view;
 
-import jexer.TAction;
-import jexer.TWindow;
+import jexer.*;
 
-public class GeneralView implements View {
-    
-    private RestaurantApplication app;
+public abstract class GeneralView implements View {
+    protected final RestaurantApplication app;
+    protected TWindow window;
 
-    public GeneralView(RestaurantApplication restaurantApplication) {
-        this.app = restaurantApplication;
+    public GeneralView(RestaurantApplication app) {
+        if (app == null) {
+            throw new IllegalArgumentException("RestaurantApplication cannot be null");
+        }
+        this.app = app;
     }
 
     @Override
     public void initialize(TWindow window) {
-        window.addLabel("Configuration Settings", 2, 2);
-        int buttonX = window.getWidth() - "Restart Game".length() - 8;
-        window.addButton("Restart Game", buttonX, 2, new TAction() {
-            public void DO() {
-                app.showView(new WelcomeView(app));
-            }
-        });
+        this.window = window;
+        setupView();
+    }
+
+    protected abstract void setupView();
+
+    @Override
+    public TWindow getWindow() {
+        return window;
     }
 }
