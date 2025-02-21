@@ -1,20 +1,19 @@
 package com.softwaredesign.project.mediator;
 
-import com.softwaredesign.project.controller.DiningRoomController;
-import com.softwaredesign.project.view.DiningRoomView;
+import com.softwaredesign.project.view.GeneralView;
+import com.softwaredesign.project.controller.BaseController;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Mediator pattern implementation that handles communication between multiple controllers
- * and their corresponding views in the restaurant application.
+ * Mediator that maintains mappings between views and their controllers.
  */
 public class RestaurantViewMediator {
     private static RestaurantViewMediator instance;
-    private final Map<String, List<DiningRoomView>> viewsByType;
-    private final Map<String, Object> controllers;
+    private final Map<String, List<GeneralView>> viewsByType;
+    private final Map<String, BaseController> controllers;
     
     private RestaurantViewMediator() {
         this.viewsByType = new HashMap<>();
@@ -29,39 +28,33 @@ public class RestaurantViewMediator {
     }
     
     /**
-     * Register a controller with the mediator
-     * @param type The type identifier for this controller (e.g., "DiningRoom", "Kitchen", etc.)
-     * @param controller The controller instance
+     * Register a controller
      */
-    public void registerController(String type, Object controller) {
+    public void registerController(String type, BaseController controller) {
         System.out.println("[RestaurantViewMediator] Registering controller of type: " + type);
         controllers.put(type, controller);
     }
     
     /**
-     * Register a view with the mediator
-     * @param type The type identifier matching its controller (e.g., "DiningRoom", "Kitchen", etc.)
-     * @param view The view instance
+     * Register a view with its corresponding controller type
      */
-    public void registerView(String type, DiningRoomView view) {
+    public void registerView(String type, GeneralView view) {
         System.out.println("[RestaurantViewMediator] Registering view for type: " + type);
         viewsByType.computeIfAbsent(type, k -> new ArrayList<>()).add(view);
         
-        // If we have a controller for this type, request initial updates
-        Object controller = controllers.get(type);
-        if (controller instanceof DiningRoomController) {
-            System.out.println("[RestaurantViewMediator] Controller found for type " + type + ", requesting initial updates");
-            ((DiningRoomController) controller).updateAllTableViews();
+        // If we have a controller for this type, request initial update
+        BaseController controller = controllers.get(type);
+        if (controller != null) {
+            System.out.println("[RestaurantViewMediator] Controller found for type " + type + ", requesting initial update");
+            controller.updateView();
         }
     }
     
     /**
-     * Unregister a view from the mediator
-     * @param type The type identifier
-     * @param view The view instance to remove
+     * Unregister a view
      */
-    public void unregisterView(String type, DiningRoomView view) {
-        List<DiningRoomView> views = viewsByType.get(type);
+    public void unregisterView(String type, GeneralView view) {
+        List<GeneralView> views = viewsByType.get(type);
         if (views != null) {
             views.remove(view);
             if (views.isEmpty()) {
@@ -71,34 +64,16 @@ public class RestaurantViewMediator {
     }
     
     /**
-     * Notify all views of a specific type about a table update
-     * @param type The type identifier
-     * @param tableNumber The table number that was updated
-     * @param capacity The table's capacity
-     * @param occupied Number of occupied seats
-     * @param status The table's status
-     * @param waiterPresent The waiter assigned to the table
+     * Get all views of a specific type
      */
-    public void notifyViewsOfType(String type, int tableNumber, int capacity, int occupied, 
-                                String status, char waiterPresent) {
-        System.out.println("[RestaurantViewMediator] Notifying views of type " + type + 
-                         " about update for table " + tableNumber);
-        
-        List<DiningRoomView> views = viewsByType.get(type);
-        if (views != null) {
-            for (DiningRoomView view : views) {
-                view.onTableUpdate(tableNumber, capacity, occupied, status, waiterPresent);
-            }
-        }
+    public List<GeneralView> getViews(String type) {
+        return viewsByType.getOrDefault(type, new ArrayList<>());
     }
     
     /**
      * Get a controller of a specific type
-     * @param type The type identifier
-     * @return The controller instance, or null if not found
      */
-    @SuppressWarnings("unchecked")
-    public <T> T getController(String type) {
-        return (T) controllers.get(type);
+    public BaseController getController(String type) {
+        return controllers.get(type);
     }
 }

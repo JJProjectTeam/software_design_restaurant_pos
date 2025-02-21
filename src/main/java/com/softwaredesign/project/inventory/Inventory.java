@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.softwaredesign.project.kitchen.StationType;
 
@@ -79,5 +80,20 @@ public class Inventory implements InventoryService, ISubject {
 
     public IngredientStore getIngredientStore(String name) {
         return ingredients.get(name);
+    }
+
+    // TODO Some placeholders for now, until this branch is merged with Ruans new inventory implementation
+    public Set<String> getAllIngredients() {
+        return ingredients.keySet();
+    }
+
+    public void updateQuantity(String name, int newQuantity) {
+        IngredientStore ingredient = ingredients.get(name);
+        if (ingredient == null) {
+            throw new IllegalArgumentException("Ingredient " + name + " not found in inventory");
+        }
+
+        ingredient.setQuantity(newQuantity);
+        notifyObservers(name, newQuantity);
     }
 }
