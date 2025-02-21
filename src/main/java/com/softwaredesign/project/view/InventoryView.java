@@ -39,8 +39,6 @@ public class InventoryView extends GamePlayView {
     @Override
     protected void addViewContent() {
         System.out.println("[InventoryView] Adding view content");
-        window.addLabel("Inventory Management", 2, 6);
-        window.addLabel("Ingredients:", 2, 8);
         createInventoryTable();
         
         // Now that the view is fully initialized
@@ -58,16 +56,15 @@ public class InventoryView extends GamePlayView {
 
     protected void createInventoryTable() {
         System.out.println("[InventoryView] Creating inventory table");
-        inventoryTable = window.addTable(2, 10, 100, 8, 3, 10);
+        inventoryTable = window.addTable(2,3, 100, 8, 3, 10);
 
         inventoryTable.setColumnLabel(0, "Ingredient");
         inventoryTable.setColumnLabel(1, "Price ($)");
         inventoryTable.setColumnLabel(2, "Quantity");
 
-        // Set column widths
-        inventoryTable.setColumnWidth(0, 20); // Ingredient name needs more space
-        inventoryTable.setColumnWidth(1, 20);
-        inventoryTable.setColumnWidth(2, 20);
+        for (int i = 0; i < inventoryTable.getColumnCount(); i++) {
+            inventoryTable.setColumnWidth(i, 10);
+        }
         
         System.out.println("[InventoryView] Inventory table created with " + inventoryTable.getColumnCount() + " columns");
     }

@@ -121,6 +121,7 @@ public class DiningRoomView extends GamePlayView {
         super.initialize(window);
     }
 
+    @Override
     public void cleanup() {
         System.out.println("[DiningRoomView] Cleaning up view, unregistering from mediator");
         mediator.unregisterView("DiningRoom", this);

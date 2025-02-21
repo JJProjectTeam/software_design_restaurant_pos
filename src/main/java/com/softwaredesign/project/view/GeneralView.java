@@ -19,6 +19,11 @@ public abstract class GeneralView implements View {
         setupView();
     }
 
+    @Override
+    public void cleanup() {
+        window.close();
+    }
+
     protected abstract void setupView();
 
     @Override
