@@ -1,14 +1,15 @@
 package com.softwaredesign.project.view;
 
 import jexer.*;
-import com.softwaredesign.project.mediator.TableUpdateMediator;
+import com.softwaredesign.project.mediator.RestaurantViewMediator;
 import java.util.Queue;
 import java.util.LinkedList;
 
 public class DiningRoomView extends GamePlayView {
     private TTableWidget seatingPlan;
-    private boolean isInitialized = false;
-    private Queue<TableUpdate> pendingUpdates = new LinkedList<>();
+    private Queue<TableUpdate> pendingUpdates;
+    private RestaurantViewMediator mediator;
+    private boolean isInitialized;
     
     private static class TableUpdate {
         final int tableNumber;
@@ -28,13 +29,18 @@ public class DiningRoomView extends GamePlayView {
     
     public DiningRoomView(RestaurantApplication app) {
         super(app);
-        System.out.println("[DiningRoomView] View created");
+        this.pendingUpdates = new LinkedList<>();
+        this.mediator = RestaurantViewMediator.getInstance();
+        this.isInitialized = false;
     }
 
     @Override
     protected void setupView() {
         super.setupView();
         System.out.println("[DiningRoomView] Setup view called");
+        
+        // Register with mediator when view is set up
+        mediator.registerView("DiningRoom", this);
     }
 
     @Override
@@ -44,9 +50,8 @@ public class DiningRoomView extends GamePlayView {
         window.addLabel("Tables", 2, 8);
         createSeatingPlan();
         
-        // Now that the view is fully initialized, register with the mediator
+        // Now that the view is fully initialized
         isInitialized = true;
-        TableUpdateMediator.getInstance().registerView(this);
         
         // Process any pending updates
         while (!pendingUpdates.isEmpty()) {
@@ -108,5 +113,16 @@ public class DiningRoomView extends GamePlayView {
             System.out.println("[DiningRoomView] ERROR updating table " + tableNumber + ": " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void initialize(TWindow window) {
+        System.out.println("[DiningRoomView] Initializing view");
+        super.initialize(window);
+    }
+
+    public void cleanup() {
+        System.out.println("[DiningRoomView] Cleaning up view, unregistering from mediator");
+        mediator.unregisterView("DiningRoom", this);
     }
 }

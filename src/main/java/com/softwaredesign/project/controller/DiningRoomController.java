@@ -1,28 +1,25 @@
 package com.softwaredesign.project.controller;
 
-import com.softwaredesign.project.mediator.TableUpdateMediator;
+import com.softwaredesign.project.mediator.RestaurantViewMediator;
 import com.softwaredesign.project.orderfulfillment.SeatingPlan;
 import com.softwaredesign.project.orderfulfillment.Table;
-import com.softwaredesign.project.customer.DineInCustomer;
 import java.util.HashMap;
 import java.util.Map;
-import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.menu.Menu;
 
 public class DiningRoomController {
     private SeatingPlan seatingPlan;
     private Map<Integer, Character> tableToWaiter;
-    private TableUpdateMediator mediator;
+    private RestaurantViewMediator mediator;
 
     public DiningRoomController(Menu menu, int totalTables, int totalSeats) {
         System.out.println("[DiningRoomController] Initializing controller...");
         this.seatingPlan = new SeatingPlan(totalTables, totalSeats, menu);
         this.tableToWaiter = new HashMap<>();
-        this.mediator = TableUpdateMediator.getInstance();
+        this.mediator = RestaurantViewMediator.getInstance();
         
         // Register with mediator
-        mediator.setController(this);
+        mediator.registerController("DiningRoom", this);
     }
 
     public void assignWaiterToTable(int tableNumber, char waiterId) {
@@ -51,7 +48,7 @@ public class DiningRoomController {
                          ", status: " + status + 
                          ", waiter: " + waiterPresent + ")");
 
-        mediator.notifyTableUpdate(tableNumber, capacity, occupied, status, waiterPresent);
+        mediator.notifyViewsOfType("DiningRoom", tableNumber, capacity, occupied, status, waiterPresent);
     }
 
     private String determineTableStatus(Table table) {
