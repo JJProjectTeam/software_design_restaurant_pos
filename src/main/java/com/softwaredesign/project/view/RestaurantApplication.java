@@ -9,12 +9,19 @@ import jexer.*;
 import jexer.event.TMenuEvent;
 import jexer.menu.TMenu;
 
+import com.softwaredesign.project.inventory.Inventory;
+import com.softwaredesign.project.kitchen.StationType;
+import com.softwaredesign.project.menu.Menu;
+import com.softwaredesign.project.customer.DineInCustomer;
+import com.softwaredesign.project.orderfulfillment.Table;
+
 public class RestaurantApplication extends TApplication {
     private TWindow mainWindow;
     private Map<ViewType, View> views = new HashMap<>();
 
     public RestaurantApplication() throws Exception {
         super(BackendType.SWING);
+        System.out.println("[RestaurantApplication] Starting application initialization");
 
         // Create the main window first
         mainWindow = new TWindow(this, "OOPsies Bistro", 0, 0, getScreen().getWidth(), getScreen().getHeight());
@@ -29,22 +36,29 @@ public class RestaurantApplication extends TApplication {
 
         // Show initial view last
         showView(ViewType.WELCOME);
+        System.out.println("[RestaurantApplication] Application initialization complete");
     }
 
+    
+
     private void initializeViews() {
+        System.out.println("[RestaurantApplication] Initializing views");
         for (ViewType viewType : ViewType.values()) {
             try {
                 View view = viewType.getViewClass()
                     .getDeclaredConstructor(RestaurantApplication.class)
                     .newInstance(this);
-                views.put(viewType, view);  // Store with ViewType enum as key
+                views.put(viewType, view);
+                System.out.println("[RestaurantApplication] Initialized view: " + viewType);
             } catch (Exception e) {
+                System.err.println("[RestaurantApplication] Failed to initialize view: " + viewType);
                 throw new RuntimeException("Failed to initialize view: " + viewType, e);
             }
         }
     }
 
     public void showView(ViewType viewType) {
+        System.out.println("[RestaurantApplication] Showing view: " + viewType);
         // Create a new ArrayList to avoid concurrent modification
         List<TWidget> widgetsToRemove = new ArrayList<>(mainWindow.getChildren());
         
