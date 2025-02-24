@@ -9,7 +9,6 @@ public class ConfigurationView extends GeneralView {
     private TTableWidget chefTable;
     private TField nameField;
     private TComboBox speedCombo;
-    private TComboBox stationCombo;
     private TComboBox strategyCombo;
     private TLabel warningLabel;
     private TLabel moneyLabel;
@@ -62,7 +61,7 @@ public class ConfigurationView extends GeneralView {
 
         // Set column widths
         chefTable.setColumnWidth(0, 20);
-        chefTable.setColumnWidth(1, 30);
+        chefTable.setColumnWidth(1, 40);
         chefTable.setColumnWidth(2, 10);
         chefTable.setColumnWidth(3, 15);
         chefTable.setColumnWidth(4, 20);
@@ -71,6 +70,114 @@ public class ConfigurationView extends GeneralView {
         // chefTable.insertRowBelow(0);
     }
 
+    private class StationCount {
+        private String type;
+        private int count;
+        private TLabel countLabel;
+        
+        public StationCount(String type, TWindow window, int x, int y) {
+            this.type = type;
+            this.count = 0;
+            
+            // Create the display
+            window.addLabel(type + ":", x, y);
+            window.addButton("-", x + type.length() + 2, y, new TAction() {
+                public void DO() {
+                    if (count > 0) {
+                        count--;
+                        updateLabel();
+                    }
+                }
+            });
+            
+            countLabel = window.addLabel("0", x + type.length() + 5, y);
+            
+            window.addButton("+", x + type.length() + 8, y, new TAction() {
+                public void DO() {
+                    count++;
+                    updateLabel();
+                }
+            });
+        }
+        
+        private void updateLabel() {
+            countLabel.setLabel(String.valueOf(count));
+        }
+        
+        public void reset() {
+            count = 0;
+            updateLabel();
+        }
+        
+        public String getType() { return type; }
+        public int getCount() { return count; }
+    }
+
+    private class StationDropdown extends TWindow {
+        private StationCount[] stations;
+        private boolean isVisible = false;
+        
+        public StationDropdown(TWindow parent, int x, int y) {
+            super(parent.getApplication(), "Stations", x, y, 25, 10);
+            stations = new StationCount[3];
+            
+            // Create station counters vertically
+            stations[0] = new StationCount("Grill", this, 2, 2);
+            stations[1] = new StationCount("Prep", this, 2, 4);
+            stations[2] = new StationCount("Plate", this, 2, 6);
+            
+            // Initialize hidden
+            this.setVisible(false);
+            
+
+        }
+        
+        public void toggle() {
+            isVisible = !isVisible;
+            this.setVisible(isVisible);
+            if (isVisible) {
+                this.activate(); // Ensure window gets focus when shown
+            }
+        }
+
+        @Override
+        public void onClose() {
+            isVisible = false;
+            this.setVisible(false);
+        }
+
+        public StationCount getStation(int index) {
+            return stations[index];
+        }
+        
+        public void resetAll() {
+            for (StationCount station : stations) {
+                station.reset();
+            }
+        }
+        
+        public int getTotalStations() {
+            int total = 0;
+            for (StationCount station : stations) {
+                total += station.getCount();
+            }
+            return total;
+        }
+        
+        public List<String> getSelectedStations() {
+            List<String> selected = new ArrayList<>();
+            for (StationCount station : stations) {
+                for (int i = 0; i < station.getCount(); i++) {
+                    selected.add(station.getType());
+                }
+            }
+            return selected;
+        }
+    }
+
+    private StationDropdown stationDropdown;
+    private TButton stationButton;
+
     private void createInputForm() {
         TAction somethingChanged = new TAction() {
             public void DO() {
@@ -78,13 +185,8 @@ public class ConfigurationView extends GeneralView {
             }
         };
 
-        List<String> stations = new ArrayList<String>();
         List<String> speeds = new ArrayList<String>();
         List<String> strategies = new ArrayList<String>();
-
-        stations.add("Grill");
-        stations.add("Prep");
-        stations.add("Plate");
 
         speeds.add("1");
         speeds.add("2");
@@ -105,30 +207,46 @@ public class ConfigurationView extends GeneralView {
         window.addLabel("Speed:", 25, 15);
         speedCombo = window.addComboBox(31, 15, 8, speeds, -1, 4, somethingChanged);
         
-        // Station section
-        window.addLabel("Station:", 41, 15);
-        stationCombo = window.addComboBox(48, 15, 12, stations, -1, 4, somethingChanged);
+        // Station dropdown section
+        window.addLabel("Stations:", 41, 15);
+        stationButton = window.addButton("Select Stations", 48, 15, new TAction() {
+            public void DO() {
+                if (stationDropdown != null) {
+                    stationDropdown.toggle();
+                }
+            }
+        });
+        stationDropdown = new StationDropdown(window, 48, 16);
         
         // Strategy section
-        window.addLabel("Strategy:", 62, 15);
-        strategyCombo = window.addComboBox(70, 15, 15, strategies, -1, 4, somethingChanged);
+        window.addLabel("Strategy:", 70, 15);
+        strategyCombo = window.addComboBox(78, 15, 15, strategies, -1, 4, somethingChanged);
         
-        // Add button at the end of the row
-        window.addButton("Add Chef", 87, 15, new TAction() {
+        // Add button
+        window.addButton("Add Chef", 95, 15, new TAction() {
             public void DO() {
                 if (validateInputs()) {
                     String name = nameField.getText();
-                    String station = stationCombo.getText();
+                    List<String> selectedStations = stationDropdown.getSelectedStations();
+                    
                     int speed = Integer.parseInt(speedCombo.getText());
-                    double costPerHour = 100 * speed;
+                    int totalStations = stationDropdown.getTotalStations();
+                    double costPerHour = calculateCost(speed, totalStations);
                     String strategy = strategyCombo.getText();
-                    addChefToTable(name, station, speed, costPerHour, strategy);
+                    System.out.println("Selected stations: " + String.join(", ", selectedStations));
+                    String allSelectedStations = String.join(", ", selectedStations);
+                    addChefToTable(name, allSelectedStations, 
+                                 speed, costPerHour, strategy);
                     refreshTable();
                     clearError();
                     clearInputs();
                 }
             }
         });
+    }
+
+    private double calculateCost(int speed, int numberOfStations) {
+        return speed * numberOfStations * 100.0;
     }
 
     private boolean validateInputs() {
@@ -139,14 +257,13 @@ public class ConfigurationView extends GeneralView {
             return false;
         }
 
-        // Validate station selection
-        String station = stationCombo.getText();
-        if (station == null || station.isEmpty()) {
-            showError("Please select a station");
+        // Validate at least one station is selected
+        if (stationDropdown.getTotalStations() == 0) {
+            showError("Please select at least one station");
             return false;
         }
 
-        // Validate speed selection
+        // Existing speed validation
         String speedText = speedCombo.getText();
         if (speedText == null || speedText.isEmpty()) {
             showError("Please select a speed");
@@ -163,7 +280,7 @@ public class ConfigurationView extends GeneralView {
             return false;
         }
 
-        // Validate strategy selection
+        // Existing strategy validation
         String strategy = strategyCombo.getText();
         if (strategy == null || strategy.isEmpty()) {
             showError("Please select a strategy");
@@ -173,6 +290,15 @@ public class ConfigurationView extends GeneralView {
         return true;
     }
 
+    private void clearInputs() {
+        nameField.setText("");
+        speedCombo.setText("");
+        strategyCombo.setText("");
+        stationDropdown.resetAll();
+        stationDropdown.setVisible(false); // Ensure dropdown is hidden
+        stationDropdown.isVisible = false; // Update internal state
+    }
+
     private boolean validateStationCoverage() {
         boolean hasGrill = false;
         boolean hasPrep = false;
@@ -180,23 +306,14 @@ public class ConfigurationView extends GeneralView {
 
         // Check all rows in the table
         for (int i = 0; i < chefTable.getRowCount(); i++) {
-            String station = chefTable.getCellText(1, i);
-            if (station != null) {
-                switch (station.trim()) {
-                    case "Grill":
-                        hasGrill = true;
-                        break;
-                    case "Prep":
-                        hasPrep = true;
-                        break;
-                    case "Plate":
-                        hasPlate = true;
-                        break;
-                }
+            String stations = chefTable.getCellText(1, i);
+            if (stations != null) {
+                if (stations.contains("Grill")) hasGrill = true;
+                if (stations.contains("Prep")) hasPrep = true;
+                if (stations.contains("Plate")) hasPlate = true;
             }
         }
 
-        // Log the current coverage status
         System.out.println("[ConfigurationView] Station coverage - Grill: " + hasGrill 
             + ", Prep: " + hasPrep + ", Plate: " + hasPlate);
 
@@ -210,13 +327,6 @@ public class ConfigurationView extends GeneralView {
 
     private void clearError() {
         errorLabel.setLabel("");
-    }
-
-    private void clearInputs() {
-        nameField.setText("");
-        speedCombo.setText("");
-        stationCombo.setText("");
-        strategyCombo.setText("");
     }
 
     // Methods to be called by controller later
