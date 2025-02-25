@@ -9,15 +9,15 @@ import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 
 public class Chef extends StaffMember {
-    private List<Station> assignedStations;
-    private ChefStrategy workStrategy;
+    private List<Station> assignedStations; // Stations where the chef is assigned
+    private ChefStrategy workStrategy; 
     private StationManager stationManager;
     
-        public Chef(double payPerHour, double speedMultiplier, ChefStrategy strategy, StationManager stationManager) {
-            super(payPerHour, speedMultiplier);
-            this.assignedStations = new ArrayList<>();
-            this.workStrategy = strategy;
-            this.stationManager = stationManager;
+    public Chef(double payPerHour, double speedMultiplier, ChefStrategy strategy, StationManager stationManager) {
+        super(payPerHour, speedMultiplier);
+        this.assignedStations = new ArrayList<>();
+        this.workStrategy = strategy;
+        this.stationManager = stationManager;
     }
 
     public void assignToStation(StationType stationType) {
@@ -29,6 +29,14 @@ public class Chef extends StaffMember {
 
     public void setWorkStrategy(ChefStrategy strategy) {
         this.workStrategy = strategy;
+    }
+
+    public ChefStrategy getWorkStrategy() {
+        return workStrategy;
+    }
+    
+    public void removeStationAssignment(Station station) {
+        assignedStations.remove(station);
     }
 
     public Station chooseNextStation() {

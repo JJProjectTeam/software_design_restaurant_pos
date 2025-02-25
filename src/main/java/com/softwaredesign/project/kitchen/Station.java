@@ -33,6 +33,11 @@ public class Station {
         return LocalDateTime.now(); //TODO order must be given an id either on creation or when added to stations
     }
 
+    // get orders from station
+    public List<Order> getBacklog() {
+        return backlog;
+    }
+
     public int getBacklogSize() {
         return backlog.size();
     }

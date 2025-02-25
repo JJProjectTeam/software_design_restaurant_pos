@@ -19,6 +19,10 @@ public class Order {
         this.modifications = new HashMap<>();
     }
 
+    public void getOrderId(String orderId) {
+        this.orderId = orderId;
+    }
+
     public void addRecipes(Recipe... recipes) {
         for (Recipe recipe : recipes) {
             recipe.setOrderId(this.orderId);
