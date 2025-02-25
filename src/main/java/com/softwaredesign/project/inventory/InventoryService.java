@@ -1,6 +1,7 @@
 package com.softwaredesign.project.inventory;
 
 import java.util.Map;
+import java.util.Set;
 
 import com.softwaredesign.project.order.Station;
 
@@ -11,4 +12,5 @@ public interface InventoryService {
     int getStock(String name);
     double getPrice(String name);
     IngredientStore getIngredientStore(String name);
+    Set<IngredientStore> getIngredientStores();
 }
