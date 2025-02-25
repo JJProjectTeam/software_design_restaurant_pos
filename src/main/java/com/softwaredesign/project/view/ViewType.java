@@ -7,7 +7,8 @@ public enum ViewType {
     END_OF_GAME(EndOfGameView.class),
     INVENTORY(InventoryView.class),
     CHEF_CONFIGURATION(ChefConfigurationView.class),
-    DINING_CONFIGURATION(DiningConfigurationView.class);
+    DINING_CONFIGURATION(DiningConfigurationView.class),
+    MENU_CONFIGURATION(MenuConfigurationView.class);
 
     private final Class<? extends View> viewClass;
 

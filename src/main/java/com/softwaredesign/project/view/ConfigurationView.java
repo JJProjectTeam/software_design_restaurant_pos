@@ -25,8 +25,8 @@ public abstract class ConfigurationView extends GeneralView {
         window.addLabel("$", window.getWidth() - 15, 2);
         moneyLabel = window.addLabel("1000", window.getWidth() - 13, 2);
         
-        warningLabel = window.addLabel("", 2, 18);
-        errorLabel = window.addLabel("", 2, 19);
+        warningLabel = window.addLabel("", 2, 30);
+        errorLabel = window.addLabel("", 2, 30);
     }
 
     protected abstract void setupSpecificElements();
