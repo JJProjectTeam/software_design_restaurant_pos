@@ -9,6 +9,7 @@ public class DiningConfigurationView extends ConfigurationView {
     private TField nameField;
     private TComboBox speedCombo;
     private TSpinner tableCountSpinner;
+    private TLabel tableCountLabel;
     private int maxTables = 20;
     private int currentTableCount = 0;
 
@@ -47,11 +48,13 @@ public class DiningConfigurationView extends ConfigurationView {
 
     private void createTableConfiguration() {
         window.addLabel("Number of Tables:", 2, 13);
+        tableCountLabel = window.addLabel("0", 25, 13);
 
         TAction increaseTableCountAction = new TAction() {
             public void DO() {
                 if (currentTableCount < maxTables) {
                     currentTableCount++;
+                    updateTableCountLabel();
                 }
             }
         };
@@ -60,12 +63,17 @@ public class DiningConfigurationView extends ConfigurationView {
             public void DO() {
                 if (currentTableCount > 0) {
                     currentTableCount--;
+                    updateTableCountLabel();
                 }
             }
         };
-        tableCountSpinner = window.addSpinner(25, 13, increaseTableCountAction, decreaseTableCountAction);
+        tableCountSpinner = window.addSpinner(35, 13, increaseTableCountAction, decreaseTableCountAction);
         
-        window.addLabel("(Maximum " + maxTables + " tables)", 35, 13);
+        window.addLabel("(Maximum " + maxTables + " tables)", 45, 13);
+    }
+
+    private void updateTableCountLabel() {
+        tableCountLabel.setLabel(String.valueOf(currentTableCount));
     }
 
     private void createWaiterInputForm() {
@@ -76,6 +84,7 @@ public class DiningConfigurationView extends ConfigurationView {
 
         window.addLabel("Add New Waiter:", 2, 15);
         nameField = window.addField( 20, 15, 20, false);
+        nameField.setText(""); 
         
         window.addLabel("Speed:", 45, 15);
         speedCombo = window.addComboBox(55, 15, 10, speeds, -1, 3, nullAction);
@@ -101,7 +110,7 @@ public class DiningConfigurationView extends ConfigurationView {
         
         // Clear input fields
         nameField.setText("");
-        speedCombo.setIndex(-1);
+        speedCombo.setIndex(0);
     }
 
     private double calculateWaiterCost(int speed) {
