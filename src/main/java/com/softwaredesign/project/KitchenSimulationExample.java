@@ -88,7 +88,10 @@ public class KitchenSimulationExample {
         Order order1 = new Order(orderId1);
         BurgerRecipe burger = new BurgerRecipe(inventory);
         order1.addRecipes(burger);
-        order1.addModification(burger, cheese, true);
+        order1.addModification(burger, cheese, true); // TODO major issue, want to remove cheese from a burger, 
+                                                                 // this will mean creating a cheese object,
+                                                                 // this will reduce the quantity in the inventory...
+                                                                 // bad...
         simulator.getOrderManager().addOrder(order1);
         System.out.println("Added Order 1: Burger with extra cheese");
         
