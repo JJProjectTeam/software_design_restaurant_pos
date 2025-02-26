@@ -12,6 +12,7 @@ public class Chef extends StaffMember {
     private List<Station> assignedStations; // Stations where the chef is assigned
     private ChefStrategy workStrategy; 
     private StationManager stationManager;
+    private Station currentStation;
     
     public Chef(double payPerHour, double speedMultiplier, ChefStrategy strategy, StationManager stationManager) {
         super(payPerHour, speedMultiplier);
@@ -22,7 +23,7 @@ public class Chef extends StaffMember {
 
     public void assignToStation(StationType stationType) {
         Station station = stationManager.getStation(stationType);
-        if (!assignedStations.contains(station)) {
+        if (station != null && !assignedStations.contains(station)) {
             assignedStations.add(station);
         }
     }
@@ -37,9 +38,34 @@ public class Chef extends StaffMember {
     
     public void removeStationAssignment(Station station) {
         assignedStations.remove(station);
+        if (currentStation == station) {
+            currentStation = null;
+        }
     }
 
     public Station chooseNextStation() {
-        return workStrategy.chooseNextStation(assignedStations);
+        if (assignedStations.isEmpty()) {
+            return null;
+        }
+        
+        currentStation = workStrategy.chooseNextStation(assignedStations);
+        return currentStation;
+    }
+    
+    public Station getCurrentStation() {
+        return currentStation;
+    }
+    
+    public List<Station> getAssignedStations() {
+        return new ArrayList<>(assignedStations);
+    }
+    
+    public boolean isAssignedToStation(StationType stationType) {
+        for (Station station : assignedStations) {
+            if (station.getType() == stationType) {
+                return true;
+            }
+        }
+        return false;
     }
 }
