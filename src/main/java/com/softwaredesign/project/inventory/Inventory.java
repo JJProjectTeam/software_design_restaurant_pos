@@ -2,8 +2,10 @@ package com.softwaredesign.project.inventory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.softwaredesign.project.kitchen.Station;
 import com.softwaredesign.project.kitchen.StationType;
@@ -80,5 +82,10 @@ public class Inventory implements InventoryService, ISubject {
 
     public IngredientStore getIngredientStore(String name) {
         return ingredients.get(name);
+    }
+
+    @Override
+    public Set<IngredientStore> getIngredientStores() {
+        return new HashSet<>(ingredients.values());
     }
 }
