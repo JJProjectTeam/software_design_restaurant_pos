@@ -1,57 +1,54 @@
 package com.softwaredesign.project.controller;
 
-import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.kitchen.StationType;
-import com.softwaredesign.project.view.GeneralView;
-import com.softwaredesign.project.view.InventoryView;
+import com.softwaredesign.project.mediator.RestaurantViewMediator;
+import com.softwaredesign.project.view.ConfigurableView;
+import com.softwaredesign.project.view.View;
+import java.util.*;
 
 public class InventoryController extends BaseController {
-    private Inventory inventory;
-
-    public InventoryController(Inventory inventory) {
+    private Map<String, Integer> ingredients;
+    
+    public InventoryController() {
         super("Inventory");
-        System.out.println("[InventoryController] Initializing controller...");
-        this.inventory = inventory;
+        this.ingredients = new HashMap<>();
+        mediator.registerController("Inventory", this);
     }
-
-    @Override
-    public void updateView() {
-        System.out.println("[InventoryController] Updating all inventory views");
-        inventory.getAllIngredients().forEach(this::updateIngredientView);
+    
+    public void addIngredient(String name, int quantity) {
+        ingredients.put(name, quantity);
+        updateView();
     }
-
-    public void addIngredient(String name, int quantity, double price, StationType station) {
-        System.out.println("[InventoryController] Adding ingredient " + name);
-        inventory.addIngredient(name, quantity, price, station);
-        updateIngredientView(name);
+    
+    public int getIngredientQuantity(String name) {
+        return ingredients.getOrDefault(name, 0);
     }
-
-    public void updateIngredientQuantity(String name, int newQuantity) {
-        System.out.println("[InventoryController] Updating quantity for " + name + " to " + newQuantity);
-        inventory.updateQuantity(name, newQuantity);
-        updateIngredientView(name);
+    
+    public Map<String, Integer> getIngredients() {
+        return new HashMap<>(ingredients);
     }
-
-    private void updateIngredientView(String ingredientName) {
-        double price = inventory.getPrice(ingredientName);
-        int quantity = inventory.getStock(ingredientName);
-
-        System.out.println("[InventoryController] Updating view for ingredient " + ingredientName + 
-                         " (price: " + price + 
-                         ", quantity: " + quantity + ")");
-
-        // Notify all registered views
-        for (GeneralView view : mediator.getViews("Inventory")) {
-            if (view instanceof InventoryView) {
-                ((InventoryView) view).onInventoryUpdate(ingredientName, price, quantity);
-            }
-            else {
-                System.out.println("[InventoryController] View is not an InventoryView, skipping update");
+    
+    public void updateIngredientQuantity(String name, int delta) {
+        int currentQuantity = ingredients.getOrDefault(name, 0);
+        int newQuantity = currentQuantity + delta;
+        
+        if (newQuantity < 0) {
+            System.out.println("[InventoryController] Warning: Ingredient " + name + " quantity would go negative");
+            return;
+        }
+        
+        ingredients.put(name, newQuantity);
+        System.out.println("[InventoryController] Updated " + name + " quantity to " + newQuantity);
+        
+        // Notify inventory views
+        for (View view : mediator.getViews("Inventory")) {
+            if (view instanceof ConfigurableView) {
+                ((ConfigurableView) view).onUpdate(this);
             }
         }
     }
-
-    public Inventory getInventory() {
-        return inventory;
+    
+    @Override
+    public void updateView() {
+        mediator.notifyViewUpdate("Inventory");
     }
 }

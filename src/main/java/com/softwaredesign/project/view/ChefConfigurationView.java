@@ -3,6 +3,8 @@ package com.softwaredesign.project.view;
 import java.util.ArrayList;
 import java.util.List;
 import jexer.*;
+import com.softwaredesign.project.controller.ConfigurationController;
+import com.softwaredesign.project.mediator.RestaurantViewMediator;
 
 public class ChefConfigurationView extends ConfigurationView {
     private TTableWidget chefTable;
@@ -43,6 +45,16 @@ public class ChefConfigurationView extends ConfigurationView {
         chefTable.setColumnWidth(2, 10);
         chefTable.setColumnWidth(3, 15);
         chefTable.setColumnWidth(4, 20);
+
+        // Populate from controller if available
+        ConfigurationController controller = (ConfigurationController) mediator.getController("Configuration");
+        if (controller != null) {
+            for (var entry : controller.getChefs().entrySet()) {
+                var chef = entry.getValue();
+                String stations = String.join(", ", chef.getStations());
+                addChefToTable(chef.getName(), stations, chef.getSpeed(), chef.getCostPerHour(), chef.getStrategy());
+            }
+        }
     }
 
     private void createInputForm() {
@@ -194,20 +206,44 @@ public class ChefConfigurationView extends ConfigurationView {
     }
 
     private void addChefToTable(String name, String stations, int speed, double costPerHour, String strategy) {
-        try {
-            int row = chefTable.getRowCount() - 1;
+        // Add to table UI
+        int row = chefTable.getRowCount()-1;
+        chefTable.insertRowBelow(row);
+        chefTable.setCellText(0, row, name);
+        chefTable.setCellText(1, row, stations);
+        chefTable.setCellText(2, row, String.valueOf(speed));
+        chefTable.setCellText(3, row, String.format("%.2f", costPerHour));
+        chefTable.setCellText(4, row, strategy);
+
+        // Add to configuration controller if available
+        ConfigurationController controller = (ConfigurationController) mediator.getController("Configuration");
+        if (controller != null) {
+            List<String> stationList = new ArrayList<>();
+            for (String station : stations.split(", ")) {
+                stationList.add(station.trim());
+            }
+            controller.addChef(name, stationList, speed, costPerHour, strategy);
+        }
+    }
+
+    @Override
+    protected void onConfigurationUpdate(ConfigurationController controller) {
+        // Clear existing table
+        while (chefTable.getRowCount() > 1) { // Keep header row
+            chefTable.deleteRow(1);
+        }
+
+        // Repopulate from controller
+        for (var entry : controller.getChefs().entrySet()) {
+            var chef = entry.getValue();
+            int row = chefTable.getRowCount()-1;
+            String stations = String.join(", ", chef.getStations());
             chefTable.insertRowBelow(row);
-            
-            chefTable.setCellText(0, row, name);
+            chefTable.setCellText(0, row, chef.getName());
             chefTable.setCellText(1, row, stations);
-            chefTable.setCellText(2, row, String.valueOf(speed));
-            chefTable.setCellText(3, row, String.format("$%.2f", costPerHour));
-            chefTable.setCellText(4, row, strategy);
-            
-            chefTable.draw();
-        } catch (Exception e) {
-            System.err.println("[StaffConfigurationView] Error adding chef to table: " + e.getMessage());
-            e.printStackTrace();
+            chefTable.setCellText(2, row, String.valueOf(chef.getSpeed()));
+            chefTable.setCellText(3, row, String.format("%.2f", chef.getCostPerHour()));
+            chefTable.setCellText(4, row, chef.getStrategy());
         }
     }
 

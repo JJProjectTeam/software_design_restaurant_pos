@@ -2,49 +2,13 @@ package com.softwaredesign.project.view;
 
 import java.util.*;
 import jexer.*;
+import com.softwaredesign.project.controller.ConfigurationController;
 
 public class MenuConfigurationView extends ConfigurationView {
     private TTableWidget menuTable;
     private TField nameField;
     private Map<String, IngredientCounter> ingredientCounters;
     private List<String> availableIngredients;
-
-    private class IngredientCounter {
-        TLabel countLabel;
-        int count;
-        
-        IngredientCounter(TLabel label) {
-            this.countLabel = label;
-            this.count = 0;
-        }
-        
-        void increment() {
-            if (count < 10) {
-                count++;
-                updateLabel();
-            }
-        }
-        
-        void decrement() {
-            if (count > 0) {
-                count--;
-                updateLabel();
-            }
-        }
-        
-        void updateLabel() {
-            countLabel.setLabel("Amount: " + String.valueOf(count));
-        }
-        
-        int getValue() {
-            return count;
-        }
-        
-        void reset() {
-            count = 0;
-            updateLabel();
-        }
-    }
 
     public MenuConfigurationView(RestaurantApplication app) {
         super(app);
@@ -87,10 +51,17 @@ public class MenuConfigurationView extends ConfigurationView {
         menuTable.setColumnLabel(1, "Ingredients");
         menuTable.setColumnLabel(2, "Price");
         menuTable.setColumnWidth(0, 20);
-        menuTable.setColumnWidth(1, 90);  
+        menuTable.setColumnWidth(1, 80);  
         menuTable.setColumnWidth(2, 10);
 
-
+        // Populate from controller if available
+        ConfigurationController controller = (ConfigurationController) mediator.getController("Configuration");
+        if (controller != null) {
+            for (var entry : controller.getMenuItems().entrySet()) {
+                var item = entry.getValue();
+                addMenuItemToTable(item.getName(), item.getIngredients(), item.getPrice());
+            }
+        }
     }
 
     private void createInputForm() {
@@ -99,48 +70,44 @@ public class MenuConfigurationView extends ConfigurationView {
         // Name field
         window.addLabel("Name:", 2, 15);
         nameField = window.addField(8, 15, 20, false);
-        
-        // Ingredients section
-        window.addLabel("Ingredients:", 2, 17);
-        
-        // Create spinners for each ingredient
-        int row = 19;
+
+        // Ingredient counters
+        int row = 17;
         int col = 2;
         for (String ingredient : availableIngredients) {
             window.addLabel(ingredient + ":", col, row);
+            TLabel countLabel = window.addLabel("Amount: 0", col + 15, row);
             
-            // Create the counter and its label
-            TLabel countLabel = window.addLabel("0", col + ingredient.length() + 4, row);
-            IngredientCounter counter = new IngredientCounter(countLabel);
-            ingredientCounters.put(ingredient, counter);
-
-            // Create decrement and increment buttons with their actions
-            window.addButton("-", col + ingredient.length() + 2, row, new TAction() {
-                @Override
+            TAction incrementAction = new TAction() {
                 public void DO() {
-                    counter.decrement();
+                    IngredientCounter counter = ingredientCounters.get(ingredient);
+                    if (counter != null) {
+                        counter.increment();
+                    }
                 }
-            });
+            };
             
-            window.addButton("+", col + ingredient.length() + 6, row, new TAction() {
-                @Override
+            TAction decrementAction = new TAction() {
                 public void DO() {
-                    counter.increment();
+                    IngredientCounter counter = ingredientCounters.get(ingredient);
+                    if (counter != null) {
+                        counter.decrement();
+                    }
                 }
-            });
+            };
             
-            // Move to next row or column based on position
-            if (col > 60) {
-                col = 2;
-                row += 2;
-            } else {
-                col += 30;
+            window.addSpinner(col + 10, row, incrementAction, decrementAction);
+            ingredientCounters.put(ingredient, new IngredientCounter(countLabel));
+            
+            row += 2;
+            if (row > 25) {
+                row = 17;
+                col += 40;
             }
         }
         
         // Add button
-        TButton addButton = window.addButton("Add Item", 2, row + 3, new TAction() {
-            @Override
+        window.addButton("Add Item", 2, row + 2, new TAction() {
             public void DO() {
                 addMenuItem();
             }
@@ -148,89 +115,147 @@ public class MenuConfigurationView extends ConfigurationView {
     }
 
     private void addMenuItem() {
-        try {
-            String name = nameField.getText().trim();
-            
-            if (name.isEmpty()) {
-                showError("Please enter a name for the menu item");
-                return;
+        String name = nameField.getText().trim();
+        if (name.isEmpty()) {
+            showError("Please enter a menu item name");
+            return;
+        }
+
+        // Collect ingredients and their amounts
+        Map<String, Integer> ingredients = new HashMap<>();
+        for (Map.Entry<String, IngredientCounter> entry : ingredientCounters.entrySet()) {
+            int count = entry.getValue().getValue();
+            if (count > 0) {
+                ingredients.put(entry.getKey(), count);
             }
-            
-            // Build ingredients list and count total ingredients
-            StringBuilder ingredients = new StringBuilder();
-            boolean hasIngredients = false;
-            int totalIngredients = 0;
-            
-            for (Map.Entry<String, IngredientCounter> entry : ingredientCounters.entrySet()) {
-                int quantity = entry.getValue().getValue();
-                if (quantity > 0) {
-                    if (hasIngredients) {
-                        ingredients.append(",");  
-                    }
-                    ingredients.append(quantity).append("x ").append(entry.getKey());
-                    hasIngredients = true;
-                    totalIngredients += quantity;
-                }
+        }
+
+        if (ingredients.isEmpty()) {
+            showError("Please add at least one ingredient");
+            return;
+        }
+
+        // Calculate price based on ingredients
+        double price = calculatePrice(ingredients);
+
+        // Add to table and controller
+        addMenuItemToTable(name, ingredients, price);
+
+        // Clear inputs
+        nameField.setText("");
+        for (IngredientCounter counter : ingredientCounters.values()) {
+            counter.reset();
+        }
+    }
+
+    private void addMenuItemToTable(String name, Map<String, Integer> ingredients, double price) {
+        // Add to table UI
+        int row = menuTable.getRowCount()-1;
+        menuTable.insertRowBelow(row);
+        menuTable.setCellText(0, row, name);
+        menuTable.setCellText(1, row, formatIngredients(ingredients));
+        menuTable.setCellText(2, row, String.format("%.2f", price));
+
+        // Add to configuration controller if available
+        ConfigurationController controller = (ConfigurationController) mediator.getController("Configuration");
+        if (controller != null) {
+            controller.addMenuItem(name, ingredients, price);
+        }
+    }
+
+    private double calculatePrice(Map<String, Integer> ingredients) {
+        // For now, assume a fixed price per ingredient
+        double price = 0;
+        for (Map.Entry<String, Integer> entry : ingredients.entrySet()) {
+            price += entry.getValue() * 1.0; // Replace with actual price calculation
+        }
+        return price;
+    }
+
+    private String formatIngredients(Map<String, Integer> ingredients) {
+        StringBuilder formatted = new StringBuilder();
+        for (Map.Entry<String, Integer> entry : ingredients.entrySet()) {
+            if (formatted.length() > 0) {
+                formatted.append(", ");
             }
-            
-            if (!hasIngredients) {
-                showError("Please select at least one ingredient");
-                return;
-            }
-            
-            String ingredientsString = ingredients.toString();
-            System.out.println("ingredientsString: " + ingredientsString);
+            formatted.append(entry.getValue()).append("x ").append(entry.getKey());
+        }
+        return formatted.toString();
+    }
+
+    // Method to handle updates from the controller
+    @Override
+    protected void onConfigurationUpdate(ConfigurationController controller) {
+        // Clear existing table
+        while (menuTable.getRowCount() > 1) { // Keep header row
+            menuTable.deleteRow(1);
+        }
+
+        // Repopulate from controller
+        for (var entry : controller.getMenuItems().entrySet()) {
+            var item = entry.getValue();
             int row = menuTable.getRowCount()-1;
-            System.out.println("row: " + row);
             menuTable.insertRowBelow(row);
-            
-            // Add to table
-            menuTable.setCellText(0, row, name);
-            menuTable.setCellText(1, row, ingredientsString);
-            System.out.print("Cell text: " + menuTable.getCellText(1, row));
-            menuTable.setCellText(2, row, String.valueOf(totalIngredients));
-            
-            // Clear form
-            nameField.setText("");
-            for (IngredientCounter counter : ingredientCounters.values()) {
-                counter.reset();
-            }
-            
-            clearError();
-        } catch (Exception e) {
-            showError("An error occurred while adding the menu item");
+            menuTable.setCellText(0, row, item.getName());
+            menuTable.setCellText(1, row, formatIngredients(item.getIngredients()));
+            menuTable.setCellText(2, row, String.format("%.2f", item.getPrice()));
         }
     }
 
     @Override
     protected boolean validateConfiguration() {
-        // Check if there's at least one menu item
-        if (menuTable.getRowCount() <= 1) {  // Account for header row
-            showError("Please add at least one menu item before proceeding");
+        int menuItemCount = menuTable.getRowCount() - 1;  // Subtract header row
+        if (menuItemCount == 0) {
+            showError("At least one menu item must be added");
             return false;
         }
-        
-        clearError();
         return true;
     }
 
     @Override
     protected void onNextPressed() {
-        app.showView(ViewType.CHEF_CONFIGURATION);
+        app.showView(ViewType.DINING_ROOM);
     }
 
     @Override
     protected void onBackPressed() {
-        app.showView(ViewType.DINING_ROOM);
+        app.showView(ViewType.DINING_CONFIGURATION);
+    }
+
+    private class IngredientCounter {
+        TLabel countLabel;
+        int count;
+        
+        IngredientCounter(TLabel label) {
+            this.countLabel = label;
+            this.count = 0;
+        }
+        
+        void increment() {
+            if (count < 10) {
+                count++;
+                updateLabel();
+            }
+        }
+        
+        void decrement() {
+            if (count > 0) {
+                count--;
+                updateLabel();
+            }
+        }
+        
+        void updateLabel() {
+            countLabel.setLabel("Amount: " + String.valueOf(count));
+        }
+        
+        int getValue() {
+            return count;
+        }
+        
+        void reset() {
+            count = 0;
+            updateLabel();
+        }
     }
 }
-
-
-/*
- * 
- * have validation at least one menu item
- * fix forward and back
- * improve ingredients fetching and add display
- * extract magic parts for controller
- * make a configuraiton object which can be passed back and forward to connfiguraitoncontroller
- */

@@ -4,7 +4,7 @@ import com.softwaredesign.project.mediator.RestaurantViewMediator;
 import com.softwaredesign.project.orderfulfillment.SeatingPlan;
 import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.view.DiningRoomView;
-import com.softwaredesign.project.view.GeneralView;
+import com.softwaredesign.project.view.View;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,10 +34,7 @@ public class DiningRoomController extends BaseController {
 
     @Override
     public void updateView() {
-        System.out.println("[DiningRoomController] Updating all table views");
-        for (Table table : seatingPlan.getAllTables()) {
-            updateRow(table);
-        }
+        mediator.notifyViewUpdate("DiningRoom");
     }
 
     private void updateRow(Table table) {
@@ -46,7 +43,7 @@ public class DiningRoomController extends BaseController {
         System.out.println("[DiningRoomController] Updating view for table " + tableNumber);
         
         // Notify all registered views
-        for (GeneralView view : mediator.getViews("DiningRoom")) {
+        for (View view : mediator.getViews("DiningRoom")) {
             if (view instanceof DiningRoomView) {
                 ((DiningRoomView) view).onTableUpdate(
                     tableNumber,

@@ -1,129 +1,101 @@
 package com.softwaredesign.project.view;
 
+import com.softwaredesign.project.controller.BaseController;
+import com.softwaredesign.project.controller.DiningRoomController;
+import com.softwaredesign.project.orderfulfillment.Table;
 import jexer.*;
-import com.softwaredesign.project.mediator.RestaurantViewMediator;
-import java.util.Queue;
-import java.util.LinkedList;
+
+import java.util.*;
 
 public class DiningRoomView extends GamePlayView {
-    private TTableWidget seatingPlan;
-    private Queue<TableUpdate> pendingUpdates;
-    private RestaurantViewMediator mediator;
-    private boolean isInitialized;
-    
-    private static class TableUpdate {
-        final int tableNumber;
-        final int capacity;
-        final int occupied;
-        final String status;
-        final char waiterPresent;
-        
-        TableUpdate(int tableNumber, int capacity, int occupied, String status, char waiterPresent) {
-            this.tableNumber = tableNumber;
-            this.capacity = capacity;
-            this.occupied = occupied;
-            this.status = status;
-            this.waiterPresent = waiterPresent;
-        }
-    }
-    
+    private final RestaurantApplication app;    
+    private TWindow window;
+    private TTableWidget tableWidget;
+    private Map<Integer, Integer> tableToRow;
+
     public DiningRoomView(RestaurantApplication app) {
         super(app);
-        this.pendingUpdates = new LinkedList<>();
-        this.mediator = RestaurantViewMediator.getInstance();
-        this.isInitialized = false;
-    }
-
-    @Override
-    protected void setupView() {
-        super.setupView();
-        System.out.println("[DiningRoomView] Setup view called");
-        
-        // Register with mediator when view is set up
-        mediator.registerView("DiningRoom", this);
-    }
-
-    @Override
-    protected void addViewContent() {
-        System.out.println("[DiningRoomView] Adding view content");
-        window.addLabel("Dining Room", 2, 6);
-        window.addLabel("Tables", 2, 8);
-        createSeatingPlan();
-        
-        // Now that the view is fully initialized
-        isInitialized = true;
-        
-        // Process any pending updates
-        while (!pendingUpdates.isEmpty()) {
-            TableUpdate update = pendingUpdates.poll();
-            updateTable(update.tableNumber, update.capacity, update.occupied, 
-                       update.status, update.waiterPresent);
-        }
-    }
-
-    protected void createSeatingPlan() {
-        System.out.println("[DiningRoomView] Creating seating plan table");
-        seatingPlan = window.addTable(2, 3, 100, 8, 5, 10);
-
-        seatingPlan.setColumnLabel(0, "Table");
-        seatingPlan.setColumnLabel(1, "Capacity");
-        seatingPlan.setColumnLabel(2, "Occupied");
-        seatingPlan.setColumnLabel(3, "Status");
-        seatingPlan.setColumnLabel(4, "Waiter");
-
-        for (int i = 0; i < seatingPlan.getColumnCount(); i++) {
-            seatingPlan.setColumnWidth(i, 10);
-        }
-        System.out.println("[DiningRoomView] Seating plan table created with " + seatingPlan.getColumnCount() + " columns");
-    }
-
-    public void onTableUpdate(int tableNumber, int capacity, int occupied, String status, char waiterPresent) {
-        System.out.println("[DiningRoomView] Received table update for table " + tableNumber);
-        
-        if (!isInitialized) {
-            System.out.println("[DiningRoomView] View not initialized yet, queueing update for table " + tableNumber);
-            pendingUpdates.offer(new TableUpdate(tableNumber, capacity, occupied, status, waiterPresent));
-            return;
-        }
-        
-        updateTable(tableNumber, capacity, occupied, status, waiterPresent);
-    }
-    
-    private void updateTable(int tableNumber, int capacity, int occupied, String status, char waiterPresent) {
-        if (seatingPlan == null || window == null) {
-            System.out.println("[DiningRoomView] ERROR: seatingPlan or window is null!");
-            return;
-        }
-        
-        try {
-            //check if the row exists
-            if (seatingPlan.getRowLabel(tableNumber) == null) {
-                System.out.println("[DiningRoomView] Creating new row for table " + tableNumber);
-                seatingPlan.insertRowBelow(tableNumber);
-                seatingPlan.setRowLabel(tableNumber, Integer.toString(tableNumber));
-            }
-
-            seatingPlan.setCellText(0, tableNumber, Integer.toString(tableNumber));
-            seatingPlan.setCellText(1, tableNumber, Integer.toString(capacity));
-            seatingPlan.setCellText(2, tableNumber, Integer.toString(occupied));    
-            seatingPlan.setCellText(3, tableNumber, status);
-            seatingPlan.setCellText(4, tableNumber, Character.toString(waiterPresent));
-            System.out.println("[DiningRoomView] Successfully updated table " + tableNumber + " in the view");
-        } catch (Exception e) {
-            System.out.println("[DiningRoomView] ERROR updating table " + tableNumber + ": " + e.getMessage());
-            e.printStackTrace();
-        }
+        this.app = app;
+        this.tableToRow = new HashMap<>();
     }
 
     @Override
     public void initialize(TWindow window) {
-        System.out.println("[DiningRoomView] Initializing view");
-        super.initialize(window);
+        this.window = window;
+        setupView();
     }
 
     @Override
     public void cleanup() {
-        System.out.println("[DiningRoomView] Cleaning up view, unregistering from mediator");
-        mediator.unregisterView("DiningRoom", this);
+        window.close();
+    }
+
+    @Override
+    public TWindow getWindow() {
+        return window;
+    }
+
+    @Override
+    public void setupView() {
+        addViewContent();
+    }
+
+    @Override
+    protected void addViewContent() {
+        window.addLabel("Dining Room", 2, 2);
+        tableWidget = window.addTable(2, 4, 60, 10);
+        
+        tableWidget.setColumnLabel(0, "Table");
+        tableWidget.setColumnLabel(1, "Capacity");
+        tableWidget.setColumnLabel(2, "Customers");
+        tableWidget.setColumnLabel(3, "Status");
+        tableWidget.setColumnLabel(4, "Waiter");
+
+        tableWidget.setColumnWidth(0, 8);  // Table number
+        tableWidget.setColumnWidth(1, 10); // Capacity
+        tableWidget.setColumnWidth(2, 12); // Customers
+        tableWidget.setColumnWidth(3, 10); // Status
+        tableWidget.setColumnWidth(4, 8);  // Waiter
+    }
+
+    public void updateFromController(BaseController controller) {
+        if (!(controller instanceof DiningRoomController)) {
+            return;
+        }
+        
+        DiningRoomController diningController = (DiningRoomController) controller;
+        for (Table table : diningController.getSeatingPlan().getAllTables()) {
+            onTableUpdate(table.getTableNumber(), table.getTableCapacity(), 
+                table.getCustomers().size(), determineTableStatus(table), ' ');
+        }
+    }
+
+    public void onTableUpdate(int tableNumber, int capacity, int customers, String status, char waiterId) {
+        int rowIndex = tableToRow.computeIfAbsent(tableNumber, k -> {
+            int newRow = tableWidget.getRowCount();
+            tableWidget.insertRowBelow(newRow-1);
+            tableWidget.setCellText(0, newRow, String.valueOf(tableNumber));
+            tableWidget.setCellText(1, newRow, String.valueOf(capacity));
+            tableWidget.setCellText(2, newRow, String.valueOf(customers));
+            tableWidget.setCellText(3, newRow, status);
+            tableWidget.setCellText(4, newRow, String.valueOf(waiterId));
+            return newRow;
+        });
+
+        tableWidget.setCellText(rowIndex, 0, String.valueOf(tableNumber));
+        tableWidget.setCellText(rowIndex, 1, String.valueOf(capacity));
+        tableWidget.setCellText(rowIndex, 2, String.valueOf(customers));
+        tableWidget.setCellText(rowIndex, 3, status);
+        tableWidget.setCellText(rowIndex, 4, String.valueOf(waiterId));
+    }
+
+    private String determineTableStatus(Table table) {
+        if (table.getCustomers().isEmpty()) {
+            return "Empty";
+        } else if (table.isEveryoneReadyToOrder()) {
+            return "Ready";
+        } else {
+            return "Browsing";
+        }
     }
 }

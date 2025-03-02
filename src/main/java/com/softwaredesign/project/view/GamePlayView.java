@@ -2,18 +2,40 @@ package com.softwaredesign.project.view;
 
 import jexer.*;
 
-public abstract class GamePlayView extends GeneralView {
+public abstract class GamePlayView implements View {
     
     protected static final int TAB_Y = 1;  
     protected static final int TAB_WIDTH = 15;  
     protected static final int TAB_SPACING = 2;  
 
+    protected final RestaurantApplication app;
+    protected TWindow window;
+
     public GamePlayView(RestaurantApplication app) {
-        super(app);
+        if (app == null) {
+            throw new IllegalArgumentException("RestaurantApplication cannot be null");
+        }
+        this.app = app;
     }
 
     @Override
-    protected void setupView() {
+    public void initialize(TWindow window) {
+        this.window = window;
+        setupView();
+    }
+
+    @Override
+    public void cleanup() {
+        window.close();
+    }
+
+    @Override
+    public TWindow getWindow() {
+        return window;
+    }
+    
+    @Override
+    public void setupView() {
         createNavigationTabs();
         addViewContent();
     }

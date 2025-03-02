@@ -3,6 +3,7 @@ package com.softwaredesign.project.view;
 import java.util.ArrayList;
 import java.util.List;
 import jexer.*;
+import com.softwaredesign.project.controller.ConfigurationController;
 
 public class DiningConfigurationView extends ConfigurationView {
     private TTableWidget waiterTable;
@@ -27,7 +28,6 @@ public class DiningConfigurationView extends ConfigurationView {
         
         // Waiter input form
         createWaiterInputForm();
-        
     }
 
     private void createWaiterTable() {
@@ -44,6 +44,17 @@ public class DiningConfigurationView extends ConfigurationView {
         waiterTable.setColumnWidth(1, 15);
         waiterTable.setColumnWidth(2, 20);
         waiterTable.setColumnWidth(3, 20);
+
+        // Populate from controller if available
+        ConfigurationController controller = (ConfigurationController) mediator.getController("Configuration");
+        if (controller != null) {
+            for (var entry : controller.getWaiters().entrySet()) {
+                var waiter = entry.getValue();
+                addWaiterToTable(waiter.getName(), waiter.getSpeed(), waiter.getCostPerHour());
+            }
+            currentTableCount = controller.getNumberOfTables();
+            updateTableCountLabel();
+        }
     }
 
     private void createTableConfiguration() {
@@ -74,6 +85,12 @@ public class DiningConfigurationView extends ConfigurationView {
 
     private void updateTableCountLabel() {
         tableCountLabel.setLabel(String.valueOf(currentTableCount));
+        
+        // Update controller if available
+        ConfigurationController controller = (ConfigurationController) mediator.getController("Configuration");
+        if (controller != null) {
+            controller.setNumberOfTables(currentTableCount);
+        }
     }
 
     private void createWaiterInputForm() {
@@ -83,8 +100,8 @@ public class DiningConfigurationView extends ConfigurationView {
         speeds.add("3");
 
         window.addLabel("Add New Waiter:", 2, 15);
-        nameField = window.addField( 20, 15, 20, false);
-        nameField.setText(""); 
+        nameField = window.addField(20, 15, 20, false);
+        nameField.setText("");
         
         window.addLabel("Speed:", 45, 15);
         speedCombo = window.addComboBox(55, 15, 10, speeds, -1, 3, nullAction);
@@ -104,52 +121,76 @@ public class DiningConfigurationView extends ConfigurationView {
         }
 
         int speed = Integer.parseInt(speedCombo.getText());
-        double costPerHour = calculateWaiterCost(speed);
-        
-        addWaiterToTable(name, speed, costPerHour, 0);
-        
-        // Clear input fields
+        double costPerHour = calculateCost(speed);
+
+        addWaiterToTable(name, speed, costPerHour);
+
+        // Clear inputs
         nameField.setText("");
-        speedCombo.setIndex(0);
+        speedCombo.setIndex(-1);
     }
 
-    private double calculateWaiterCost(int speed) {
+    private void addWaiterToTable(String name, int speed, double costPerHour) {
+        // Add to table UI
+        int row = waiterTable.getRowCount();
+        waiterTable.insertRowBelow(row-1);
+        waiterTable.setCellText(0, row, name);
+        waiterTable.setCellText(1, row, String.valueOf(speed));
+        waiterTable.setCellText(2, row, String.valueOf(costPerHour));
+        waiterTable.setCellText(3, row, "");
+
+        // Add to configuration controller if available
+        ConfigurationController controller = (ConfigurationController) mediator.getController("Configuration");
+        if (controller != null) {
+            controller.addWaiter(name, speed, costPerHour);
+        }
+    }
+
+    private double calculateCost(int speed) {
         // Base cost of 15 per hour, increases with speed
         return 15.0 + (speed - 1) * 5.0;
     }
 
-    private void addWaiterToTable(String name, int speed, double costPerHour, int tablesAssigned) {
-        int row = waiterTable.getRowCount() - 1;
-        waiterTable.insertRowBelow(row);
-        
-        waiterTable.setCellText(0, row, name);
-        waiterTable.setCellText(1, row, String.valueOf(speed));
-        waiterTable.setCellText(2, row, String.format("$%.2f", costPerHour));
-        waiterTable.setCellText(3, row, String.valueOf(tablesAssigned));
-        
-        waiterTable.draw();
+    // Method to handle updates from the controller
+    @Override
+    protected void onConfigurationUpdate(ConfigurationController controller) {
+        // Clear existing table
+        while (waiterTable.getRowCount() > 1) { // Keep header row
+            waiterTable.deleteRow(1);
+        }
+
+        // Repopulate from controller
+        for (var entry : controller.getWaiters().entrySet()) {
+            var waiter = entry.getValue();
+            int row = waiterTable.getRowCount()-1;
+            waiterTable.insertRowBelow(row);
+            waiterTable.setCellText(0, row, waiter.getName());
+            waiterTable.setCellText(1, row, String.valueOf(waiter.getSpeed()));
+            waiterTable.setCellText(2, row, String.format("%.2f", waiter.getCostPerHour()));
+            waiterTable.setCellText(3, row, String.valueOf(waiter.getAssignedTables().size()));
+        }
+            
+        // Update table count
+        tableCountLabel.setLabel(String.valueOf(controller.getNumberOfTables()));
     }
 
     @Override
     protected boolean validateConfiguration() {
         int waiterCount = waiterTable.getRowCount() - 1;  // Subtract header row
-        
-        if (currentTableCount == 0) {
-            showError("Please add at least one table");
-            return false;
-        }
-        
         if (waiterCount == 0) {
-            showError("Please add at least one waiter");
+            showError("At least one waiter must be added");
             return false;
         }
-        
+        if (currentTableCount == 0) {
+            showError("At least one table must be added");
+            return false;
+        }
         return true;
     }
 
     @Override
     protected void onNextPressed() {
-        app.showView(ViewType.DINING_ROOM);
+        app.showView(ViewType.MENU_CONFIGURATION);
     }
 
     @Override

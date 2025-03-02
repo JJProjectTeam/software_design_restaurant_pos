@@ -1,22 +1,49 @@
 package com.softwaredesign.project.view;
 
+import com.softwaredesign.project.controller.BaseController;
+import com.softwaredesign.project.controller.ConfigurationController;
+import com.softwaredesign.project.mediator.RestaurantViewMediator;
+
 import jexer.*;
 
-public abstract class ConfigurationView extends GeneralView {
+public abstract class ConfigurationView implements View, ConfigurableView {
+    protected final RestaurantApplication app;
+    protected TWindow window;
     protected TLabel moneyLabel;
     protected TLabel errorLabel;
     protected TLabel warningLabel;
+    protected RestaurantViewMediator mediator;
+    protected TTableWidget configTable;
 
     public ConfigurationView(RestaurantApplication app) {
-        super(app);
+        if (app == null) {
+            throw new IllegalArgumentException("RestaurantApplication cannot be null");
+        }
+        this.app = app;
+        this.mediator = RestaurantViewMediator.getInstance();
+        mediator.registerView("Configuration", this);
     }
 
     @Override
-    protected void setupView() {
+    public void initialize(TWindow window) {
+        this.window = window;
+        setupView();
+    }
+
+    @Override
+    public void cleanup() {
+        window.close();
+    }
+
+    @Override
+    public TWindow getWindow() {
+        return window;
+    }
+
+    @Override
+    public void setupView() {
         setupCommonElements();
-        
         setupSpecificElements();
-        
         setupNavigationButtons();
     }
 
@@ -25,13 +52,21 @@ public abstract class ConfigurationView extends GeneralView {
         window.addLabel("$", window.getWidth() - 15, 2);
         moneyLabel = window.addLabel("1000", window.getWidth() - 13, 2);
         
-        warningLabel = window.addLabel("", 2, 30);
-        errorLabel = window.addLabel("", 2, 30);
+        // Initialize status labels with different positions
+        errorLabel = window.addLabel("", 2, window.getHeight() - 6);
+        warningLabel = window.addLabel("", 2, window.getHeight() - 5);
+        
+        clearWarning(); // Reset labels to initial state
     }
 
     protected abstract void setupSpecificElements();
     
     protected abstract boolean validateConfiguration();
+
+    protected TAction nullAction = new TAction() {
+        public void DO() {
+        }
+    };
 
     protected void setupNavigationButtons() {
         window.addButton("Next", window.getWidth() - 15, window.getHeight() - 4, new TAction() {
@@ -49,31 +84,39 @@ public abstract class ConfigurationView extends GeneralView {
         });
     }
 
-    protected abstract void onNextPressed();
-    protected abstract void onBackPressed();
-
     protected void showError(String message) {
-        errorLabel.setLabel(message);
-        System.out.println("[ConfigurationView] Error: " + message);
+        if (errorLabel != null) {
+            errorLabel.setLabel("Error: " + message);
+            errorLabel.setColorKey("RED");
+        }
     }
 
     protected void showWarning(String message) {
-        warningLabel.setLabel(message);
-    }
-
-    protected void clearError() {
-        errorLabel.setLabel("");
+        if (warningLabel != null) {
+            warningLabel.setLabel("Warning: " + message);
+            warningLabel.setColorKey("YELLOW");
+        }
     }
 
     protected void clearWarning() {
-        warningLabel.setLabel("");
+        if (errorLabel != null) {
+            errorLabel.setLabel("");
+        }
+        if (warningLabel != null) {
+            warningLabel.setLabel("");
+        }
     }
 
-    protected void updateMoney(int amount) {
-        moneyLabel.setLabel(String.valueOf(amount));
-    }
-    protected TAction nullAction = new TAction() {
-        public void DO() {
+    protected abstract void onNextPressed();
+    protected abstract void onBackPressed();
+
+    @Override
+    public void onUpdate(BaseController controller) {
+        if (controller instanceof ConfigurationController) {
+            onConfigurationUpdate((ConfigurationController) controller);
         }
-    };
+    }
+
+    // Each subclass must implement this to handle configuration updates
+    protected abstract void onConfigurationUpdate(ConfigurationController controller);
 }

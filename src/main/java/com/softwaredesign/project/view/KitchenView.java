@@ -38,7 +38,7 @@ public class KitchenView extends GamePlayView {
     }
 
     @Override
-    protected void setupView() {
+    public void setupView() {
         super.setupView();
         System.out.println("[KitchenView] Setup view called");
         
