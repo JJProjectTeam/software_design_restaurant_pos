@@ -20,13 +20,18 @@ public abstract class GamePlayView implements View {
 
     @Override
     public void initialize(TWindow window) {
+        if (window == null) {
+            throw new IllegalArgumentException("Window cannot be null");
+        }
         this.window = window;
         setupView();
     }
 
     @Override
     public void cleanup() {
-        window.close();
+        if (window != null) {
+            window.close();
+        }
     }
 
     @Override
@@ -36,11 +41,13 @@ public abstract class GamePlayView implements View {
     
     @Override
     public void setupView() {
+        System.out.println("[GamePlayView] Setting up view with navigation tabs");
         createNavigationTabs();
         addViewContent();
     }
     
     protected void createNavigationTabs() {
+        System.out.println("[GamePlayView] Creating navigation tabs for " + this.getClass().getSimpleName());
         // Add navigation tabs at the top
         if (this instanceof KitchenView) {
             addTab("Dining Room", ViewType.DINING_ROOM, 1);
@@ -55,6 +62,11 @@ public abstract class GamePlayView implements View {
     }
     
     protected void addTab(String label, ViewType destination, int position) {
+        if (window == null) {
+            System.err.println("[GamePlayView] Cannot add tab - window is null");
+            return;
+        }
+        System.out.println("[GamePlayView] Adding tab: " + label + " at position " + position);
         int x = position * (TAB_WIDTH + TAB_SPACING);
         TButton tab = window.addButton(label, x, TAB_Y, new TAction() {
             public void DO() {

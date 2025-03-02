@@ -9,15 +9,12 @@ import jexer.*;
 import jexer.event.TMenuEvent;
 import jexer.menu.TMenu;
 
-import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.kitchen.StationType;
-import com.softwaredesign.project.menu.Menu;
-import com.softwaredesign.project.customer.DineInCustomer;
-import com.softwaredesign.project.orderfulfillment.Table;
+import com.softwaredesign.project.mediator.RestaurantViewMediator;
 
 public class RestaurantApplication extends TApplication {
     private TWindow mainWindow;
     private Map<ViewType, View> views = new HashMap<>();
+    private ViewType currentView;
 
     public RestaurantApplication() throws Exception {
         super(BackendType.SWING);
@@ -34,12 +31,8 @@ public class RestaurantApplication extends TApplication {
         TMenu helpMenu = addMenu("&Help");
         helpMenu.addItem(1025, "&Restart Game");
 
-        // Show initial view last
-        showView(ViewType.WELCOME);
         System.out.println("[RestaurantApplication] Application initialization complete");
     }
-
-    
 
     private void initializeViews() {
         System.out.println("[RestaurantApplication] Initializing views");
@@ -58,6 +51,11 @@ public class RestaurantApplication extends TApplication {
     }
 
     public void showView(ViewType viewType) {
+        if (currentView == viewType) {
+            System.out.println("[RestaurantApplication] Already showing view: " + viewType);
+            return;
+        }
+
         System.out.println("[RestaurantApplication] Showing view: " + viewType);
         // Create a new ArrayList to avoid concurrent modification
         List<TWidget> widgetsToRemove = new ArrayList<>(mainWindow.getChildren());
@@ -71,10 +69,22 @@ public class RestaurantApplication extends TApplication {
         View viewToShow = views.get(viewType);
         if (viewToShow != null) {
             viewToShow.initialize(mainWindow);
+            // Force a refresh of the view through the mediator
+            if (viewType == ViewType.DINING_ROOM) {
+                RestaurantViewMediator.getInstance().notifyViewUpdate("DiningRoom");
+            }
             mainWindow.show();
+            currentView = viewType;
         } else {
             throw new IllegalArgumentException("Unknown view: " + viewType);
         }
+    }
+
+    public void run() {
+        // Show initial view
+        showView(ViewType.WELCOME);
+        // Start the event loop
+        super.run();
     }
 
     public TWindow getMainWindow() {

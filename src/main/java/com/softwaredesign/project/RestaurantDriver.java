@@ -1,20 +1,19 @@
 package com.softwaredesign.project;
 
 import com.softwaredesign.project.controller.DiningRoomController;
+import com.softwaredesign.project.menu.Menu;
+import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.view.RestaurantApplication;
 import com.softwaredesign.project.inventory.Inventory;
 import com.softwaredesign.project.kitchen.StationType;
-import com.softwaredesign.project.menu.Menu;
-import com.softwaredesign.project.customer.DineInCustomer;
-import com.softwaredesign.project.orderfulfillment.Table;
 
 public class RestaurantDriver {
+
     public static void main(String[] args) {
         try {
-            // First create and initialize the restaurant application
-            RestaurantApplication app = new RestaurantApplication();
+            System.out.println("[RestaurantDriver] Starting application...");
             
-            // Create menu with inventory
+            // Initialize inventory and menu
             System.out.println("[RestaurantDriver] Initializing inventory and menu");
             Inventory inventoryService = new Inventory();
             inventoryService.addIngredient("Beef Patty", 10, 1.0, StationType.GRILL);
@@ -23,33 +22,37 @@ public class RestaurantDriver {
             inventoryService.addIngredient("Tomato", 10, 1.0, StationType.PREP);
             inventoryService.addIngredient("Cheese", 10, 1.0, StationType.PREP);
             Menu menu = new Menu(inventoryService);
-
-            // Create the dining room controller
-            System.out.println("[RestaurantDriver] Creating dining room controller");
-            DiningRoomController controller = new DiningRoomController(menu, 5, 12);
-
-            // Setup initial restaurant state
-            System.out.println("[RestaurantDriver] Setting up initial restaurant state");
-            controller.assignWaiterToTable(1, 'A');
-            controller.assignWaiterToTable(2, 'B');
-            controller.assignWaiterToTable(3, 'A');
-
+            
+            // Initialize controllers
+            DiningRoomController diningRoomController = new DiningRoomController(menu, 5, 12);
+            
+            // Create and start the application UI
+            RestaurantApplication app = new RestaurantApplication();
+            
+            // Let the UI initialize first
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                System.err.println("[RestaurantDriver] UI initialization interrupted: " + e.getMessage());
+            }
+            
+            // Set up initial state through controllers
+            System.out.println("[RestaurantDriver] Setting up initial state...");
+            diningRoomController.assignWaiterToTable(1, 'A');
+            diningRoomController.assignWaiterToTable(2, 'B');
+            diningRoomController.assignWaiterToTable(3, 'A');
+            
             // Add some initial customers
-            Table table1 = controller.getSeatingPlan().getTable(1);
-            table1.addCustomer(new DineInCustomer());
-            table1.addCustomer(new DineInCustomer());
-
-            Table table2 = controller.getSeatingPlan().getTable(2);
-            table2.addCustomer(new DineInCustomer());
-
-            // Run the application
-            System.out.println("[RestaurantDriver] Starting restaurant application");
+            diningRoomController.addCustomerToTable(1, new DineInCustomer());
+            diningRoomController.addCustomerToTable(1, new DineInCustomer());
+            diningRoomController.addCustomerToTable(2, new DineInCustomer());
+            
+            // Start the application
+            System.out.println("[RestaurantDriver] Running application...");
             app.run();
-
         } catch (Exception e) {
-            System.err.println("[RestaurantDriver] Error running restaurant application: " + e.getMessage());
+            System.err.println("[RestaurantDriver] Fatal error running application: " + e.getMessage());
             e.printStackTrace();
         }
     }
 }
-

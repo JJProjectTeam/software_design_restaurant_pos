@@ -5,9 +5,12 @@ import com.softwaredesign.project.orderfulfillment.SeatingPlan;
 import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.view.DiningRoomView;
 import com.softwaredesign.project.view.View;
+import com.softwaredesign.project.customer.DineInCustomer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import com.softwaredesign.project.menu.Menu;
 
 public class DiningRoomController extends BaseController {
@@ -29,23 +32,27 @@ public class DiningRoomController extends BaseController {
     public void assignWaiterToTable(int tableNumber, char waiterId) {
         System.out.println("[DiningRoomController] Assigning waiter " + waiterId + " to table " + tableNumber);
         tableToWaiter.put(tableNumber, waiterId);
-        updateRow(seatingPlan.getTable(tableNumber));
+        notifyViewsOfTableUpdate(seatingPlan.getTable(tableNumber));
     }
 
-    @Override
-    public void updateView() {
-        mediator.notifyViewUpdate("DiningRoom");
+    public void addCustomerToTable(int tableNumber, DineInCustomer customer) {
+        System.out.println("[DiningRoomController] Adding customer to table " + tableNumber);
+        Table table = seatingPlan.getTable(tableNumber);
+        table.addCustomer(customer);
+        notifyViewsOfTableUpdate(table);
     }
 
-    private void updateRow(Table table) {
+    private void notifyViewsOfTableUpdate(Table table) {
+        // First update our internal state
         int tableNumber = table.getTableNumber();
         char waiterId = tableToWaiter.getOrDefault(tableNumber, ' ');
-        System.out.println("[DiningRoomController] Updating view for table " + tableNumber);
         
-        // Notify all registered views
-        for (View view : mediator.getViews("DiningRoom")) {
+        // Then notify views through the mediator
+        List<View> views = mediator.getViews("DiningRoom");
+        for (View view : views) {
             if (view instanceof DiningRoomView) {
-                ((DiningRoomView) view).onTableUpdate(
+                DiningRoomView diningView = (DiningRoomView) view;
+                diningView.onTableUpdate(
                     tableNumber,
                     table.getTableCapacity(),
                     table.getCustomers().size(),
@@ -53,10 +60,37 @@ public class DiningRoomController extends BaseController {
                     waiterId
                 );
             }
-            else {
-                System.out.println("[DiningRoomController] View is not a DiningRoomView, skipping update");
+        }
+    }
+
+    @Override
+    public void updateView() {
+        System.out.println("[DiningRoomController] Updating all views");
+        // Update all tables
+        for (Table table : seatingPlan.getAllTables()) {
+            int tableNumber = table.getTableNumber();
+            char waiterId = tableToWaiter.getOrDefault(tableNumber, ' ');
+            
+            // Notify views through the mediator
+            List<View> views = mediator.getViews("DiningRoom");
+            for (View view : views) {
+                if (view instanceof DiningRoomView) {
+                    DiningRoomView diningView = (DiningRoomView) view;
+                    diningView.onTableUpdate(
+                        tableNumber,
+                        table.getTableCapacity(),
+                        table.getCustomers().size(),
+                        determineTableStatus(table),
+                        waiterId
+                    );
+                }
             }
         }
+    }
+
+    public void refreshAllTables() {
+        System.out.println("[DiningRoomController] Refreshing all tables");
+        updateView();
     }
 
     private String determineTableStatus(Table table) {
