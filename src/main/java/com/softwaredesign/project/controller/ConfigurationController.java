@@ -2,132 +2,148 @@ package com.softwaredesign.project.controller;
 
 import java.util.*;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
+import com.softwaredesign.project.menu.Menu;
+import com.softwaredesign.project.view.*;
+import com.softwaredesign.project.kitchen.*;
+import com.softwaredesign.project.order.*;
+import com.softwaredesign.project.inventory.*;
+import com.softwaredesign.project.orderfulfillment.CollectionPoint;
+import com.softwaredesign.project.orderfulfillment.Table;
+import com.softwaredesign.project.staff.Chef;
+import com.softwaredesign.project.staff.Waiter;
+import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 
 public class ConfigurationController extends BaseController {
-    private Map<String, ChefConfig> chefs;
-    private Map<String, WaiterConfig> waiters;
-    private Map<String, MenuItem> menuItems;
-    private int numberOfTables;
+    private Kitchen kitchen;
+    private OrderManager orderManager;
+    private InventoryService inventory;
+    private CollectionPoint collectionPoint;
+    private StationManager stationManager;
+    private List<Waiter> waiters;
+    private List<Table> tables;
+    private Menu menu;
     private RestaurantViewMediator mediator;
+    private int QUANTITY = 10;
+    private boolean configurationComplete = false;
 
     public ConfigurationController() {
         super("Configuration");
-        this.chefs = new HashMap<>();
-        this.waiters = new HashMap<>();
-        this.menuItems = new HashMap<>();
-        this.numberOfTables = 0;
         this.mediator = RestaurantViewMediator.getInstance();
-        
-        // Register with mediator
         mediator.registerController("Configuration", this);
+        this.waiters = new ArrayList<>();
+        this.tables = new ArrayList<>();
+        setupBaseComponents();
+    
     }
 
-    // Chef configuration methods
-    public void addChef(String name, List<String> stations, int speed, double costPerHour, String strategy) {
-        chefs.put(name, new ChefConfig(name, stations, speed, costPerHour, strategy));
-        updateView();
+    private void setupBaseComponents() {
+        // Create basic components needed for the restaurant
+        this.inventory = new Inventory();
+        this.collectionPoint = new CollectionPoint();
+        this.stationManager = new StationManager();
+        this.orderManager = new OrderManager(collectionPoint, stationManager);
+        this.kitchen = new Kitchen(orderManager, inventory, collectionPoint);
+        this.menu = new Menu(inventory);
     }
 
-    public Map<String, ChefConfig> getChefs() {
-        return Collections.unmodifiableMap(chefs);
+    // Methods to read from views and create restaurant entities
+    public void createRestaurantComponents() {
+        ChefConfigurationView chefView = (ChefConfigurationView) mediator.getView("ChefConfiguration");
+        DiningConfigurationView diningView = (DiningConfigurationView) mediator.getView("DiningConfiguration");
+        MenuConfigurationView menuView = (MenuConfigurationView) mediator.getView("MenuConfiguration");
+
+        createChefs(chefView.getChefs());
+        createWaitersAndTables(diningView.getWaiters(), diningView.getNumberOfTables());
+        createMenuItems(menuView.getMenuItems());
     }
 
-    // Waiter configuration methods
-    public void addWaiter(String name, int speed, double costPerHour) {
-        waiters.put(name, new WaiterConfig(name, speed, costPerHour));
-        updateView();
+    private void createChefs(Map<String, ChefConfigurationView.ChefData> chefData) {
+        for (var entry : chefData.entrySet()) {
+            var data = entry.getValue();
+            
+            // Create chef strategy based on selection
+            ChefStrategy strategy = createChefStrategy(data.getStrategy());
+            
+            // Create chef stations
+            List<Station> stations = new ArrayList<>();
+            for (String stationType : data.getStations()) {
+                Station station = new Station(StationType.valueOf(stationType.toUpperCase()));
+                stations.add(station);
+                stationManager.addStation(station);
+            }
+            
+            Chef chef = new Chef(data.getCostPerHour(), data.getSpeed(), strategy, stationManager);
+            for (Station station : stations) {
+                chef.assignToStation(station.getType());
+            }
+        }
     }
 
-    public Map<String, WaiterConfig> getWaiters() {
-        return Collections.unmodifiableMap(waiters);
+    private ChefStrategy createChefStrategy(String strategyName) {
+        return switch (strategyName.toUpperCase()) {
+            case "FIFO", "OLDEST" -> new OldestOrderFirstStrategy();
+            case "LIFO", "NEWEST" -> new NewestOrderFirstStrategy(); // You'll need to create this class
+            default -> new OldestOrderFirstStrategy(); // Default to FIFO/Oldest
+        };
     }
 
-    // Menu configuration methods
-    public void addMenuItem(String name, Map<String, Integer> ingredients, double price) {
-        menuItems.put(name, new MenuItem(name, ingredients, price));
-        updateView();
-    }
-
-    public Map<String, MenuItem> getMenuItems() {
-        return Collections.unmodifiableMap(menuItems);
-    }
-
-    // Table configuration methods
-    public void setNumberOfTables(int tables) {
-        this.numberOfTables = tables;
-        updateView();
-    }
-
-    public int getNumberOfTables() {
-        return numberOfTables;
-    }
-
-    // Configuration validation
-    public boolean isValid() {
-        return !chefs.isEmpty() && !waiters.isEmpty() && !menuItems.isEmpty() && numberOfTables > 0;
-    }
-
-    @Override
-    public void updateView() {
-        // The mediator will handle notifying all registered views
-        mediator.notifyViewUpdate("Configuration");
-    }
-
-    // Configuration data classes
-    public static class ChefConfig {
-        private final String name;
-        private final List<String> stations;
-        private final int speed;
-        private final double costPerHour;
-        private final String strategy;
-
-        public ChefConfig(String name, List<String> stations, int speed, double costPerHour, String strategy) {
-            this.name = name;
-            this.stations = new ArrayList<>(stations);
-            this.speed = speed;
-            this.costPerHour = costPerHour;
-            this.strategy = strategy;
+    private void createWaitersAndTables(Map<String, DiningConfigurationView.WaiterData> waiterData, int tableCount) {
+        // Create tables
+        tables.clear();
+        //TODO this should be creating a seating plan!!
+        for (int i = 0; i < tableCount; i++) {
+            tables.add(new Table(i + 1));
         }
 
-        public String getName() { return name; }
-        public List<String> getStations() { return Collections.unmodifiableList(stations); }
-        public int getSpeed() { return speed; }
-        public double getCostPerHour() { return costPerHour; }
-        public String getStrategy() { return strategy; }
-    }
-
-    public static class WaiterConfig {
-        private final String name;
-        private final int speed;
-        private final double costPerHour;
-        private final List<Integer> assignedTables;
-
-        public WaiterConfig(String name, int speed, double costPerHour) {
-            this.name = name;
-            this.speed = speed;
-            this.costPerHour = costPerHour;
-            this.assignedTables = new ArrayList<>();
+        // Create waiters
+        waiters.clear();
+        for (var entry : waiterData.entrySet()) {
+            var data = entry.getValue();
+            Waiter waiter = new Waiter(data.getCostPerHour(), data.getSpeed(), orderManager, menu);
+            
+            // TODO This will be done by seating plan
+            for (Integer tableNum : data.assignedTables) {
+                if (tableNum > 0 && tableNum <= tables.size()) {
+                    waiter.assignTable(tables.get(tableNum - 1));
+                }
+            }
+            
+            waiters.add(waiter);
         }
-
-        public String getName() { return name; }
-        public int getSpeed() { return speed; }
-        public double getCostPerHour() { return costPerHour; }
-        public List<Integer> getAssignedTables() { return Collections.unmodifiableList(assignedTables); }
     }
 
-    public static class MenuItem {
-        private final String name;
-        private final Map<String, Integer> ingredients;
-        private final double price;
-
-        public MenuItem(String name, Map<String, Integer> ingredients, double price) {
-            this.name = name;
-            this.ingredients = new HashMap<>(ingredients);
-            this.price = price;
+    private void createMenuItems(Map<String, MenuConfigurationView.MenuItem> menuData) {
+        for (var entry : menuData.entrySet()) {
+            var data = entry.getValue();
+            
+            // TODO way of doing recipe has to change!!! If we want users to be able to create then they shouldnt be concrete classes!!
+            //it has to be able to create a recipe with a list of ingredients
+            //not require one of predefined concrete recipe
+            Recipe recipe = new Recipe(data.getName(), inventory);
+            menu.addMenuItem(data.getName(), recipe, data.getPrice);
         }
-
-        public String getName() { return name; }
-        public Map<String, Integer> getIngredients() { return Collections.unmodifiableMap(ingredients); }
-        public double getPrice() { return price; }
     }
+
+    // Getters for restaurant components
+    public Kitchen getKitchen() { return kitchen; }
+    public OrderManager getOrderManager() { return orderManager; }
+    public InventoryService getInventory() { return inventory; }
+    public List<Waiter> getWaiters() { return Collections.unmodifiableList(waiters); }
+    public List<Table> getTables() { return Collections.unmodifiableList(tables); }
+    public Menu getMenu() { return menu; }
+
+    public void submitConfiguration() {
+        createRestaurantComponents();
+        configurationComplete = true;
+        mediator.notifyConfigurationComplete();
+    }
+
+    public boolean isConfigurationComplete() {
+        return configurationComplete;
+    }
+
+    public void updateView(){
+        
+    }
+    
 }

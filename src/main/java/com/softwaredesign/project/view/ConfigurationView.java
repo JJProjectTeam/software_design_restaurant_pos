@@ -112,11 +112,7 @@ public abstract class ConfigurationView implements View, ConfigurableView {
 
     @Override
     public void onUpdate(BaseController controller) {
-        if (controller instanceof ConfigurationController) {
-            onConfigurationUpdate((ConfigurationController) controller);
-        }
+
     }
 
-    // Each subclass must implement this to handle configuration updates
-    protected abstract void onConfigurationUpdate(ConfigurationController controller);
 }

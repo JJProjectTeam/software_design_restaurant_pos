@@ -34,7 +34,7 @@ public class WelcomeView implements View {
         window.addLabel("Welcome to Restaurant Simulator!", 2, 2);
         window.addButton("Start", 2, 4, new TAction() {
             public void DO() {
-                app.showView(ViewType.DINING_ROOM);
+                app.showView(ViewType.CHEF_CONFIGURATION);
             }
         });
     }

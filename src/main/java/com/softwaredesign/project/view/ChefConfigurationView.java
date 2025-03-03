@@ -1,18 +1,68 @@
 package com.softwaredesign.project.view;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import jexer.*;
-import com.softwaredesign.project.controller.ConfigurationController;
-import com.softwaredesign.project.mediator.RestaurantViewMediator;
 
 public class ChefConfigurationView extends ConfigurationView {
+    // Local storage for chef data
+    private Map<String, ChefData> chefs = new HashMap<>();
+    
+    // Inner class to hold chef data
+    public static class ChefData {
+        String name;
+        List<String> stations;
+        int speed;
+        double costPerHour;
+        String strategy;
+
+        ChefData(String name, List<String> stations, int speed, double costPerHour, String strategy) {
+            this.name = name;
+            this.stations = new ArrayList<>(stations);
+            this.speed = speed;
+            this.costPerHour = costPerHour;
+            this.strategy = strategy;
+        }
+
+        public String getName() { return name; }
+        public List<String> getStations() { return stations; }
+        public int getSpeed() { return speed; }
+        public double getCostPerHour() { return costPerHour; }
+        public String getStrategy() { return strategy; }
+        
+    }
+
     private TTableWidget chefTable;
     private TField nameField;
     private TComboBox speedCombo;
     private TComboBox strategyCombo;
     private StationDropdown stationDropdown;
     private TButton stationButton;
+    private TButton submitButton;
+
+    // Getters for external access
+    public Map<String, ChefData> getChefs() {
+        return chefs;
+    }
+
+    public void setChefs(Map<String, ChefData> newChefs) {
+        chefs.clear();
+        chefs.putAll(newChefs);
+        refreshChefTable();
+    }
+
+    private void refreshChefTable() {
+        // Clear existing table
+        while (chefTable.getRowCount() > 1) {
+            chefTable.deleteRow(1);
+        }
+
+        // Repopulate from local storage
+        for (var entry : chefs.entrySet()) {
+            var chef = entry.getValue();
+            String stations = String.join(", ", chef.stations);
+            addChefToTable(chef.name, stations, chef.speed, chef.costPerHour, chef.strategy);
+        }
+    }
 
     public ChefConfigurationView(RestaurantApplication app) {
         super(app);
@@ -20,11 +70,18 @@ public class ChefConfigurationView extends ConfigurationView {
 
     @Override
     protected void setupSpecificElements() {
-        // Chef table
+        window.addLabel("Chef Configuration", 2, 2);
         createChefTable();
-        
-        // Input form
         createInputForm();
+        
+        // Simplified submit button without controller reference
+        submitButton = window.addButton("Submit Configuration", 2, 18, new TAction() {
+            public void DO() {
+                if (validateConfiguration()) {
+                    onNextPressed();
+                }
+            }
+        });
         
         showWarning("Warning: At least one chef must be assigned to each station type!");
     }
@@ -46,15 +103,8 @@ public class ChefConfigurationView extends ConfigurationView {
         chefTable.setColumnWidth(3, 15);
         chefTable.setColumnWidth(4, 20);
 
-        // Populate from controller if available
-        ConfigurationController controller = (ConfigurationController) mediator.getController("Configuration");
-        if (controller != null) {
-            for (var entry : controller.getChefs().entrySet()) {
-                var chef = entry.getValue();
-                String stations = String.join(", ", chef.getStations());
-                addChefToTable(chef.getName(), stations, chef.getSpeed(), chef.getCostPerHour(), chef.getStrategy());
-            }
-        }
+        // Populate from local storage
+        refreshChefTable();
     }
 
     private void createInputForm() {
@@ -65,9 +115,8 @@ public class ChefConfigurationView extends ConfigurationView {
         speeds.add("2");
         speeds.add("3");
 
-        strategies.add("LongestQ");
-        strategies.add("OldestOrder");
-        strategies.add("NewestOrder");
+        strategies.add("FIFO");
+        strategies.add("LIFO");
 
         // Add all labels and fields in one row (y=15)
         window.addLabel("Add New Chef:", 2, 13);
@@ -98,19 +147,7 @@ public class ChefConfigurationView extends ConfigurationView {
         // Add button
         window.addButton("Add Chef", 95, 15, new TAction() {
             public void DO() {
-                if (validateInputs()) {
-                    String name = nameField.getText();
-                    List<String> selectedStations = stationDropdown.getSelectedStations();
-                    
-                    int speed = Integer.parseInt(speedCombo.getText());
-                    int totalStations = stationDropdown.getTotalStations();
-                    double costPerHour = calculateCost(speed, totalStations);
-                    String strategy = strategyCombo.getText();
-                    
-                    String allSelectedStations = String.join(", ", selectedStations);
-                    addChefToTable(name, allSelectedStations, speed, costPerHour, strategy);
-                    clearInputs();
-                }
+                handleAddChef();
             }
         });
     }
@@ -173,14 +210,10 @@ public class ChefConfigurationView extends ConfigurationView {
         boolean hasPrep = false;
         boolean hasPlate = false;
 
-        // Check all rows in the table
-        for (int i = 0; i < chefTable.getRowCount(); i++) {
-            String stations = chefTable.getCellText(1, i);
-            if (stations != null) {
-                if (stations.contains("Grill")) hasGrill = true;
-                if (stations.contains("Prep")) hasPrep = true;
-                if (stations.contains("Plate")) hasPlate = true;
-            }
+        for (ChefData chef : chefs.values()) {
+            if (chef.stations.contains("Grill")) hasGrill = true;
+            if (chef.stations.contains("Prep")) hasPrep = true;
+            if (chef.stations.contains("Plate")) hasPlate = true;
         }
 
         return hasGrill && hasPrep && hasPlate;
@@ -214,36 +247,24 @@ public class ChefConfigurationView extends ConfigurationView {
         chefTable.setCellText(2, row, String.valueOf(speed));
         chefTable.setCellText(3, row, String.format("%.2f", costPerHour));
         chefTable.setCellText(4, row, strategy);
-
-        // Add to configuration controller if available
-        ConfigurationController controller = (ConfigurationController) mediator.getController("Configuration");
-        if (controller != null) {
-            List<String> stationList = new ArrayList<>();
-            for (String station : stations.split(", ")) {
-                stationList.add(station.trim());
-            }
-            controller.addChef(name, stationList, speed, costPerHour, strategy);
-        }
     }
 
-    @Override
-    protected void onConfigurationUpdate(ConfigurationController controller) {
-        // Clear existing table
-        while (chefTable.getRowCount() > 1) { // Keep header row
-            chefTable.deleteRow(1);
-        }
-
-        // Repopulate from controller
-        for (var entry : controller.getChefs().entrySet()) {
-            var chef = entry.getValue();
-            int row = chefTable.getRowCount()-1;
-            String stations = String.join(", ", chef.getStations());
-            chefTable.insertRowBelow(row);
-            chefTable.setCellText(0, row, chef.getName());
-            chefTable.setCellText(1, row, stations);
-            chefTable.setCellText(2, row, String.valueOf(chef.getSpeed()));
-            chefTable.setCellText(3, row, String.format("%.2f", chef.getCostPerHour()));
-            chefTable.setCellText(4, row, chef.getStrategy());
+    private void handleAddChef() {
+        if (validateInputs()) {
+            String name = nameField.getText();
+            List<String> selectedStations = stationDropdown.getSelectedStations();
+            int speed = Integer.parseInt(speedCombo.getText());
+            double costPerHour = calculateCost(speed, selectedStations.size());
+            String strategy = strategyCombo.getText();
+            
+            // Add to local storage
+            chefs.put(name, new ChefData(name, selectedStations, speed, costPerHour, strategy));
+            
+            // Add to table for display
+            addChefToTable(name, String.join(", ", selectedStations), speed, costPerHour, strategy);
+            
+            // Clear inputs
+            clearInputs();
         }
     }
 

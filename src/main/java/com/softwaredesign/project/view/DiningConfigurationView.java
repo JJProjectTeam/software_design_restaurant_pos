@@ -1,9 +1,7 @@
 package com.softwaredesign.project.view;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import jexer.*;
-import com.softwaredesign.project.controller.ConfigurationController;
 
 public class DiningConfigurationView extends ConfigurationView {
     private TTableWidget waiterTable;
@@ -14,8 +12,45 @@ public class DiningConfigurationView extends ConfigurationView {
     private int maxTables = 20;
     private int currentTableCount = 0;
 
+    // Local storage for waiter data
+    private Map<String, WaiterData> waiters = new HashMap<>();
+
+    // Inner class to hold waiter data
+    public static class WaiterData {
+        String name;
+        int speed;
+        double costPerHour;
+        List<Integer> assignedTables;
+
+        WaiterData(String name, int speed, double costPerHour) {
+            this.name = name;
+            this.speed = speed;
+            this.costPerHour = costPerHour;
+            this.assignedTables = new ArrayList<>();
+        }
+        public String getName() {
+            return name;
+        }
+        public int getSpeed() {
+            return speed;
+        }
+        public double getCostPerHour() {
+            return costPerHour;
+        }
+        
+    }
+
     public DiningConfigurationView(RestaurantApplication app) {
         super(app);
+    }
+
+    // Getters for external access
+    public Map<String, WaiterData> getWaiters() {
+        return waiters;
+    }
+
+    public int getNumberOfTables() {
+        return currentTableCount;
     }
 
     @Override
@@ -45,15 +80,10 @@ public class DiningConfigurationView extends ConfigurationView {
         waiterTable.setColumnWidth(2, 20);
         waiterTable.setColumnWidth(3, 20);
 
-        // Populate from controller if available
-        ConfigurationController controller = (ConfigurationController) mediator.getController("Configuration");
-        if (controller != null) {
-            for (var entry : controller.getWaiters().entrySet()) {
-                var waiter = entry.getValue();
-                addWaiterToTable(waiter.getName(), waiter.getSpeed(), waiter.getCostPerHour());
-            }
-            currentTableCount = controller.getNumberOfTables();
-            updateTableCountLabel();
+        // Populate from local storage
+        for (var entry : waiters.entrySet()) {
+            var waiter = entry.getValue();
+            addWaiterToTable(waiter.name, waiter.speed, waiter.costPerHour);
         }
     }
 
@@ -85,12 +115,6 @@ public class DiningConfigurationView extends ConfigurationView {
 
     private void updateTableCountLabel() {
         tableCountLabel.setLabel(String.valueOf(currentTableCount));
-        
-        // Update controller if available
-        ConfigurationController controller = (ConfigurationController) mediator.getController("Configuration");
-        if (controller != null) {
-            controller.setNumberOfTables(currentTableCount);
-        }
     }
 
     private void createWaiterInputForm() {
@@ -123,6 +147,9 @@ public class DiningConfigurationView extends ConfigurationView {
         int speed = Integer.parseInt(speedCombo.getText());
         double costPerHour = calculateCost(speed);
 
+        // Add to local storage
+        waiters.put(name, new WaiterData(name, speed, costPerHour));
+        
         addWaiterToTable(name, speed, costPerHour);
 
         // Clear inputs
@@ -131,53 +158,21 @@ public class DiningConfigurationView extends ConfigurationView {
     }
 
     private void addWaiterToTable(String name, int speed, double costPerHour) {
-        // Add to table UI
         int row = waiterTable.getRowCount();
         waiterTable.insertRowBelow(row-1);
         waiterTable.setCellText(0, row, name);
         waiterTable.setCellText(1, row, String.valueOf(speed));
-        waiterTable.setCellText(2, row, String.valueOf(costPerHour));
-        waiterTable.setCellText(3, row, "");
-
-        // Add to configuration controller if available
-        ConfigurationController controller = (ConfigurationController) mediator.getController("Configuration");
-        if (controller != null) {
-            controller.addWaiter(name, speed, costPerHour);
-        }
+        waiterTable.setCellText(2, row, String.format("%.2f", costPerHour));
+        waiterTable.setCellText(3, row, "0"); // Initially no tables assigned
     }
 
     private double calculateCost(int speed) {
-        // Base cost of 15 per hour, increases with speed
         return 15.0 + (speed - 1) * 5.0;
-    }
-
-    // Method to handle updates from the controller
-    @Override
-    protected void onConfigurationUpdate(ConfigurationController controller) {
-        // Clear existing table
-        while (waiterTable.getRowCount() > 1) { // Keep header row
-            waiterTable.deleteRow(1);
-        }
-
-        // Repopulate from controller
-        for (var entry : controller.getWaiters().entrySet()) {
-            var waiter = entry.getValue();
-            int row = waiterTable.getRowCount()-1;
-            waiterTable.insertRowBelow(row);
-            waiterTable.setCellText(0, row, waiter.getName());
-            waiterTable.setCellText(1, row, String.valueOf(waiter.getSpeed()));
-            waiterTable.setCellText(2, row, String.format("%.2f", waiter.getCostPerHour()));
-            waiterTable.setCellText(3, row, String.valueOf(waiter.getAssignedTables().size()));
-        }
-            
-        // Update table count
-        tableCountLabel.setLabel(String.valueOf(controller.getNumberOfTables()));
     }
 
     @Override
     protected boolean validateConfiguration() {
-        int waiterCount = waiterTable.getRowCount() - 1;  // Subtract header row
-        if (waiterCount == 0) {
+        if (waiters.isEmpty()) {
             showError("At least one waiter must be added");
             return false;
         }

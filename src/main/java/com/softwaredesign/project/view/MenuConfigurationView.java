@@ -2,13 +2,62 @@ package com.softwaredesign.project.view;
 
 import java.util.*;
 import jexer.*;
-import com.softwaredesign.project.controller.ConfigurationController;
 
 public class MenuConfigurationView extends ConfigurationView {
     private TTableWidget menuTable;
     private TField nameField;
     private Map<String, IngredientCounter> ingredientCounters;
     private List<String> availableIngredients;
+
+    // Local storage for menu items
+    private Map<String, MenuItem> menuItems = new HashMap<>();
+
+    // Inner class to hold menu item data
+    public static class MenuItem {
+        String name;
+        Map<String, Integer> ingredients;
+        double price;
+
+        MenuItem(String name, Map<String, Integer> ingredients, double price) {
+            this.name = name;
+            this.ingredients = new HashMap<>(ingredients);
+            this.price = price;
+        }
+
+        public String getName() {
+            return name;
+        }
+        public Map<String, Integer> getIngredients() {
+            return ingredients;
+        }
+        public double getPrice() {
+            return price;
+        }
+    }
+
+    // Getters for external access
+    public Map<String, MenuItem> getMenuItems() {
+        return menuItems;
+    }
+
+    public void setMenuItems(Map<String, MenuItem> newItems) {
+        menuItems.clear();
+        menuItems.putAll(newItems);
+        refreshMenuTable();
+    }
+
+    private void refreshMenuTable() {
+        // Clear existing table
+        while (menuTable.getRowCount() > 1) {
+            menuTable.deleteRow(1);
+        }
+
+        // Repopulate from local storage
+        for (var entry : menuItems.entrySet()) {
+            var item = entry.getValue();
+            addMenuItemToTable(item.name, item.ingredients, item.price);
+        }
+    }
 
     public MenuConfigurationView(RestaurantApplication app) {
         super(app);
@@ -54,14 +103,8 @@ public class MenuConfigurationView extends ConfigurationView {
         menuTable.setColumnWidth(1, 80);  
         menuTable.setColumnWidth(2, 10);
 
-        // Populate from controller if available
-        ConfigurationController controller = (ConfigurationController) mediator.getController("Configuration");
-        if (controller != null) {
-            for (var entry : controller.getMenuItems().entrySet()) {
-                var item = entry.getValue();
-                addMenuItemToTable(item.getName(), item.getIngredients(), item.getPrice());
-            }
-        }
+        // Populate from local storage
+        refreshMenuTable();
     }
 
     private void createInputForm() {
@@ -135,10 +178,12 @@ public class MenuConfigurationView extends ConfigurationView {
             return;
         }
 
-        // Calculate price based on ingredients
         double price = calculatePrice(ingredients);
 
-        // Add to table and controller
+        // Add to local storage
+        menuItems.put(name, new MenuItem(name, ingredients, price));
+        
+        // Add to table
         addMenuItemToTable(name, ingredients, price);
 
         // Clear inputs
@@ -149,18 +194,11 @@ public class MenuConfigurationView extends ConfigurationView {
     }
 
     private void addMenuItemToTable(String name, Map<String, Integer> ingredients, double price) {
-        // Add to table UI
         int row = menuTable.getRowCount()-1;
         menuTable.insertRowBelow(row);
         menuTable.setCellText(0, row, name);
         menuTable.setCellText(1, row, formatIngredients(ingredients));
         menuTable.setCellText(2, row, String.format("%.2f", price));
-
-        // Add to configuration controller if available
-        ConfigurationController controller = (ConfigurationController) mediator.getController("Configuration");
-        if (controller != null) {
-            controller.addMenuItem(name, ingredients, price);
-        }
     }
 
     private double calculatePrice(Map<String, Integer> ingredients) {
@@ -183,29 +221,9 @@ public class MenuConfigurationView extends ConfigurationView {
         return formatted.toString();
     }
 
-    // Method to handle updates from the controller
-    @Override
-    protected void onConfigurationUpdate(ConfigurationController controller) {
-        // Clear existing table
-        while (menuTable.getRowCount() > 1) { // Keep header row
-            menuTable.deleteRow(1);
-        }
-
-        // Repopulate from controller
-        for (var entry : controller.getMenuItems().entrySet()) {
-            var item = entry.getValue();
-            int row = menuTable.getRowCount()-1;
-            menuTable.insertRowBelow(row);
-            menuTable.setCellText(0, row, item.getName());
-            menuTable.setCellText(1, row, formatIngredients(item.getIngredients()));
-            menuTable.setCellText(2, row, String.format("%.2f", item.getPrice()));
-        }
-    }
-
     @Override
     protected boolean validateConfiguration() {
-        int menuItemCount = menuTable.getRowCount() - 1;  // Subtract header row
-        if (menuItemCount == 0) {
+        if (menuItems.isEmpty()) {
             showError("At least one menu item must be added");
             return false;
         }

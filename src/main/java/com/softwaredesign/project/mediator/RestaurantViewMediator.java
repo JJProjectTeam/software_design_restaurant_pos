@@ -13,6 +13,7 @@ public class RestaurantViewMediator {
     private static RestaurantViewMediator instance;
     private final Map<String, List<View>> registeredViews;
     private final Map<String, BaseController> controllers;
+    private Runnable configurationListener;
     
     private RestaurantViewMediator() {
         registeredViews = new HashMap<>();
@@ -86,6 +87,19 @@ public class RestaurantViewMediator {
                     }
                 }
             }
+        }
+    }
+    public View getView(String name) {
+        return registeredViews.get(name).get(0);
+    }
+
+    public void registerConfigurationListener(Runnable listener) {
+        this.configurationListener = listener;
+    }
+
+    public void notifyConfigurationComplete() {
+        if (configurationListener != null) {
+            configurationListener.run();
         }
     }
 }

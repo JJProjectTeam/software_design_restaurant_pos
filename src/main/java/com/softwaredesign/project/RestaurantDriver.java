@@ -1,58 +1,112 @@
 package com.softwaredesign.project;
 
-import com.softwaredesign.project.controller.DiningRoomController;
-import com.softwaredesign.project.menu.Menu;
-import com.softwaredesign.project.customer.DineInCustomer;
-import com.softwaredesign.project.view.RestaurantApplication;
-import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.kitchen.StationType;
+import com.softwaredesign.project.controller.*;
+import com.softwaredesign.project.view.*;
+import com.softwaredesign.project.mediator.RestaurantViewMediator;
 
 public class RestaurantDriver {
-
-    public static void main(String[] args) {
+    private RestaurantApplication app;
+    private RestaurantViewMediator mediator;
+    private ConfigurationController configController;
+    private DiningRoomController diningRoomController;
+    private KitchenController kitchenController;
+    private static final int TOTALSEATS = 40;
+    
+    public RestaurantDriver() {
+        try{
+            this.app = new RestaurantApplication();
+            this.mediator = RestaurantViewMediator.getInstance();
+        }
+        catch (Exception e){
+            System.err.println("[RestaurantDriver] Fatal error running application: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    public void start() {
         try {
             System.out.println("[RestaurantDriver] Starting application...");
             
-            // Initialize inventory and menu
-            System.out.println("[RestaurantDriver] Initializing inventory and menu");
-            Inventory inventoryService = new Inventory();
-            inventoryService.addIngredient("Beef Patty", 10, 1.0, StationType.GRILL);
-            inventoryService.addIngredient("Bun", 10, 1.0, StationType.PREP);
-            inventoryService.addIngredient("Lettuce", 10, 1.0, StationType.PREP);
-            inventoryService.addIngredient("Tomato", 10, 1.0, StationType.PREP);
-            inventoryService.addIngredient("Cheese", 10, 1.0, StationType.PREP);
-            Menu menu = new Menu(inventoryService);
+            // Initialize configuration phase
+            initializeConfiguration();
             
-            // Initialize controllers
-            DiningRoomController diningRoomController = new DiningRoomController(menu, 5, 12);
+            // Wait for configuration to complete
+            waitForConfiguration();
             
-            // Create and start the application UI
-            RestaurantApplication app = new RestaurantApplication();
+            // Initialize restaurant operation phase
+            initializeOperation();
             
-            // Let the UI initialize first
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                System.err.println("[RestaurantDriver] UI initialization interrupted: " + e.getMessage());
-            }
-            
-            // Set up initial state through controllers
-            System.out.println("[RestaurantDriver] Setting up initial state...");
-            diningRoomController.assignWaiterToTable(1, 'A');
-            diningRoomController.assignWaiterToTable(2, 'B');
-            diningRoomController.assignWaiterToTable(3, 'A');
-            
-            // Add some initial customers
-            diningRoomController.addCustomerToTable(1, new DineInCustomer());
-            diningRoomController.addCustomerToTable(1, new DineInCustomer());
-            diningRoomController.addCustomerToTable(2, new DineInCustomer());
-            
-            // Start the application
+            // Run the application
             System.out.println("[RestaurantDriver] Running application...");
             app.run();
+            
         } catch (Exception e) {
             System.err.println("[RestaurantDriver] Fatal error running application: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void initializeConfiguration() {
+        // Create and register configuration controller
+        configController = new ConfigurationController();
+        
+        // Let the UI initialize
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            System.err.println("[RestaurantDriver] UI initialization interrupted: " + e.getMessage());
+        }
+        
+        // Start with welcome/configuration screen
+        app.showView(ViewType.WELCOME);
+        
+        // Register for configuration completion notification
+        mediator.registerConfigurationListener(this::onConfigurationComplete);
+    }
+
+    private void waitForConfiguration() {
+        // This could be improved with proper synchronization
+        while (!configController.isConfigurationComplete()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+    }
+
+    private void onConfigurationComplete() {
+        System.out.println("[RestaurantDriver] Configuration completed, initializing restaurant...");
+        configController.createRestaurantComponents();
+        initializeOperation();
+    }
+
+    private void initializeOperation() {
+        // Create operational controllers with configured components
+        diningRoomController = new DiningRoomController(
+            configController.getMenu(),
+            configController.getTables().size(),
+            TOTALSEATS
+
+        );
+
+        kitchenController = new KitchenController(
+            configController.getKitchen()
+        );
+
+        // Register operational controllers with mediator
+        mediator.registerController("DiningRoom", diningRoomController);
+        mediator.registerController("Kitchen", kitchenController);
+
+        // Switch to dining room view
+        app.showView(ViewType.DINING_ROOM);
+        
+        System.out.println("[RestaurantDriver] Restaurant initialized and ready for operation");
+    }
+
+    public static void main(String[] args) {
+        RestaurantDriver driver = new RestaurantDriver();
+        driver.start();
     }
 }
