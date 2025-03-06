@@ -1,6 +1,8 @@
 package com.softwaredesign.project.staff.chefstrategies;
 
 import com.softwaredesign.project.order.Order;
+import com.softwaredesign.project.order.Recipe;
+import com.softwaredesign.project.order.RecipeTask;
 import com.softwaredesign.project.kitchen.Station;
 
 import java.util.List;
@@ -14,9 +16,17 @@ public interface ChefStrategy {
     Station chooseNextStation(List<Station> assignedStations);
     
     /**
-     * Get the next order to work on from the chosen station
-     * @param station The station to get the order from
-     * @return The next order to work on or null if no orders are available
+     * Get the next task to work on from the chosen station
+     * @param station The station to get the task from
+     * @return The next recipe task to work on or null if no tasks are available
      */
-    Order getNextOrder(Station station);
+    RecipeTask getNextTask(Station station);
+    
+    /**
+     * Get the order associated with a task
+     * This is a helper method since we no longer have direct access to orders in the backlog
+     * @param task The task to get the order for
+     * @return The order ID or null if not available
+     */
+    String getOrderIdForTask(RecipeTask task);
 }

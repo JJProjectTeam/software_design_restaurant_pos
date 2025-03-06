@@ -33,4 +33,20 @@ public class StationManager {
     public List<Station> getAllStations() {
         return new ArrayList<>(stations.values());
     }
+    
+    /**
+     * Returns a list of stations of the specified type.
+     * Since we currently only have one station per type, this will return a list with at most one station.
+     * 
+     * @param type The station type to filter by
+     * @return List of stations of the specified type
+     */
+    public List<Station> getStationsByType(StationType type) {
+        List<Station> result = new ArrayList<>();
+        Station station = stations.get(type);
+        if (station != null) {
+            result.add(station);
+        }
+        return result;
+    }
 }

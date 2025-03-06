@@ -1,6 +1,7 @@
 package com.softwaredesign.project.orderfulfillment;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.softwaredesign.project.order.Meal;
 
@@ -50,5 +51,46 @@ public class CollectionPoint {
 
     public boolean hasReadyOrders() {
         return !readyOrders.isEmpty();
+    }
+    
+    /**
+     * Returns a set of order IDs that have at least one completed meal but are not fully complete
+     * @return List of order IDs that are partially completed
+     */
+    public List<String> getPartiallyCompletedOrderIds() {
+        List<String> partiallyCompleted = new ArrayList<>();
+        
+        for (Map.Entry<String, List<Meal>> entry : completedMeals.entrySet()) {
+            String orderId = entry.getKey();
+            if (!entry.getValue().isEmpty() && !readyOrders.contains(orderId)) {
+                partiallyCompleted.add(orderId);
+            }
+        }
+        
+        return partiallyCompleted;
+    }
+    
+    /**
+     * Gets the number of completed meals for a specific order
+     * @param orderId The order ID to check
+     * @return The number of completed meals for the order
+     */
+    public int getCompletedMealsCount(String orderId) {
+        if (!completedMeals.containsKey(orderId)) {
+            return 0;
+        }
+        return completedMeals.get(orderId).size();
+    }
+    
+    /**
+     * Gets the total number of meals expected for a specific order
+     * @param orderId The order ID to check
+     * @return The total number of meals expected for the order
+     */
+    public int getTotalMealsExpected(String orderId) {
+        if (!mealsPerOrder.containsKey(orderId)) {
+            return 0;
+        }
+        return mealsPerOrder.get(orderId);
     }
 }

@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 import com.softwaredesign.project.inventory.Ingredient;
 import com.softwaredesign.project.inventory.InventoryService;
@@ -13,6 +14,7 @@ import com.softwaredesign.project.kitchen.Station;
 public abstract class Recipe {
     protected String name;
     protected List<Ingredient> ingredients;
+    protected List<RecipeTask> tasks;
     protected Queue<Station> stationsToVisit;
     protected String orderId;
     protected final InventoryService inventoryService;
@@ -24,11 +26,16 @@ public abstract class Recipe {
         this.name = name;
         this.inventoryService = inventoryService;
         this.ingredients = new ArrayList<>();
+        this.tasks = new ArrayList<>();
         initializeBaseIngredients();
+        initializeTasks();
         stationsToVisit = new LinkedList<>();
     }
 
     protected abstract void initializeBaseIngredients();
+    
+    // New method for initializing tasks - to be implemented by subclasses
+    protected abstract void initializeTasks();
 
     public void addIngredient(Ingredient ingredient) {
         ingredients.add(ingredient);
@@ -59,7 +66,50 @@ public abstract class Recipe {
     }
 
     public boolean isComplete() {
-        return stationsToVisit.isEmpty();
+        return stationsToVisit.isEmpty() && allTasksCompleted();
+    }
+    
+    // New method to check if all tasks are completed
+    public boolean allTasksCompleted() {
+        if (tasks.isEmpty()) {
+            return true;
+        }
+        
+        for (RecipeTask task : tasks) {
+            if (!task.isCompleted()) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    // New method to add a task
+    public void addTask(RecipeTask task) {
+        tasks.add(task);
+        task.setRecipe(this); // Set the reference to this recipe
+    }
+    
+    // New method to get the list of tasks
+    public List<RecipeTask> getTasks() {
+        return tasks;
+    }
+    
+    /**
+     * Returns a list of all tasks in this recipe that are not yet completed
+     * @return List of uncompleted tasks
+     */
+    public List<RecipeTask> getUncompletedTasks() {
+        return tasks.stream()
+                .filter(task -> !task.isCompleted())
+                .collect(Collectors.toList());
+    }
+    
+    // New method to get incomplete tasks
+    public List<RecipeTask> getIncompleteTasks() {
+        return tasks.stream()
+                .filter(task -> !task.isCompleted())
+                .collect(Collectors.toList());
     }
 
     public void setOrderId(String orderId) {
@@ -86,6 +136,15 @@ public abstract class Recipe {
     }
 
     public Meal buildMeal() {
-        return new Meal(name, ingredients, inventoryService, orderId);
+        // Collect all ingredients from tasks
+        List<Ingredient> allIngredients = new ArrayList<>();
+        // Add direct ingredients from recipe
+        allIngredients.addAll(ingredients);
+        // Add ingredients from tasks
+        for (RecipeTask task : tasks) {
+            allIngredients.addAll(task.getIngredients());
+        }
+        
+        return new Meal(name, allIngredients, inventoryService, orderId);
     }
 }

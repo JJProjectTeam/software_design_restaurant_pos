@@ -81,7 +81,7 @@ public class Menu {
     }
 
     private Ingredient getRandomIngredient() {
-        // Placeholder ingredients - will be replaced with actual inventory items
+        // TODO Placeholder ingredients - will be replaced with actual inventory items
         String[] sampleIngredients = {"Cheese", "Tomato", "Lettuce", "Onion", "Pickles", "Mayo", "Mustard"};
         Random random = new Random();
         return new Ingredient(sampleIngredients[random.nextInt(sampleIngredients.length)], inventoryService);

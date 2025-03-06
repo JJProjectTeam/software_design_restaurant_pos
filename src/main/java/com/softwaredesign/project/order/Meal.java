@@ -48,4 +48,8 @@ public class Meal {
         result.append(" Price: ").append(getPrice());
         return result.toString();
     }
+
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
 }

@@ -19,7 +19,7 @@ public class Order {
         this.modifications = new HashMap<>();
     }
 
-    public void getOrderId(String orderId) {
+    public void setOrderId(String orderId) {
         this.orderId = orderId;
     }
 
