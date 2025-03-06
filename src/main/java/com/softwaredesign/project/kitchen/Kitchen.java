@@ -19,16 +19,15 @@ public class Kitchen extends Entity {
     private OrderManager orderManager;
     private CollectionPoint collectionPoint;
     private StationManager stationManager;
-    private List<Recipe> pendingRecipes = new ArrayList<>();
-    
-    private Map<Recipe, List<RecipeTask>> pendingTasks = new HashMap<>();
+    private List<Recipe> pendingRecipes = new ArrayList<>(); // recipes to be complete 
+    private Map<Recipe, List<RecipeTask>> pendingTasks = new HashMap<>(); // tasks to be completed
     
     public Kitchen(OrderManager orderManager, CollectionPoint collectionPoint) {
         this.orderManager = orderManager;
         this.collectionPoint = collectionPoint;
         this.stationManager = new StationManager(collectionPoint);
         
-        // Set the kitchen reference in each station
+        // Set the kitchen reference in/ Set the kitchen reference in each station
         for (Station station : stationManager.getAllStations()) {
             station.setKitchen(this);
         }
@@ -53,17 +52,20 @@ public class Kitchen extends Entity {
         return orderManager;
     }
 
+    /**
+     * Gets the recipes from the order manager
+     */
     public void getRecipes() {
         if (orderManager == null) {
             System.out.println("OrderManager is not set");
             return;
         }
         
-        List<Recipe> newRecipes = orderManager.processOrder();
-        if (newRecipes != null && !newRecipes.isEmpty()) {
-            pendingRecipes.addAll(newRecipes);
+        List<Recipe> newRecipes = orderManager.processOrder(); // returns a registered order (list of recipes)
+        if (newRecipes != null && !newRecipes.isEmpty()) { // if there are new recipes
+            pendingRecipes.addAll(newRecipes); 
             
-            // Add all incomplete tasks from new recipes to pending tasks
+            // Add all incomplete tasks from new recipes to pending tasks (unpack!)
             for (Recipe recipe : newRecipes) {
                 List<RecipeTask> incompleteTasks = recipe.getIncompleteTasks();
                 pendingTasks.put(recipe, new ArrayList<>(incompleteTasks));
@@ -294,16 +296,17 @@ public class Kitchen extends Entity {
                                 
                                 if (task.areDependenciesMet()) {
                                     System.out.println("[DEBUG] Found task " + task.getName() + 
-                                                     " for idle " + stationType + " station");
+                                                     " for idle " + stationType + " station" +
+                                                     " from order: " + recipe.getOrderId());
                                     
-                                        // Assign the task to the station
-                                        station.assignTask(recipe, task);
-                                        
-                                        // If this is a PREP task, log it with higher visibility
-                                        if (stationType == StationType.PREP) {
-                                            System.out.println("[IMPORTANT] Successfully assigned PREP task " + 
-                                                             task.getName() + " to PREP station");
-                                        }
+                                    // Assign the task to the station
+                                    station.assignTask(recipe, task);
+                                    
+                                    // If this is a PREP task, log it with higher visibility
+                                    if (stationType == StationType.PREP) {
+                                        System.out.println("[IMPORTANT] Successfully assigned PREP task " + 
+                                                         task.getName() + " to PREP station");
+                                    }
                                     
                                     // If we assigned a task, break out of the task loop
                                     // but continue checking other stations

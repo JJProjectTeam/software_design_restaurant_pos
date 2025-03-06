@@ -15,7 +15,6 @@ public abstract class Recipe {
     protected String name;
     protected List<Ingredient> ingredients;
     protected List<RecipeTask> tasks;
-    protected Queue<Station> stationsToVisit;
     protected String orderId;
     protected final InventoryService inventoryService;
 
@@ -29,7 +28,14 @@ public abstract class Recipe {
         this.tasks = new ArrayList<>();
         initializeBaseIngredients();
         initializeTasks();
-        stationsToVisit = new LinkedList<>();
+        
+        // Ensure all tasks have their recipe reference set
+        for (RecipeTask task : tasks) {
+            if (task.getRecipe() == null) {
+                task.setRecipe(this);
+                System.out.println("[FIX] Setting recipe reference for task: " + task.getName() + " in recipe: " + name);
+            }
+        }
     }
 
     protected abstract void initializeBaseIngredients();
@@ -53,22 +59,6 @@ public abstract class Recipe {
         return name;
     }
 
-    public Queue<Station> getStationsToVisit() {
-        return stationsToVisit;
-    }
-
-    public void addStation(Station station) {
-        stationsToVisit.add(station);
-    }
-
-    public void removeStation(Station station) {
-        stationsToVisit.remove(station);
-    }
-
-    public boolean isComplete() {
-        return stationsToVisit.isEmpty() && allTasksCompleted();
-    }
-    
     // New method to check if all tasks are completed
     public boolean allTasksCompleted() {
         if (tasks.isEmpty()) {
@@ -110,6 +100,10 @@ public abstract class Recipe {
         return tasks.stream()
                 .filter(task -> !task.isCompleted())
                 .collect(Collectors.toList());
+    }
+
+    public boolean isComplete() {
+        return allTasksCompleted();
     }
 
     public void setOrderId(String orderId) {

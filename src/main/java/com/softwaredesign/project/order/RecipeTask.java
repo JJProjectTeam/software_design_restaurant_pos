@@ -178,11 +178,29 @@ public class RecipeTask {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RecipeTask that = (RecipeTask) o;
-        return name.equals(that.name) && stationType == that.stationType;
+        
+        // Basic equality check for name and station type
+        boolean basicEquality = name.equals(that.name) && stationType == that.stationType;
+        
+        // If recipes are available, also check if they're from the same order
+        if (recipe != null && that.recipe != null) {
+            String thisOrderId = recipe.getOrderId();
+            String thatOrderId = that.recipe.getOrderId();
+            
+            if (thisOrderId != null && thatOrderId != null) {
+                return basicEquality && thisOrderId.equals(thatOrderId);
+            }
+        }
+        
+        return basicEquality;
     }
     
     @Override
     public int hashCode() {
+        // Include recipe's orderId in hash if available
+        if (recipe != null && recipe.getOrderId() != null) {
+            return Objects.hash(name, stationType, recipe.getOrderId());
+        }
         return Objects.hash(name, stationType);
     }
     

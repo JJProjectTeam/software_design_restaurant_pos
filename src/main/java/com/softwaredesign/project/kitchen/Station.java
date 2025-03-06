@@ -17,12 +17,16 @@ public class Station extends Entity {
     private final StationType type;
     private List<RecipeTask> backlog;
     private Chef assignedChef;
+    private Chef taskChef; // Chef who is currently working on the task
+
     private Recipe currentRecipe;
     private RecipeTask currentTask;
-    private Chef taskChef; // Chef who is currently working on the task
-    private int cookingProgress;
+
+    private int cookingProgress; // can be used to track progress of a task
+
     private CollectionPoint collectionPoint;
     private boolean needsIngredients;
+    
     private Kitchen kitchen;  // Reference to the kitchen
 
     public Station(StationType type, CollectionPoint collectionPoint) {
@@ -70,36 +74,34 @@ public class Station extends Entity {
     }
 
     public void addTask(RecipeTask task) {
+        // Ensure the task has a recipe reference
+        if (task.getRecipe() == null) {
+            System.out.println("[WARNING] Task added to backlog without recipe reference: " + task.getName());
+            // Don't add tasks without a recipe reference
+            System.out.println("[FIX] Rejecting task without recipe reference: " + task.getName());
+            return;
+        }
+        
         // Check if this specific task is already in the backlog to prevent duplicates
         boolean taskAlreadyExists = false;
         
         for (RecipeTask existingTask : backlog) {
-            // Check if it's the same task (same name and same station type)
-            if (existingTask.getName().equals(task.getName()) && 
-                existingTask.getStationType() == task.getStationType()) {
-                Recipe existingRecipe = existingTask.getRecipe();
-                Recipe newRecipe = task.getRecipe();
-                
-                // If both tasks have the same recipe, it's a duplicate
-                if (existingRecipe != null && newRecipe != null && 
-                    existingRecipe.equals(newRecipe)) {
-                    taskAlreadyExists = true;
-                    break;
-                }
-                
-                // If recipes have the same order ID, consider it a duplicate
-                if (existingRecipe != null && newRecipe != null && 
-                    existingRecipe.getOrderId() != null && 
-                    existingRecipe.getOrderId().equals(newRecipe.getOrderId())) {
-                    taskAlreadyExists = true;
-                    break;
-                }
+            // Use the enhanced equals method which now considers the recipe's orderId
+            if (existingTask.equals(task)) {
+                taskAlreadyExists = true;
+                System.out.println("[DEBUG] Prevented duplicate task: " + task.getName() + 
+                               " for recipe: " + (task.getRecipe() != null ? task.getRecipe().getName() : "unknown") +
+                               " with orderId: " + (task.getRecipe() != null ? task.getRecipe().getOrderId() : "unknown"));
+                break;
             }
         }
         
         // Only add the task if it's not already in the backlog
         if (!taskAlreadyExists) {
             backlog.add(task);
+            System.out.println("[DEBUG] Added task to " + type + " station backlog: " + task.getName() + 
+                           " for recipe: " + (task.getRecipe() != null ? task.getRecipe().getName() : "unknown") +
+                           " with orderId: " + (task.getRecipe() != null ? task.getRecipe().getOrderId() : "unknown"));
         }
     }
     
@@ -292,6 +294,12 @@ public class Station extends Entity {
     }
     
     public void assignTask(Recipe recipe, RecipeTask task) {
+        // Ensure the task has a reference to its recipe
+        if (task.getRecipe() == null && recipe != null) {
+            System.out.println("[FIX] Setting recipe reference for task: " + task.getName());
+            task.setRecipe(recipe);
+        }
+        
         if (currentRecipe == null && currentTask == null) { // if no task is assigned
             // Check if all dependencies are met before assigning the task
             if (!task.areDependenciesMet()) {

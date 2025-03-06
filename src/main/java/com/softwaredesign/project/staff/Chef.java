@@ -102,24 +102,24 @@ public class Chef extends StaffMember {
         
         // PRIORITY 1: First check if there are any PREP stations with pending tasks
         // This ensures we prioritize the start of the recipe pipeline
-        for (Station station : assignedStations) {
-            if (station.getType() == StationType.PREP && !station.isBusy() && station.hasBacklogItems()) {
-                System.out.println("[IMPORTANT] Chef " + name + " prioritizing PREP station with backlog items");
-                station.registerChef(this);
+        // for (Station station : assignedStations) {
+        //     if (station.getType() == StationType.PREP && !station.isBusy() && station.hasBacklogItems()) {
+        //         System.out.println("[IMPORTANT] Chef " + name + " prioritizing PREP station with backlog items");
+        //         station.registerChef(this);
                 
-                StringBuilder logMessage = new StringBuilder();
-                logMessage.append(name).append(" moved to PREP station (priority assignment)");
+        //         StringBuilder logMessage = new StringBuilder();
+        //         logMessage.append(name).append(" moved to PREP station (priority assignment)");
                 
-                if (station.getCurrentTask() != null) {
-                    logMessage.append(" to work on: ").append(station.getCurrentTask().getName());
-                } else {
-                    logMessage.append(" (waiting for task assignment)");
-                }
+        //         if (station.getCurrentTask() != null) {
+        //             logMessage.append(" to work on: ").append(station.getCurrentTask().getName());
+        //         } else {
+        //             logMessage.append(" (waiting for task assignment)");
+        //         }
                 
-                System.out.println(logMessage.toString());
-                return station;
-            }
-        }
+        //         System.out.println(logMessage.toString());
+        //         return station;
+        //     }
+        // }
         
         // PRIORITY 2: Check if there's a station with a task already assigned but no chef
         for (Station station : assignedStations) {

@@ -16,10 +16,6 @@ import com.softwaredesign.project.inventory.Ingredient;
  * (I think)
  * 
  * getRandomAdditionalIngredient and getRandomIngredientFromRecipe will eventually be replaced with calls to the inventory
- * 
- * 
- * 
- * 
  */
 public class Menu {
     private final InventoryService inventoryService;

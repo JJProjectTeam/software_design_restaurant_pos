@@ -35,13 +35,17 @@ public class OrderManager {
         orders.add(order);
     }
 
+    /**
+     * Processes the next order in the queue
+     * @return A list of recipes from the order
+     */
     public List<Recipe> processOrder() {
         if (orders.isEmpty()) {
             return new ArrayList<>();
         }
 
-        // Peek instead of poll - don't remove the order yet
-        Order order = orders.peek();
+        // Get the next order and remove it from the queue
+        Order order = orders.poll();
         List<Recipe> recipes = order.getRecipes();
 
         // Ensure the order is registered with the collection point
@@ -57,12 +61,7 @@ public class OrderManager {
             // Set the orderId on the recipe to ensure proper tracking
             recipe.setOrderId(orderId);
             makeAmendments(recipe, order);
-            stationMapper.mapStationsToRecipe(recipe);
         }
-
-        // Instead of removing the order, we'll keep it in the queue
-        // so stations can use it for their backlogs
-        // orders.poll();
         
         // Clone the recipes list to avoid modifying the original order's recipes
         return new ArrayList<>(recipes);
