@@ -1,0 +1,109 @@
+package com.softwaredesign.project.controller;
+
+import com.softwaredesign.project.mediator.RestaurantViewMediator;
+import com.softwaredesign.project.orderfulfillment.SeatingPlan;
+import com.softwaredesign.project.orderfulfillment.Table;
+import com.softwaredesign.project.view.DiningRoomView;
+import com.softwaredesign.project.view.View;
+import com.softwaredesign.project.customer.DineInCustomer;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import com.softwaredesign.project.menu.Menu;
+
+public class DiningRoomController extends BaseController {
+    private SeatingPlan seatingPlan;
+    private Map<Integer, Character> tableToWaiter;
+    private RestaurantViewMediator mediator;
+
+    public DiningRoomController(Menu menu, int totalTables, int totalSeats) {
+        super("DiningRoom");
+        System.out.println("[DiningRoomController] Initializing controller...");
+        this.seatingPlan = new SeatingPlan(totalTables, totalSeats, menu);
+        this.tableToWaiter = new HashMap<>();
+        this.mediator = RestaurantViewMediator.getInstance();
+        
+        // Register with mediator
+        mediator.registerController("DiningRoom", this);
+    }
+
+    public void assignWaiterToTable(int tableNumber, char waiterId) {
+        System.out.println("[DiningRoomController] Assigning waiter " + waiterId + " to table " + tableNumber);
+        tableToWaiter.put(tableNumber, waiterId);
+        notifyViewsOfTableUpdate(seatingPlan.getTable(tableNumber));
+    }
+
+    public void addCustomerToTable(int tableNumber, DineInCustomer customer) {
+        System.out.println("[DiningRoomController] Adding customer to table " + tableNumber);
+        Table table = seatingPlan.getTable(tableNumber);
+        table.addCustomer(customer);
+        notifyViewsOfTableUpdate(table);
+    }
+
+    private void notifyViewsOfTableUpdate(Table table) {
+        // First update our internal state
+        int tableNumber = table.getTableNumber();
+        char waiterId = tableToWaiter.getOrDefault(tableNumber, ' ');
+        
+        // Then notify views through the mediator
+        List<View> views = mediator.getViews("DiningRoom");
+        for (View view : views) {
+            if (view instanceof DiningRoomView) {
+                DiningRoomView diningView = (DiningRoomView) view;
+                diningView.onTableUpdate(
+                    tableNumber,
+                    table.getTableCapacity(),
+                    table.getCustomers().size(),
+                    determineTableStatus(table),
+                    waiterId
+                );
+            }
+        }
+    }
+
+    @Override
+    public void updateView() {
+        System.out.println("[DiningRoomController] Updating all views");
+        // Update all tables
+        for (Table table : seatingPlan.getAllTables()) {
+            int tableNumber = table.getTableNumber();
+            char waiterId = tableToWaiter.getOrDefault(tableNumber, ' ');
+            
+            // Notify views through the mediator
+            List<View> views = mediator.getViews("DiningRoom");
+            for (View view : views) {
+                if (view instanceof DiningRoomView) {
+                    DiningRoomView diningView = (DiningRoomView) view;
+                    diningView.onTableUpdate(
+                        tableNumber,
+                        table.getTableCapacity(),
+                        table.getCustomers().size(),
+                        determineTableStatus(table),
+                        waiterId
+                    );
+                }
+            }
+        }
+    }
+
+    public void refreshAllTables() {
+        System.out.println("[DiningRoomController] Refreshing all tables");
+        updateView();
+    }
+
+    private String determineTableStatus(Table table) {
+        if (table.getCustomers().isEmpty()) {
+            return "Empty";
+        } else if (table.isEveryoneReadyToOrder()) {
+            return "Ready";
+        } else {
+            return "Browsing";
+        }
+    }
+
+    public SeatingPlan getSeatingPlan() {
+        return seatingPlan;
+    }
+}
