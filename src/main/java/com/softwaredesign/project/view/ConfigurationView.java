@@ -9,9 +9,6 @@ import jexer.*;
 public abstract class ConfigurationView implements View, ConfigurableView {
     protected final RestaurantApplication app;
     protected TWindow window;
-    // protected TLabel moneyLabel;
-    // protected TLabel errorLabel;
-    // protected TLabel warningLabel;
     protected RestaurantViewMediator mediator;
     protected TTableWidget configTable;
 
@@ -56,19 +53,10 @@ public abstract class ConfigurationView implements View, ConfigurableView {
     protected void setupCommonElements() {
         System.out.println("[ConfigurationView] setupCommonElements started");
         try {
-            // Initialize labels with empty strings first to ensure they have valid attributes
-            // errorLabel = window.addLabel("", 2, window.getHeight() - 6);
-            // warningLabel = window.addLabel("", 2, window.getHeight() - 5);
-            
-            // Now add the other labels
+            // Add the configuration title and money label
             window.addLabel("Configuration Settings", 2, 2);
             window.addLabel("$", window.getWidth() - 15, 2);
-            // moneyLabel = window.addLabel("1000", window.getWidth() - 13, 2);
             
-            System.out.println("[ConfigurationView] Labels initialized");
-            
-            // Clear warnings after labels are fully initialized
-            clearWarning();
             System.out.println("[ConfigurationView] setupCommonElements completed");
         } catch (Exception e) {
             System.err.println("[ConfigurationView] Error in setupCommonElements: " + e.getMessage());
@@ -113,51 +101,29 @@ public abstract class ConfigurationView implements View, ConfigurableView {
 
     protected void showError(String message) {
         System.out.println("[ConfigurationView] showError called with message: " + message);
-        // if (errorLabel != null) {
-        //     try {
-        //         errorLabel.setLabel("Error: " + message);
-        //         errorLabel.setColorKey("RED");
-        //     } catch (Exception e) {
-        //         System.err.println("[ConfigurationView] Error setting error label: " + e.getMessage());
-        //         e.printStackTrace();
-        //     }
-        // } else {
-        //     System.err.println("[ConfigurationView] ERROR: errorLabel is null when showing error: " + message);
-        // }
+        try {
+            // Use a message box instead of a label
+            new TMessageBox(window.getApplication(), "Error", message, TMessageBox.Type.OK);
+        } catch (Exception e) {
+            System.err.println("[ConfigurationView] Error showing error message box: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     protected void showWarning(String message) {
         System.out.println("[ConfigurationView] showWarning called with message: " + message);
-        // if (warningLabel != null) {
-        //     try {
-        //         // warningLabel.setLabel("Warning: " + message);
-        //         // warningLabel.setColorKey("YELLOW");
-        //     } catch (Exception e) {
-        //         System.err.println("[ConfigurationView] Error setting warning label: " + e.getMessage());
-        //         e.printStackTrace();
-        //     }
-        // } else {
-        //     System.err.println("[ConfigurationView] ERROR: warningLabel is null when showing warning: " + message);
-        // }
+        try {
+            // Use a message box instead of a label
+            new TMessageBox(window.getApplication(), "Warning", message, TMessageBox.Type.OK);
+        } catch (Exception e) {
+            System.err.println("[ConfigurationView] Error showing warning message box: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     protected void clearWarning() {
-        System.out.println("[ConfigurationView] clearWarning called");
-        try {
-            // if (errorLabel != null) {
-            //     errorLabel.setLabel("");
-            // } else {
-            //     System.err.println("[ConfigurationView] ERROR: errorLabel is null when clearing warnings");
-            // }
-            // if (warningLabel != null) {
-            //     warningLabel.setLabel("");
-            // } else {
-            //     System.err.println("[ConfigurationView] ERROR: warningLabel is null when clearing warnings");
-            // }
-        } catch (Exception e) {
-            System.err.println("[ConfigurationView] Error clearing warnings: " + e.getMessage());
-            e.printStackTrace();
-        }
+        System.out.println("[ConfigurationView] clearWarning called - no action needed with message boxes");
+        // No action needed since we're using message boxes that disappear when closed
     }
 
     protected abstract void onNextPressed();

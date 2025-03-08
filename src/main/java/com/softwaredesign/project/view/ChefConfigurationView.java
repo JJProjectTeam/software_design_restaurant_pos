@@ -73,20 +73,6 @@ public class ChefConfigurationView extends ConfigurationView {
             System.out.println("[ChefConfigurationView] Creating input form");
             createInputForm();
             
-            // Add warning - with a small delay to ensure UI is ready
-            System.out.println("[ChefConfigurationView] Adding warning");
-            try {
-                // Make sure warning label is initialized before using it
-            //     if (warningLabel != null) {
-            //         showWarning("At least one chef must be assigned to each station type!");
-            //     } else {
-            //         System.err.println("[ChefConfigurationView] Warning label is null, cannot show warning");
-            //     }
-            } catch (Exception e) {
-                System.err.println("[ChefConfigurationView] Error showing warning: " + e.getMessage());
-                e.printStackTrace();
-            }
-            
             System.out.println("[ChefConfigurationView] setupSpecificElements completed");
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error setting up elements: " + e.getMessage());
@@ -366,10 +352,18 @@ public class ChefConfigurationView extends ConfigurationView {
     @Override
     protected boolean validateConfiguration() {
         try {
+            // Check if there are no chefs
+            if (chefs.isEmpty()) {
+                showError("You must add at least one chef!");
+                return false;
+            }
+            
+            // Check if all station types are covered
             if (!validateStationCoverage()) {
                 showError("At least one chef must be assigned to each station type!");
                 return false;
             }
+            
             return true;
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error validating configuration: " + e.getMessage());
