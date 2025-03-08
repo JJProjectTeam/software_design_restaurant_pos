@@ -54,13 +54,6 @@ public class MenuConfigurationView extends ConfigurationView {
             
             createRecipeSelectionArea();
             
-            // Add a button to update selections
-            window.addButton("Update Selections", 2, window.getHeight() - 6, new TAction() {
-                public void DO() {
-                    syncSelections();
-                }
-            });
-            
         } catch (Exception e) {
             System.err.println("[MenuConfigurationView] Error setting up elements: " + e.getMessage());
             e.printStackTrace();
@@ -245,6 +238,32 @@ public class MenuConfigurationView extends ConfigurationView {
             app.showView(ViewType.DINING_CONFIGURATION);
         } catch (Exception e) {
             System.err.println("[MenuConfigurationView] Error navigating to previous view: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void setupNavigationButtons() {
+        System.out.println("[MenuConfigurationView] setupNavigationButtons started");
+        try {
+            window.addButton("Start Game", window.getWidth() - 15, window.getHeight() - 4, new TAction() {
+                public void DO() {
+                    System.out.println("[MenuConfigurationView] Start Game button pressed");
+                    if (validateConfiguration()) {
+                        onNextPressed();
+                    }
+                }
+            });
+
+            window.addButton("Back", 2, window.getHeight() - 4, new TAction() {
+                public void DO() {
+                    System.out.println("[MenuConfigurationView] Back button pressed");
+                    onBackPressed();
+                }
+            });
+            System.out.println("[MenuConfigurationView] setupNavigationButtons completed");
+        } catch (Exception e) {
+            System.err.println("[MenuConfigurationView] Error in setupNavigationButtons: " + e.getMessage());
             e.printStackTrace();
         }
     }

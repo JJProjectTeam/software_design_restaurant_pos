@@ -9,8 +9,11 @@ public class DiningConfigurationView extends ConfigurationView {
     private TField nameField;
     private TComboBox speedCombo;
     private TLabel tableCountLabel;
+    private TLabel tableCapacityLabel;
     private int maxTables = 20;
     private int currentTableCount = 0;
+    private int maxCapacity = 10;
+    private int currentTableCapacity = 0;
 
     // Local storage for waiter data
     private Map<String, WaiterData> waiters = new HashMap<>();
@@ -56,6 +59,10 @@ public class DiningConfigurationView extends ConfigurationView {
 
     public int getNumberOfTables() {
         return currentTableCount;
+    }
+    
+    public int getTableCapacity() {
+        return currentTableCapacity;
     }
 
     @Override
@@ -123,6 +130,7 @@ public class DiningConfigurationView extends ConfigurationView {
 
     private void createTableConfiguration() {
         try {
+            // Table count configuration
             window.addLabel("Number of Tables:", 2, 15);
             tableCountLabel = window.addLabel("0", 25, 15);
             
@@ -146,6 +154,31 @@ public class DiningConfigurationView extends ConfigurationView {
             });
             
             window.addLabel("(Maximum " + maxTables + " tables)", 40, 15);
+            
+            // Table capacity configuration
+            window.addLabel("Table Capacity:", 2, 17);
+            tableCapacityLabel = window.addLabel("0", 25, 17);
+            
+            // Add buttons to increase/decrease table capacity
+            window.addButton("-", 30, 17, new TAction() {
+                public void DO() {
+                    if (currentTableCapacity > 0) {
+                        currentTableCapacity--;
+                        updateTableCapacityLabel();
+                    }
+                }
+            });
+            
+            window.addButton("+", 35, 17, new TAction() {
+                public void DO() {
+                    if (currentTableCapacity < maxCapacity) {
+                        currentTableCapacity++;
+                        updateTableCapacityLabel();
+                    }
+                }
+            });
+            
+            window.addLabel("(Maximum " + maxCapacity + " seats per table)", 40, 17);
         } catch (Exception e) {
             System.err.println("[DiningConfigurationView] Error creating table configuration: " + e.getMessage());
             e.printStackTrace();
@@ -160,25 +193,34 @@ public class DiningConfigurationView extends ConfigurationView {
             e.printStackTrace();
         }
     }
+    
+    private void updateTableCapacityLabel() {
+        try {
+            tableCapacityLabel.setLabel(String.valueOf(currentTableCapacity));
+        } catch (Exception e) {
+            System.err.println("[DiningConfigurationView] Error updating table capacity label: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     private void createWaiterInputForm() {
         try {
-            window.addLabel("Add New Waiter:", 2, 17);
+            window.addLabel("Add New Waiter:", 2, 19);
             
             // Name field
-            window.addLabel("Name:", 2, 19);
-            nameField = window.addField(8, 19, 20, false);
+            window.addLabel("Name:", 2, 21);
+            nameField = window.addField(8, 21, 20, false);
             
             // Speed selection
-            window.addLabel("Speed:", 30, 19);
+            window.addLabel("Speed:", 30, 21);
             List<String> speeds = new ArrayList<>();
             speeds.add("1");
             speeds.add("2");
             speeds.add("3");
-            speedCombo = window.addComboBox(36, 19, 10, speeds, 0, 3, nullAction);
+            speedCombo = window.addComboBox(36, 21, 10, speeds, 0, 3, nullAction);
             
             // Add waiter button
-            window.addButton("Add Waiter", 50, 19, new TAction() {
+            window.addButton("Add Waiter", 50, 21, new TAction() {
                 public void DO() {
                     addWaiter();
                 }
@@ -243,6 +285,10 @@ public class DiningConfigurationView extends ConfigurationView {
             }
             if (currentTableCount == 0) {
                 showError("At least one table must be added");
+                return false;
+            }
+            if (currentTableCapacity == 0) {
+                showError("Table capacity must be set (at least 1)");
                 return false;
             }
             return true;
