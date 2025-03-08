@@ -5,7 +5,6 @@ import jexer.*;
 
 public class MenuConfigurationView extends ConfigurationView {
     // UI Components
-    private TTableWidget menuTable;
     private Map<String, List<String>> availableRecipes; // For display only
     private Map<String, TCheckBox> recipeCheckboxes;
     private Set<String> selectedRecipes; // Just store the names of selected recipes
@@ -30,40 +29,22 @@ public class MenuConfigurationView extends ConfigurationView {
             // Title
             window.addLabel("Menu Configuration", 2, 2);
             
-            // Create menu table
-            createMenuTable();
-            
             // Create recipe selection area
+            //TODO this probably needs to be SCROLLABLE for when there are a lot of recipes
             createRecipeSelectionArea();
-            
-            // Add warning
-            showWarning("Please select at least one menu item");
         } catch (Exception e) {
             System.err.println("[MenuConfigurationView] Error setting up elements: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    private void createMenuTable() {
-        try {
-            window.addLabel("Selected Menu Items:", 2, 4);
-            menuTable = window.addTable(2, 6, 130, 8, 2, 1);
-            menuTable.setColumnLabel(0, "Item Name");
-            menuTable.setColumnLabel(1, "Ingredients");
-            menuTable.setColumnWidth(0, 30);
-            menuTable.setColumnWidth(1, 100);
-        } catch (Exception e) {
-            System.err.println("[MenuConfigurationView] Error creating menu table: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
     private void createRecipeSelectionArea() {
         try {
-            window.addLabel("Available Recipes:", 2, 15);
+            window.addLabel("Available Recipes:", 2, 4);
+            window.addLabel("(Select the items you want to include in your menu)", 2, 5);
             
             // Create checkboxes directly in the main window
-            int y = 17;
+            int y = 7;
             for (Map.Entry<String, List<String>> recipe : availableRecipes.entrySet()) {
                 final String recipeName = recipe.getKey();
                 List<String> ingredients = recipe.getValue();
@@ -72,20 +53,13 @@ public class MenuConfigurationView extends ConfigurationView {
                 final TCheckBox checkbox = window.addCheckBox(2, y, recipeName, false);
                 
                 // Add a label for ingredients
-                window.addLabel(formatIngredientsList(ingredients), 40, y);
+                window.addLabel("Ingredients: " + formatIngredientsList(ingredients), 30, y);
                 
                 // Store the checkbox for later reference
                 recipeCheckboxes.put(recipeName, checkbox);
                 
                 y += 2;
             }
-            
-            // Add a button to sync selections
-            window.addButton("Update Selection", 2, y + 2, new TAction() {
-                public void DO() {
-                    syncCheckboxSelections();
-                }
-            });
         } catch (Exception e) {
             System.err.println("[MenuConfigurationView] Error creating recipe selection area: " + e.getMessage());
             e.printStackTrace();
@@ -103,38 +77,8 @@ public class MenuConfigurationView extends ConfigurationView {
                     selectedRecipes.add(recipeName);
                 }
             }
-            refreshMenuTable();
         } catch (Exception e) {
             System.err.println("[MenuConfigurationView] Error syncing checkbox selections: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    private void refreshMenuTable() {
-        try {
-            // Clear existing table
-            while (menuTable.getRowCount() > 1) {
-                menuTable.deleteRow(1);
-            }
-
-            // Repopulate from selected items
-            for (String recipeName : selectedRecipes) {
-                addMenuItemToTable(recipeName, availableRecipes.get(recipeName));
-            }
-        } catch (Exception e) {
-            System.err.println("[MenuConfigurationView] Error refreshing menu table: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    private void addMenuItemToTable(String name, List<String> ingredients) {
-        try {
-            int row = menuTable.getRowCount()-1;
-            menuTable.insertRowBelow(row);
-            menuTable.setCellText(0, row, name);
-            menuTable.setCellText(1, row, formatIngredientsList(ingredients));
-        } catch (Exception e) {
-            System.err.println("[MenuConfigurationView] Error adding menu item to table: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -145,6 +89,7 @@ public class MenuConfigurationView extends ConfigurationView {
 
     // Getters/setters for controller access
     public Set<String> getSelectedRecipes() {
+        syncCheckboxSelections(); // Ensure we have the latest selections
         return new HashSet<>(selectedRecipes);
     }
 
@@ -160,9 +105,6 @@ public class MenuConfigurationView extends ConfigurationView {
                 TCheckBox checkbox = entry.getValue();
                 checkbox.setChecked(recipes.contains(recipeName));
             }
-            
-            // Refresh the menu table
-            refreshMenuTable();
         } catch (Exception e) {
             System.err.println("[MenuConfigurationView] Error setting selected recipes: " + e.getMessage());
             e.printStackTrace();
