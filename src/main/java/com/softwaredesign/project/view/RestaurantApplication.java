@@ -130,12 +130,46 @@ public class RestaurantApplication extends TApplication {
     public boolean onMenu(TMenuEvent menu) {
         switch (menu.getId()) {
             case 1025: // MENU_RESTART
-                showView(ViewType.WELCOME);
+                restartApplication();
                 break;
             default:
                 return super.onMenu(menu);
         }
         return true;
+    }
+
+    /**
+     * Properly restarts the application by reinitializing all views and resetting the application state.
+     */
+    private void restartApplication() {
+        System.out.println("[RestaurantApplication] Restarting application");
+        try {
+            // Clear the current view
+            currentView = null;
+            
+            // Clear all widgets from the main window
+            List<TWidget> widgetsToRemove = new ArrayList<>(mainWindow.getChildren());
+            for (TWidget widget : widgetsToRemove) {
+                System.out.println("[RestaurantApplication] Removing widget: " + widget.getClass().getSimpleName());
+                mainWindow.remove(widget);
+            }
+            
+            // Reset the mediator
+            RestaurantViewMediator mediator = RestaurantViewMediator.getInstance();
+            mediator.reset();
+            
+            // Reinitialize all views
+            views.clear();
+            initializeViews();
+            
+            // Show the welcome view
+            showView(ViewType.WELCOME);
+            
+            System.out.println("[RestaurantApplication] Application restart completed");
+        } catch (Exception e) {
+            System.err.println("[RestaurantApplication] ERROR during restart: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) throws Exception {

@@ -102,4 +102,15 @@ public class RestaurantViewMediator {
             configurationListener.run();
         }
     }
+    
+    /**
+     * Reset the mediator by clearing all registered views and controllers.
+     * This is used when restarting the application.
+     */
+    public void reset() {
+        System.out.println("[RestaurantViewMediator] Resetting mediator");
+        registeredViews.clear();
+        controllers.clear();
+        configurationListener = null;
+    }
 }
