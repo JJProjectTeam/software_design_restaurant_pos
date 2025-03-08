@@ -7,6 +7,11 @@ public class ChefConfigurationView extends ConfigurationView {
     // Local storage for chef data
     private Map<String, ChefData> chefs = new HashMap<>();
     
+    // Station counts
+    private int grillStationCount = 1;
+    private int prepStationCount = 1;
+    private int plateStationCount = 1;
+    
     // Inner class to hold chef data
     public static class ChefData {
         String name;
@@ -39,11 +44,19 @@ public class ChefConfigurationView extends ConfigurationView {
     private TCheckBox grillCheckbox;
     private TCheckBox prepCheckbox;
     private TCheckBox plateCheckbox;
+    private TLabel grillCountLabel;
+    private TLabel prepCountLabel;
+    private TLabel plateCountLabel;
 
     // Getters for external access
     public Map<String, ChefData> getChefs() {
         return chefs;
     }
+    
+    // Getters for station counts
+    public int getGrillStationCount() { return grillStationCount; }
+    public int getPrepStationCount() { return prepStationCount; }
+    public int getPlateStationCount() { return plateStationCount; }
 
     public ChefConfigurationView(RestaurantApplication app) {
         super(app);
@@ -69,6 +82,10 @@ public class ChefConfigurationView extends ConfigurationView {
             // Create chef table
             System.out.println("[ChefConfigurationView] Creating chef table");
             createChefTable();
+            
+            // Create station count configuration
+            System.out.println("[ChefConfigurationView] Creating station count configuration");
+            createStationCountConfiguration();
             
             // Create input form
             System.out.println("[ChefConfigurationView] Creating input form");
@@ -125,6 +142,111 @@ public class ChefConfigurationView extends ConfigurationView {
             e.printStackTrace();
         }
     }
+    
+    private void createStationCountConfiguration() {
+        try {
+            System.out.println("[ChefConfigurationView] createStationCountConfiguration started");
+            
+            window.addLabel("Station Counts:", 2, 16);
+            
+            // Grill station count
+            window.addLabel("Grill Stations:", 10, 17);
+            grillCountLabel = window.addLabel(String.valueOf(grillStationCount), 25, 17);
+            
+            // Add buttons to increase/decrease grill count
+            window.addButton("-", 30, 17, new TAction() {
+                public void DO() {
+                    if (grillStationCount > 1) {
+                        grillStationCount--;
+                        updateStationCountLabels();
+                    } else {
+                        showError("Must have at least one Grill station");
+                    }
+                }
+            });
+            
+            window.addButton("+", 35, 17, new TAction() {
+                public void DO() {
+                    if (grillStationCount < 5) {
+                        grillStationCount++;
+                        updateStationCountLabels();
+                    } else {
+                        showError("Maximum 5 Grill stations allowed");
+                    }
+                }
+            });
+            
+            // Prep station count
+            window.addLabel("Prep Stations:", 10, 18);
+            prepCountLabel = window.addLabel(String.valueOf(prepStationCount), 25, 18);
+            
+            // Add buttons to increase/decrease prep count
+            window.addButton("-", 30, 18, new TAction() {
+                public void DO() {
+                    if (prepStationCount > 1) {
+                        prepStationCount--;
+                        updateStationCountLabels();
+                    } else {
+                        showError("Must have at least one Prep station");
+                    }
+                }
+            });
+            
+            window.addButton("+", 35, 18, new TAction() {
+                public void DO() {
+                    if (prepStationCount < 5) {
+                        prepStationCount++;
+                        updateStationCountLabels();
+                    } else {
+                        showError("Maximum 5 Prep stations allowed");
+                    }
+                }
+            });
+            
+            // Plate station count
+            window.addLabel("Plate Stations:", 10, 19);
+            plateCountLabel = window.addLabel(String.valueOf(plateStationCount), 25, 19);
+            
+            // Add buttons to increase/decrease plate count
+            window.addButton("-", 30, 19, new TAction() {
+                public void DO() {
+                    if (plateStationCount > 1) {
+                        plateStationCount--;
+                        updateStationCountLabels();
+                    } else {
+                        showError("Must have at least one Plate station");
+                    }
+                }
+            });
+            
+            window.addButton("+", 35, 19, new TAction() {
+                public void DO() {
+                    if (plateStationCount < 5) {
+                        plateStationCount++;
+                        updateStationCountLabels();
+                    } else {
+                        showError("Maximum 5 Plate stations allowed");
+                    }
+                }
+            });
+            
+            System.out.println("[ChefConfigurationView] createStationCountConfiguration completed");
+        } catch (Exception e) {
+            System.err.println("[ChefConfigurationView] Error creating station count configuration: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    private void updateStationCountLabels() {
+        try {
+            grillCountLabel.setLabel(String.valueOf(grillStationCount));
+            prepCountLabel.setLabel(String.valueOf(prepStationCount));
+            plateCountLabel.setLabel(String.valueOf(plateStationCount));
+        } catch (Exception e) {
+            System.err.println("[ChefConfigurationView] Error updating station count labels: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     private void refreshChefTable() {
         try {
@@ -157,12 +279,12 @@ public class ChefConfigurationView extends ConfigurationView {
             System.out.println("[ChefConfigurationView] createInputForm started");
             
             System.out.println("[ChefConfigurationView] Adding 'Add New Chef' label");
-            window.addLabel("Add New Chef:", 2, 15);
+            window.addLabel("Add New Chef:", 2, 21);
             
             // Name field
             System.out.println("[ChefConfigurationView] Adding name field");
-            window.addLabel("Name:", 2, 17);
-            nameField = window.addField(8, 17, 15, false);
+            window.addLabel("Name:", 2, 23);
+            nameField = window.addField(8, 23, 15, false);
             
             // Create a local nullAction instead of using the parent's
             System.out.println("[ChefConfigurationView] Creating local nullAction");
@@ -175,33 +297,33 @@ public class ChefConfigurationView extends ConfigurationView {
             
             // Speed selection
             System.out.println("[ChefConfigurationView] Adding speed selection");
-            window.addLabel("Speed:", 30, 17);
+            window.addLabel("Speed:", 30, 23);
             List<String> speeds = new ArrayList<>();
             speeds.add("1");
             speeds.add("2");
             speeds.add("3");
             System.out.println("[ChefConfigurationView] Creating speed combo box");
-            speedCombo = window.addComboBox(36, 17, 8, speeds, 0, 4, localNullAction);
+            speedCombo = window.addComboBox(36, 23, 8, speeds, 0, 4, localNullAction);
             
             // Strategy selection
             System.out.println("[ChefConfigurationView] Adding strategy selection");
-            window.addLabel("Strategy:", 50, 17);
+            window.addLabel("Strategy:", 50, 23);
             List<String> strategies = new ArrayList<>();
             strategies.add("FIFO");
             strategies.add("LIFO");
             System.out.println("[ChefConfigurationView] Creating strategy combo box");
-            strategyCombo = window.addComboBox(58, 17, 15, strategies, 0, 4, localNullAction);
+            strategyCombo = window.addComboBox(58, 23, 15, strategies, 0, 4, localNullAction);
             
             // Station checkboxes
             System.out.println("[ChefConfigurationView] Adding station checkboxes");
-            window.addLabel("Stations:", 2, 19);
-            grillCheckbox = window.addCheckBox(10, 19, "Grill", false);
-            prepCheckbox = window.addCheckBox(30, 19, "Prep", false);
-            plateCheckbox = window.addCheckBox(50, 19, "Plate", false);
+            window.addLabel("Stations:", 2, 25);
+            grillCheckbox = window.addCheckBox(10, 25, "Grill", false);
+            prepCheckbox = window.addCheckBox(30, 25, "Prep", false);
+            plateCheckbox = window.addCheckBox(50, 25, "Plate", false);
             
             // Add chef button
             System.out.println("[ChefConfigurationView] Adding 'Add Chef' button");
-            window.addButton("Add Chef", 80, 19, new TAction() {
+            window.addButton("Add Chef", 80, 25, new TAction() {
                 public void DO() {
                     System.out.println("[ChefConfigurationView] Add Chef button pressed");
                     handleAddChef();

@@ -73,30 +73,39 @@ public class ConfigurationController extends BaseController {
 
     // Methods to read from views and create restaurant entities
     public void createRestaurantComponents() {
-        try {
-            System.out.println("[ConfigurationController] Creating restaurant components...");
-            
-            // Get views
-            ChefConfigurationView chefView = (ChefConfigurationView) mediator.getView("ChefConfiguration");
-            DiningConfigurationView diningView = (DiningConfigurationView) mediator.getView("DiningConfiguration");
-            MenuConfigurationView menuView = (MenuConfigurationView) mediator.getView("MenuConfiguration");
-            
-            if (chefView != null && diningView != null && menuView != null) {
-                createChefs(chefView.getChefs());
-                createWaitersAndTables(diningView.getWaiters(), diningView.getNumberOfTables());
-                createMenuItems(menuView.getSelectedRecipes());
-                System.out.println("[ConfigurationController] Restaurant components created successfully");
-            } else {
-                System.err.println("[ConfigurationController] One or more views are null, using default configuration");
-                // Use default configuration
-                createDefaultConfiguration();
-            }
-        } catch (Exception e) {
-            System.err.println("[ConfigurationController] Error creating restaurant components: " + e.getMessage());
-            e.printStackTrace();
-            // Use default configuration as fallback
-            createDefaultConfiguration();
-        }
+        System.out.println("[ConfigurationController] Creating restaurant components");
+        
+        // Get configuration data from views
+        ChefConfigurationView chefView = (ChefConfigurationView) mediator.getView("Configuration");
+        DiningConfigurationView diningView = (DiningConfigurationView) mediator.getView("DiningConfiguration");
+        MenuConfigurationView menuView = (MenuConfigurationView) mediator.getView("MenuConfiguration");
+        
+        // Get station counts
+        int grillStationCount = chefView.getGrillStationCount();
+        int prepStationCount = chefView.getPrepStationCount();
+        int plateStationCount = chefView.getPlateStationCount();
+        
+        System.out.println("[ConfigurationController] Station counts - Grill: " + grillStationCount + 
+                          ", Prep: " + prepStationCount + 
+                          ", Plate: " + plateStationCount);
+        
+        // Create chefs
+        createChefs(chefView.getChefs());
+        
+        // Create waiters and tables
+        createWaitersAndTables(diningView.getWaiters(), diningView.getNumberOfTables());
+        
+        // Create menu items
+        createMenuItems(menuView.getSelectedRecipes());
+        
+        // Create stations based on configuration
+        createStations(grillStationCount, prepStationCount, plateStationCount);
+        
+        // Set configuration as complete
+        configurationComplete = true;
+        
+        // Notify mediator that configuration is complete
+        mediator.notifyConfigurationComplete();
     }
     
     private void createDefaultConfiguration() {
@@ -232,6 +241,49 @@ public class ConfigurationController extends BaseController {
         }
     }
 
+    /**
+     * Create stations based on the configuration
+     */
+    private void createStations(int grillCount, int prepCount, int plateCount) {
+        System.out.println("[ConfigurationController] Creating stations - Grill: " + grillCount + 
+                          ", Prep: " + prepCount + 
+                          ", Plate: " + plateCount);
+        
+        // Clear existing stations if any
+        stationManager = new StationManager(collectionPoint);
+        
+        // Create Grill stations
+        for (int i = 0; i < grillCount; i++) {
+            Station grillStation = new Station(StationType.GRILL, collectionPoint);
+            stationManager.addStation(grillStation);
+            System.out.println("[ConfigurationController] Created Grill station " + (i + 1));
+        }
+        
+        // Create Prep stations
+        for (int i = 0; i < prepCount; i++) {
+            Station prepStation = new Station(StationType.PREP, collectionPoint);
+            stationManager.addStation(prepStation);
+            System.out.println("[ConfigurationController] Created Prep station " + (i + 1));
+        }
+        
+        // Create Plate stations
+        for (int i = 0; i < plateCount; i++) {
+            Station plateStation = new Station(StationType.PLATE, collectionPoint);
+            stationManager.addStation(plateStation);
+            System.out.println("[ConfigurationController] Created Plate station " + (i + 1));
+        }
+        
+        // Create a new kitchen with the station manager
+        kitchen = new Kitchen(orderManager, collectionPoint);
+        
+        // Set the kitchen reference in each station
+        for (Station station : stationManager.getAllStations()) {
+            station.setKitchen(kitchen);
+        }
+        
+        System.out.println("[ConfigurationController] Created kitchen with " + stationManager.getAllStations().size() + " stations");
+    }
+
     // Getters for restaurant components
     public Kitchen getKitchen() { return kitchen; }
     public OrderManager getOrderManager() { return orderManager; }
@@ -239,12 +291,6 @@ public class ConfigurationController extends BaseController {
     public List<Waiter> getWaiters() { return Collections.unmodifiableList(waiters); }
     public List<Table> getTables() { return Collections.unmodifiableList(tables); }
     public Menu getMenu() { return menu; }
-
-    public void submitConfiguration() {
-        createRestaurantComponents();
-        configurationComplete = true;
-        mediator.notifyConfigurationComplete();
-    }
 
     public boolean isConfigurationComplete() {
         return configurationComplete;
