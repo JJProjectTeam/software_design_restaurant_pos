@@ -7,6 +7,7 @@ public class DiningConfigurationView extends ConfigurationView {
     // UI Components
     private TTableWidget waiterTable;
     private TField nameField;
+    private TField removeNameField;
     private TComboBox speedCombo;
     private TLabel tableCountLabel;
     private TLabel tableCapacityLabel;
@@ -104,6 +105,15 @@ public class DiningConfigurationView extends ConfigurationView {
 
             // Populate from local storage
             refreshWaiterTable();
+            
+            // Add a field and button to remove a waiter
+            window.addLabel("Remove Waiter (enter name):", 2, 14);
+            removeNameField = window.addField(30, 14, 20, false);
+            window.addButton("Remove", 55, 14, new TAction() {
+                public void DO() {
+                    removeWaiter();
+                }
+            });
         } catch (Exception e) {
             System.err.println("[DiningConfigurationView] Error creating waiter table: " + e.getMessage());
             e.printStackTrace();
@@ -238,6 +248,12 @@ public class DiningConfigurationView extends ConfigurationView {
                 showError("Please enter a waiter name");
                 return;
             }
+            
+            // Check if a waiter with this name already exists
+            if (waiters.containsKey(name)) {
+                showError("A waiter with the name '" + name + "' already exists. Please use a unique name.");
+                return;
+            }
 
             int speed = Integer.parseInt(speedCombo.getText());
             double costPerHour = calculateCost(speed);
@@ -316,6 +332,46 @@ public class DiningConfigurationView extends ConfigurationView {
         } catch (Exception e) {
             System.err.println("[DiningConfigurationView] Error navigating to previous view: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    private void removeWaiter() {
+        try {
+            // Get the waiter name from the field
+            String waiterName = removeNameField.getText();
+            
+            // Check if a name was entered
+            if (waiterName == null || waiterName.trim().isEmpty()) {
+                showError("Please enter a waiter name to remove");
+                return;
+            }
+            
+            // Check if the waiter exists
+            if (!waiters.containsKey(waiterName)) {
+                showError("Waiter '" + waiterName + "' not found");
+                return;
+            }
+            
+            // Don't allow removing the last waiter
+            if (waiters.size() <= 1) {
+                showError("Cannot remove the last waiter. At least one waiter is required.");
+                return;
+            }
+            
+            // Remove from local storage
+            waiters.remove(waiterName);
+            
+            // Refresh the table
+            refreshWaiterTable();
+            
+            // Clear the remove field
+            removeNameField.setText("");
+            
+            System.out.println("[DiningConfigurationView] Waiter removed: " + waiterName);
+        } catch (Exception e) {
+            System.err.println("[DiningConfigurationView] Error removing waiter: " + e.getMessage());
+            e.printStackTrace();
+            showError("Error removing waiter: " + e.getMessage());
         }
     }
 }

@@ -33,6 +33,7 @@ public class ChefConfigurationView extends ConfigurationView {
     // UI Components
     private TTableWidget chefTable;
     private TField nameField;
+    private TField removeNameField;
     private TComboBox speedCombo;
     private TComboBox strategyCombo;
     private TCheckBox grillCheckbox;
@@ -107,6 +108,16 @@ public class ChefConfigurationView extends ConfigurationView {
             // Populate from local storage
             System.out.println("[ChefConfigurationView] Refreshing chef table");
             refreshChefTable();
+            
+            // Add a field and button to remove a chef
+            window.addLabel("Remove Chef (enter name):", 2, 14);
+            removeNameField = window.addField(30, 14, 20, false);
+            window.addButton("Remove", 55, 14, new TAction() {
+                public void DO() {
+                    System.out.println("[ChefConfigurationView] Remove Chef button pressed");
+                    removeChef();
+                }
+            });
             
             System.out.println("[ChefConfigurationView] createChefTable completed");
         } catch (Exception e) {
@@ -212,6 +223,12 @@ public class ChefConfigurationView extends ConfigurationView {
                 String name = nameField.getText();
                 System.out.println("[ChefConfigurationView] Adding chef with name: " + name);
                 
+                // Check if a chef with this name already exists
+                if (chefs.containsKey(name)) {
+                    showError("A chef with the name '" + name + "' already exists. Please use a unique name.");
+                    return;
+                }
+                
                 // Get selected stations
                 List<String> selectedStations = new ArrayList<>();
                 if (grillCheckbox.isChecked()) selectedStations.add("Grill");
@@ -240,6 +257,68 @@ public class ChefConfigurationView extends ConfigurationView {
             System.err.println("[ChefConfigurationView] Error handling add chef: " + e.getMessage());
             e.printStackTrace();
             showError("Error adding chef: " + e.getMessage());
+        }
+    }
+
+    private void removeChef() {
+        try {
+            System.out.println("[ChefConfigurationView] removeChef started");
+            
+            // Get the chef name from the field
+            String chefName = removeNameField.getText();
+            
+            // Check if a name was entered
+            if (chefName == null || chefName.trim().isEmpty()) {
+                showError("Please enter a chef name to remove");
+                return;
+            }
+            
+            // Check if the chef exists
+            if (!chefs.containsKey(chefName)) {
+                showError("Chef '" + chefName + "' not found");
+                return;
+            }
+            
+            // Don't allow removing the last chef if it would break station coverage
+            if (chefs.size() <= 1) {
+                showError("Cannot remove the last chef. At least one chef is required.");
+                return;
+            }
+            
+            // Check if removing this chef would break station coverage
+            ChefData chefToRemove = chefs.get(chefName);
+            Map<String, ChefData> tempChefs = new HashMap<>(chefs);
+            tempChefs.remove(chefName);
+            
+            boolean hasGrill = false;
+            boolean hasPrep = false;
+            boolean hasPlate = false;
+            
+            for (ChefData chef : tempChefs.values()) {
+                if (chef.stations.contains("Grill")) hasGrill = true;
+                if (chef.stations.contains("Prep")) hasPrep = true;
+                if (chef.stations.contains("Plate")) hasPlate = true;
+            }
+            
+            if (!hasGrill || !hasPrep || !hasPlate) {
+                showError("Cannot remove this chef as it would leave some stations uncovered. All stations must have at least one chef assigned.");
+                return;
+            }
+            
+            // Remove from local storage
+            chefs.remove(chefName);
+            
+            // Refresh the table
+            refreshChefTable();
+            
+            // Clear the remove field
+            removeNameField.setText("");
+            
+            System.out.println("[ChefConfigurationView] Chef removed: " + chefName);
+        } catch (Exception e) {
+            System.err.println("[ChefConfigurationView] Error removing chef: " + e.getMessage());
+            e.printStackTrace();
+            showError("Error removing chef: " + e.getMessage());
         }
     }
 
