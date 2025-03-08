@@ -141,11 +141,11 @@ public class DiningConfigurationView extends ConfigurationView {
     private void createTableConfiguration() {
         try {
             // Table count configuration
-            window.addLabel("Number of Tables:", 2, 15);
-            tableCountLabel = window.addLabel("0", 25, 15);
+            window.addLabel("Number of Tables:", 2, 20);
+            tableCountLabel = window.addLabel("0", 25, 20);
             
             // Add buttons to increase/decrease table count
-            window.addButton("-", 30, 15, new TAction() {
+            window.addButton("-", 30, 20, new TAction() {
                 public void DO() {
                     if (currentTableCount > 0) {
                         currentTableCount--;
@@ -154,7 +154,7 @@ public class DiningConfigurationView extends ConfigurationView {
                 }
             });
             
-            window.addButton("+", 35, 15, new TAction() {
+            window.addButton("+", 35, 20, new TAction() {
                 public void DO() {
                     if (currentTableCount < maxTables) {
                         currentTableCount++;
@@ -163,14 +163,14 @@ public class DiningConfigurationView extends ConfigurationView {
                 }
             });
             
-            window.addLabel("(Maximum " + maxTables + " tables)", 40, 15);
+            window.addLabel("(Maximum " + maxTables + " tables)", 40, 20);
             
             // Table capacity configuration
-            window.addLabel("Table Capacity:", 2, 17);
-            tableCapacityLabel = window.addLabel("0", 25, 17);
+            window.addLabel("Table Capacity:", 2, 22);
+            tableCapacityLabel = window.addLabel("0", 25, 22);
             
             // Add buttons to increase/decrease table capacity
-            window.addButton("-", 30, 17, new TAction() {
+            window.addButton("-", 30, 22, new TAction() {
                 public void DO() {
                     if (currentTableCapacity > 0) {
                         currentTableCapacity--;
@@ -179,7 +179,7 @@ public class DiningConfigurationView extends ConfigurationView {
                 }
             });
             
-            window.addButton("+", 35, 17, new TAction() {
+            window.addButton("+", 35, 22, new TAction() {
                 public void DO() {
                     if (currentTableCapacity < maxCapacity) {
                         currentTableCapacity++;
@@ -188,7 +188,7 @@ public class DiningConfigurationView extends ConfigurationView {
                 }
             });
             
-            window.addLabel("(Maximum " + maxCapacity + " seats per table)", 40, 17);
+            window.addLabel("(Maximum " + maxCapacity + " seats per table)", 40, 22);
         } catch (Exception e) {
             System.err.println("[DiningConfigurationView] Error creating table configuration: " + e.getMessage());
             e.printStackTrace();
@@ -215,22 +215,22 @@ public class DiningConfigurationView extends ConfigurationView {
 
     private void createWaiterInputForm() {
         try {
-            window.addLabel("Add New Waiter:", 2, 19);
+            window.addLabel("Add New Waiter:", 2, 16);
             
             // Name field
-            window.addLabel("Name:", 2, 21);
-            nameField = window.addField(8, 21, 20, false);
+            window.addLabel("Name:", 2, 18);
+            nameField = window.addField(8, 18, 20, false);
             
             // Speed selection
-            window.addLabel("Speed:", 30, 21);
+            window.addLabel("Speed:", 30, 18);
             List<String> speeds = new ArrayList<>();
             speeds.add("1");
             speeds.add("2");
             speeds.add("3");
-            speedCombo = window.addComboBox(36, 21, 10, speeds, 0, 3, nullAction);
+            speedCombo = window.addComboBox(36, 18, 10, speeds, 0, 3, nullAction);
             
             // Add waiter button
-            window.addButton("Add Waiter", 50, 21, new TAction() {
+            window.addButton("Add Waiter", 50, 18, new TAction() {
                 public void DO() {
                     addWaiter();
                 }

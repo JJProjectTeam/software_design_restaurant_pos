@@ -147,14 +147,14 @@ public class ChefConfigurationView extends ConfigurationView {
         try {
             System.out.println("[ChefConfigurationView] createStationCountConfiguration started");
             
-            window.addLabel("Station Counts:", 2, 16);
+            window.addLabel("Station Counts:", 2, 23);
             
             // Grill station count
-            window.addLabel("Grill Stations:", 10, 17);
-            grillCountLabel = window.addLabel(String.valueOf(grillStationCount), 25, 17);
+            window.addLabel("Grill Stations:", 10, 25);
+            grillCountLabel = window.addLabel(String.valueOf(grillStationCount), 25, 25);
             
             // Add buttons to increase/decrease grill count
-            window.addButton("-", 30, 17, new TAction() {
+            window.addButton("-", 30, 25, new TAction() {
                 public void DO() {
                     if (grillStationCount > 1) {
                         grillStationCount--;
@@ -165,7 +165,7 @@ public class ChefConfigurationView extends ConfigurationView {
                 }
             });
             
-            window.addButton("+", 35, 17, new TAction() {
+            window.addButton("+", 35, 25, new TAction() {
                 public void DO() {
                     if (grillStationCount < 5) {
                         grillStationCount++;
@@ -177,11 +177,11 @@ public class ChefConfigurationView extends ConfigurationView {
             });
             
             // Prep station count
-            window.addLabel("Prep Stations:", 10, 18);
-            prepCountLabel = window.addLabel(String.valueOf(prepStationCount), 25, 18);
+            window.addLabel("Prep Stations:", 10, 27);
+            prepCountLabel = window.addLabel(String.valueOf(prepStationCount), 25, 27);
             
             // Add buttons to increase/decrease prep count
-            window.addButton("-", 30, 18, new TAction() {
+            window.addButton("-", 30, 27, new TAction() {
                 public void DO() {
                     if (prepStationCount > 1) {
                         prepStationCount--;
@@ -192,7 +192,7 @@ public class ChefConfigurationView extends ConfigurationView {
                 }
             });
             
-            window.addButton("+", 35, 18, new TAction() {
+            window.addButton("+", 35, 27, new TAction() {
                 public void DO() {
                     if (prepStationCount < 5) {
                         prepStationCount++;
@@ -204,11 +204,11 @@ public class ChefConfigurationView extends ConfigurationView {
             });
             
             // Plate station count
-            window.addLabel("Plate Stations:", 10, 19);
-            plateCountLabel = window.addLabel(String.valueOf(plateStationCount), 25, 19);
+            window.addLabel("Plate Stations:", 10, 29);
+            plateCountLabel = window.addLabel(String.valueOf(plateStationCount), 25, 29);
             
             // Add buttons to increase/decrease plate count
-            window.addButton("-", 30, 19, new TAction() {
+            window.addButton("-", 30, 29, new TAction() {
                 public void DO() {
                     if (plateStationCount > 1) {
                         plateStationCount--;
@@ -219,7 +219,7 @@ public class ChefConfigurationView extends ConfigurationView {
                 }
             });
             
-            window.addButton("+", 35, 19, new TAction() {
+            window.addButton("+", 35, 29, new TAction() {
                 public void DO() {
                     if (plateStationCount < 5) {
                         plateStationCount++;
@@ -279,12 +279,12 @@ public class ChefConfigurationView extends ConfigurationView {
             System.out.println("[ChefConfigurationView] createInputForm started");
             
             System.out.println("[ChefConfigurationView] Adding 'Add New Chef' label");
-            window.addLabel("Add New Chef:", 2, 21);
+            window.addLabel("Add New Chef:", 2, 16);
             
             // Name field
             System.out.println("[ChefConfigurationView] Adding name field");
-            window.addLabel("Name:", 2, 23);
-            nameField = window.addField(8, 23, 15, false);
+            window.addLabel("Name:", 2, 18);
+            nameField = window.addField(8, 18, 15, false);
             
             // Create a local nullAction instead of using the parent's
             System.out.println("[ChefConfigurationView] Creating local nullAction");
@@ -297,33 +297,33 @@ public class ChefConfigurationView extends ConfigurationView {
             
             // Speed selection
             System.out.println("[ChefConfigurationView] Adding speed selection");
-            window.addLabel("Speed:", 30, 23);
+            window.addLabel("Speed:", 30, 18);
             List<String> speeds = new ArrayList<>();
             speeds.add("1");
             speeds.add("2");
             speeds.add("3");
             System.out.println("[ChefConfigurationView] Creating speed combo box");
-            speedCombo = window.addComboBox(36, 23, 8, speeds, 0, 4, localNullAction);
+            speedCombo = window.addComboBox(36, 18, 8, speeds, 0, 4, localNullAction);
             
             // Strategy selection
             System.out.println("[ChefConfigurationView] Adding strategy selection");
-            window.addLabel("Strategy:", 50, 23);
+            window.addLabel("Strategy:", 50, 18);
             List<String> strategies = new ArrayList<>();
             strategies.add("FIFO");
             strategies.add("LIFO");
             System.out.println("[ChefConfigurationView] Creating strategy combo box");
-            strategyCombo = window.addComboBox(58, 23, 15, strategies, 0, 4, localNullAction);
+            strategyCombo = window.addComboBox(58, 18, 15, strategies, 0, 4, localNullAction);
             
             // Station checkboxes
             System.out.println("[ChefConfigurationView] Adding station checkboxes");
-            window.addLabel("Stations:", 2, 25);
-            grillCheckbox = window.addCheckBox(10, 25, "Grill", false);
-            prepCheckbox = window.addCheckBox(30, 25, "Prep", false);
-            plateCheckbox = window.addCheckBox(50, 25, "Plate", false);
+            window.addLabel("Stations:", 2, 20);
+            grillCheckbox = window.addCheckBox(10, 20, "Grill", false);
+            prepCheckbox = window.addCheckBox(30, 20, "Prep", false);
+            plateCheckbox = window.addCheckBox(50, 20, "Plate", false);
             
             // Add chef button
             System.out.println("[ChefConfigurationView] Adding 'Add Chef' button");
-            window.addButton("Add Chef", 80, 25, new TAction() {
+            window.addButton("Add Chef", 80, 20, new TAction() {
                 public void DO() {
                     System.out.println("[ChefConfigurationView] Add Chef button pressed");
                     handleAddChef();
