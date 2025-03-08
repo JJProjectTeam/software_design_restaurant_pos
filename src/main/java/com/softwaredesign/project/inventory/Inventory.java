@@ -84,7 +84,6 @@ public class Inventory implements InventoryService, ISubject {
         return ingredients.get(name);
     }
 
-    // TODO Some placeholders for now, until this branch is merged with Ruans new inventory implementation
     public Set<String> getAllIngredients() {
         return ingredients.keySet();
     }
@@ -97,5 +96,10 @@ public class Inventory implements InventoryService, ISubject {
 
         ingredient.setQuantity(newQuantity);
         notifyObservers(name, newQuantity);
+    }
+
+    @Override
+    public Set<IngredientStore> getIngredientStores() {
+        return new HashSet<>(ingredients.values());
     }
 }

@@ -15,10 +15,11 @@ import com.softwaredesign.project.staff.Waiter;
 import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.order.OrderManager;
+import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.order.Meal;
+import com.softwaredesign.project.order.RecipeTask;
 import com.softwaredesign.project.kitchen.StationManager;
 import com.softwaredesign.project.kitchen.StationType;
-
 
 public class OrderFulfillmentTest {
     private OrderManager orderManager;
@@ -44,9 +45,9 @@ public class OrderFulfillmentTest {
         inventoryService.addIngredient("Mayo", 10, 0.5, StationType.PREP);
 
         collectionPoint = new CollectionPoint();
-        StationManager stationManager = new StationManager();
+        StationManager stationManager = new StationManager(collectionPoint);
         orderManager = new OrderManager(collectionPoint, stationManager);
-        kitchen = new Kitchen(orderManager, inventoryService, collectionPoint);
+        kitchen = new Kitchen(orderManager, collectionPoint);
         menu = new Menu(inventoryService);
         waiter = new Waiter(15.0, 1.0, orderManager, menu);
     }
@@ -68,8 +69,34 @@ public class OrderFulfillmentTest {
         customer2.finishBrowsing();
         waiter.takeTableOrder(table);
 
-        // Kitchen processes the order
-        kitchen.prepareRecipes();
+        // Process the order through OrderManager
+        List<Recipe> recipes = orderManager.processOrder();
+        assertFalse("Should have recipes to process", recipes.isEmpty());
+        assertEquals("Should have 2 recipes (one per customer)", 2, recipes.size());
+        
+        // Verify recipes have order IDs assigned
+        String orderId = recipes.get(0).getOrderId();
+        assertNotNull("Recipe should have orderId assigned", orderId);
+        for (Recipe recipe : recipes) {
+            assertEquals("All recipes should have same orderId", orderId, recipe.getOrderId());
+        }
+
+        // Kitchen needs to process the order
+        kitchen.getRecipes();
+        
+        // Simulate completing all tasks for each recipe
+        for (Recipe recipe : recipes) {
+            // Mark all tasks as completed
+            for (RecipeTask task : recipe.getTasks()) {
+                task.setCompleted(true);
+            }
+            
+            // Create a meal for each completed recipe and add it to the collection point
+            if (recipe.allTasksCompleted()) {
+                Meal meal = recipe.buildMeal();
+                collectionPoint.addCompletedMeal(meal);
+            }
+        }
 
         // Check CollectionPoint for completed order
         assertTrue("Should have ready orders", collectionPoint.hasReadyOrders());
@@ -82,7 +109,6 @@ public class OrderFulfillmentTest {
         assertEquals("Should have 2 meals", 2, completedMeals.size());
         
         // Verify all meals have the same orderId
-        String orderId = completedMeals.get(0).getOrderId();
         for (Meal meal : completedMeals) {
             assertEquals("All meals should have the same orderId", orderId, meal.getOrderId());
         }
