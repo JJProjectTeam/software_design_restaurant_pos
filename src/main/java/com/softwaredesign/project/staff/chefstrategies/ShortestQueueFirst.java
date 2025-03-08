@@ -10,10 +10,23 @@ import com.softwaredesign.project.order.RecipeTask;
 public class ShortestQueueFirst implements ChefStrategy {
     @Override
     public Station chooseNextStation(List<Station> assignedStations) {
-        return assignedStations.stream()
+        // Find station with the smallest backlog that isn't busy and doesn't have a chef
+        Station bestStation = assignedStations.stream()
             .filter(station -> station != null && station.getBacklogSize() > 0)
+            .filter(station -> !station.hasChef())
             .min((s1, s2) -> Integer.compare(s1.getBacklogSize(), s2.getBacklogSize()))
             .orElse(null);
+        
+        // If no station with backlog is available, find any unoccupied station
+        if (bestStation == null) {
+            bestStation = assignedStations.stream()
+                .filter(station -> station != null)
+                .filter(station -> !station.hasChef())
+                .findFirst()
+                .orElse(null);
+        }
+        
+        return bestStation;
     }
 
     @Override

@@ -15,15 +15,12 @@ public class StationManager {
     public StationManager(CollectionPoint collectionPoint) {
         this.stations = new HashMap<>();
         this.collectionPoint = collectionPoint;
-        initializeStations();
     }
     
-    public void initializeStations() {
-        for (StationType type : StationType.values()) {
-            Station station = new Station(type, collectionPoint);
-            stations.put(type, station);
-            GameEngine.getInstance().registerEntity(station);
-        }
+
+    public void addStation(Station station) {
+        stations.put(station.getType(), station);
+        GameEngine.getInstance().registerEntity(station);
     }
     
     public Station getStation(StationType type) {

@@ -2,47 +2,84 @@ package com.softwaredesign.project.view;
 
 import java.util.*;
 import jexer.*;
+import jexer.TScrollableWindow;
 
 public class MenuConfigurationView extends ConfigurationView {
     private TTableWidget menuTable;
-    private TField nameField;
-    private Map<String, IngredientCounter> ingredientCounters;
-    private List<String> availableIngredients;
+    private Map<String, List<String>> availableRecipes; // For display only
+    private Map<String, TCheckBox> recipeCheckboxes;
+    private Set<String> selectedRecipes; // Just store the names of selected recipes
 
-    // Local storage for menu items
-    private Map<String, MenuItem> menuItems = new HashMap<>();
-
-    // Inner class to hold menu item data
-    public static class MenuItem {
-        String name;
-        Map<String, Integer> ingredients;
-        double price;
-
-        MenuItem(String name, Map<String, Integer> ingredients, double price) {
-            this.name = name;
-            this.ingredients = new HashMap<>(ingredients);
-            this.price = price;
-        }
-
-        public String getName() {
-            return name;
-        }
-        public Map<String, Integer> getIngredients() {
-            return ingredients;
-        }
-        public double getPrice() {
-            return price;
-        }
+    public MenuConfigurationView(RestaurantApplication app, Map<String, List<String>> recipes) {
+        super(app);
+        this.availableRecipes = recipes;
+        this.recipeCheckboxes = new HashMap<>();
+        this.selectedRecipes = new HashSet<>();
     }
 
-    // Getters for external access
-    public Map<String, MenuItem> getMenuItems() {
-        return menuItems;
+    @Override
+    protected void setupSpecificElements() {
+        // Selected menu items table
+        createMenuTable();
+        
+        // Scrollable recipe selection area
+        createRecipeSelectionArea();
+
+        showWarning("Please select at least one menu item");
     }
 
-    public void setMenuItems(Map<String, MenuItem> newItems) {
-        menuItems.clear();
-        menuItems.putAll(newItems);
+    private void createMenuTable() {
+        window.addLabel("Selected Menu Items:", 2, 2);
+        menuTable = window.addTable(2, 4, 130, 8, 2, 1);
+        menuTable.setColumnLabel(0, "Item Name");
+        menuTable.setColumnLabel(1, "Ingredients");
+        menuTable.setColumnWidth(0, 30);
+        menuTable.setColumnWidth(1, 100);
+    }
+
+    private void createRecipeSelectionArea() {
+        window.addLabel("Available Recipes:", 2, 13);
+        
+        // Create a scrollable window
+        final TScrollableWindow scrollWindow = new TScrollableWindow(window.getApplication(),
+                "Recipe Selection", 2, 15, 130, 15);
+        
+        // Create a panel to hold the checkboxes
+        TPanel panel = scrollWindow.addPanel(0, 0, 128, availableRecipes.size() * 2 + 1);
+        
+        int row = 0;
+        for (Map.Entry<String, List<String>> recipe : availableRecipes.entrySet()) {
+            final String recipeName = recipe.getKey();
+            List<String> ingredients = recipe.getValue();
+            
+            // Create a regular checkbox
+            final TCheckBox checkbox = panel.addCheckBox(2, row, recipeName, false);
+            
+            // Add a label for ingredients
+            panel.addLabel(formatIngredientsList(ingredients), 40, row);
+            
+            // Store the checkbox for later reference
+            recipeCheckboxes.put(recipeName, checkbox);
+            
+            row += 2;
+        }
+        
+        // Set up scrollbar values
+        scrollWindow.setVerticalValue(0);
+        scrollWindow.setTopValue(0);
+        scrollWindow.setBottomValue(Math.max(0, row - 10));
+    }
+
+    private void syncCheckboxSelections() {
+        selectedRecipes.clear();
+        for (Map.Entry<String, TCheckBox> entry : recipeCheckboxes.entrySet()) {
+            String recipeName = entry.getKey();
+            TCheckBox checkbox = entry.getValue();
+            
+            if (checkbox.isChecked()) {
+                selectedRecipes.add(recipeName);
+            }
+        }
         refreshMenuTable();
     }
 
@@ -52,179 +89,51 @@ public class MenuConfigurationView extends ConfigurationView {
             menuTable.deleteRow(1);
         }
 
-        // Repopulate from local storage
-        for (var entry : menuItems.entrySet()) {
-            var item = entry.getValue();
-            addMenuItemToTable(item.name, item.ingredients, item.price);
+        // Repopulate from selected items
+        for (String recipeName : selectedRecipes) {
+            addMenuItemToTable(recipeName, availableRecipes.get(recipeName));
         }
     }
 
-    public MenuConfigurationView(RestaurantApplication app) {
-        super(app);
-        this.ingredientCounters = new HashMap<>();
-        initializeAvailableIngredients();
-    }
-
-    private void initializeAvailableIngredients() {
-        // For now, hardcode available ingredients
-        availableIngredients = Arrays.asList(
-            "Beef Patty",
-            "Chicken Breast",
-            "Bun",
-            "Lettuce",
-            "Tomato",
-            "Cheese",
-            "Onion",
-            "Bacon",
-            "Mayo",
-            "Ketchup"
-        );
-    }
-
-    @Override
-    protected void setupSpecificElements() {
-        // Menu items table
-        createMenuTable();
-        
-        // Input form for new menu items
-        createInputForm();
-
-        // Show initial warning
-        showWarning("At least one menu item must be added before proceeding");
-    }
-
-    private void createMenuTable() {
-        window.addLabel("Menu Items:", 2, 2);
-        menuTable = window.addTable(2, 4, 130, 8, 3, 1);
-        menuTable.setColumnLabel(0, "Item Name");
-        menuTable.setColumnLabel(1, "Ingredients");
-        menuTable.setColumnLabel(2, "Price");
-        menuTable.setColumnWidth(0, 20);
-        menuTable.setColumnWidth(1, 80);  
-        menuTable.setColumnWidth(2, 10);
-
-        // Populate from local storage
-        refreshMenuTable();
-    }
-
-    private void createInputForm() {
-        window.addLabel("Add New Menu Item:", 2, 13);
-        
-        // Name field
-        window.addLabel("Name:", 2, 15);
-        nameField = window.addField(8, 15, 20, false);
-
-        // Ingredient counters
-        int row = 17;
-        int col = 2;
-        for (String ingredient : availableIngredients) {
-            window.addLabel(ingredient + ":", col, row);
-            TLabel countLabel = window.addLabel("Amount: 0", col + 15, row);
-            
-            TAction incrementAction = new TAction() {
-                public void DO() {
-                    IngredientCounter counter = ingredientCounters.get(ingredient);
-                    if (counter != null) {
-                        counter.increment();
-                    }
-                }
-            };
-            
-            TAction decrementAction = new TAction() {
-                public void DO() {
-                    IngredientCounter counter = ingredientCounters.get(ingredient);
-                    if (counter != null) {
-                        counter.decrement();
-                    }
-                }
-            };
-            
-            window.addSpinner(col + 10, row, incrementAction, decrementAction);
-            ingredientCounters.put(ingredient, new IngredientCounter(countLabel));
-            
-            row += 2;
-            if (row > 25) {
-                row = 17;
-                col += 40;
-            }
-        }
-        
-        // Add button
-        window.addButton("Add Item", 2, row + 2, new TAction() {
-            public void DO() {
-                addMenuItem();
-            }
-        });
-    }
-
-    private void addMenuItem() {
-        String name = nameField.getText().trim();
-        if (name.isEmpty()) {
-            showError("Please enter a menu item name");
-            return;
-        }
-
-        // Collect ingredients and their amounts
-        Map<String, Integer> ingredients = new HashMap<>();
-        for (Map.Entry<String, IngredientCounter> entry : ingredientCounters.entrySet()) {
-            int count = entry.getValue().getValue();
-            if (count > 0) {
-                ingredients.put(entry.getKey(), count);
-            }
-        }
-
-        if (ingredients.isEmpty()) {
-            showError("Please add at least one ingredient");
-            return;
-        }
-
-        double price = calculatePrice(ingredients);
-
-        // Add to local storage
-        menuItems.put(name, new MenuItem(name, ingredients, price));
-        
-        // Add to table
-        addMenuItemToTable(name, ingredients, price);
-
-        // Clear inputs
-        nameField.setText("");
-        for (IngredientCounter counter : ingredientCounters.values()) {
-            counter.reset();
-        }
-    }
-
-    private void addMenuItemToTable(String name, Map<String, Integer> ingredients, double price) {
+    private void addMenuItemToTable(String name, List<String> ingredients) {
         int row = menuTable.getRowCount()-1;
         menuTable.insertRowBelow(row);
         menuTable.setCellText(0, row, name);
-        menuTable.setCellText(1, row, formatIngredients(ingredients));
-        menuTable.setCellText(2, row, String.format("%.2f", price));
+        menuTable.setCellText(1, row, formatIngredientsList(ingredients));
     }
 
-    private double calculatePrice(Map<String, Integer> ingredients) {
-        // For now, assume a fixed price per ingredient
-        double price = 0;
-        for (Map.Entry<String, Integer> entry : ingredients.entrySet()) {
-            price += entry.getValue() * 1.0; // Replace with actual price calculation
-        }
-        return price;
+    private String formatIngredientsList(List<String> ingredients) {
+        return String.join(", ", ingredients);
     }
 
-    private String formatIngredients(Map<String, Integer> ingredients) {
-        StringBuilder formatted = new StringBuilder();
-        for (Map.Entry<String, Integer> entry : ingredients.entrySet()) {
-            if (formatted.length() > 0) {
-                formatted.append(", ");
-            }
-            formatted.append(entry.getValue()).append("x ").append(entry.getKey());
+    // Simplified getters/setters for controller access
+    public Set<String> getSelectedRecipes() {
+        return new HashSet<>(selectedRecipes);
+    }
+
+    public void setSelectedRecipes(Set<String> recipes) {
+        // Update the internal set
+        selectedRecipes.clear();
+        selectedRecipes.addAll(recipes);
+        
+        // Update checkboxes to match
+        for (Map.Entry<String, TCheckBox> entry : recipeCheckboxes.entrySet()) {
+            String recipeName = entry.getKey();
+            TCheckBox checkbox = entry.getValue();
+            checkbox.setChecked(recipes.contains(recipeName));
         }
-        return formatted.toString();
+        
+        // Refresh the menu table
+        refreshMenuTable();
     }
 
     @Override
     protected boolean validateConfiguration() {
-        if (menuItems.isEmpty()) {
-            showError("At least one menu item must be added");
+        // Sync checkbox selections before validation
+        syncCheckboxSelections();
+        
+        if (selectedRecipes.isEmpty()) {
+            showError("At least one menu item must be selected");
             return false;
         }
         return true;
@@ -232,48 +141,15 @@ public class MenuConfigurationView extends ConfigurationView {
 
     @Override
     protected void onNextPressed() {
+        // Ensure selections are synced before proceeding
+        syncCheckboxSelections();
         app.showView(ViewType.DINING_ROOM);
     }
 
     @Override
     protected void onBackPressed() {
+        // Ensure selections are synced before going back
+        syncCheckboxSelections();
         app.showView(ViewType.DINING_CONFIGURATION);
-    }
-
-    private class IngredientCounter {
-        TLabel countLabel;
-        int count;
-        
-        IngredientCounter(TLabel label) {
-            this.countLabel = label;
-            this.count = 0;
-        }
-        
-        void increment() {
-            if (count < 10) {
-                count++;
-                updateLabel();
-            }
-        }
-        
-        void decrement() {
-            if (count > 0) {
-                count--;
-                updateLabel();
-            }
-        }
-        
-        void updateLabel() {
-            countLabel.setLabel("Amount: " + String.valueOf(count));
-        }
-        
-        int getValue() {
-            return count;
-        }
-        
-        void reset() {
-            count = 0;
-            updateLabel();
-        }
     }
 }

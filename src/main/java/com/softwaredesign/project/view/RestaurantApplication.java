@@ -82,7 +82,7 @@ public class RestaurantApplication extends TApplication {
 
     public void run() {
         // Show initial view
-        showView(ViewType.WELCOME);
+        showView(ViewType.MENU_CONFIGURATION);
         // Start the event loop
         super.run();
     }

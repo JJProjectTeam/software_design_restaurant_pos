@@ -34,7 +34,7 @@ public class OldestOrderFirstStrategy implements ChefStrategy {
     }
 
     @Override
-    public Order getNextOrder(Station station) {
+    public RecipeTask getNextTask(Station station) {
         if (station == null || station.getBacklog().isEmpty()) {
             return null;
         }
@@ -57,5 +57,12 @@ public class OldestOrderFirstStrategy implements ChefStrategy {
         // we'll need to return null and let the caller handle getting the order
         // through other means like the OrderManager
         return null; // This strategy now only helps prioritize stations, not orders directly
+    }
+    @Override
+    public String getOrderIdForTask(RecipeTask task) {
+        if (task == null || task.getRecipe() == null) {
+            return null;
+        }
+        return task.getRecipe().getOrderId();
     }
 }
