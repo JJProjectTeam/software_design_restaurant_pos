@@ -30,15 +30,21 @@ public class RestaurantDriver {
             // Initialize configuration phase
             initializeConfiguration();
             
+            // Show the welcome view explicitly
+            app.showView(ViewType.WELCOME);
+            
+            // Run the application - this starts the event loop
+            System.out.println("[RestaurantDriver] Running application...");
+            app.run();
+            
+            // The following code won't execute until the application is closed
+            // because app.run() starts an event loop
+            
             // Wait for configuration to complete
             waitForConfiguration();
             
             // Initialize restaurant operation phase
             initializeOperation();
-            
-            // Run the application
-            System.out.println("[RestaurantDriver] Running application...");
-            app.run();
             
         } catch (Exception e) {
             System.err.println("[RestaurantDriver] Fatal error running application: " + e.getMessage());
@@ -57,8 +63,8 @@ public class RestaurantDriver {
             System.err.println("[RestaurantDriver] UI initialization interrupted: " + e.getMessage());
         }
         
-        // Start with welcome/configuration screen
-        app.showView(ViewType.WELCOME);
+        // The welcome view is now shown in the start method
+        // app.showView(ViewType.WELCOME);
         
         // Register for configuration completion notification
         mediator.registerConfigurationListener(this::onConfigurationComplete);
@@ -83,6 +89,9 @@ public class RestaurantDriver {
     }
 
     private void initializeOperation() {
+        // Initialize menu recipes for gameplay
+        configController.getMenu().initializeRecipes();
+        
         // Create operational controllers with configured components
         diningRoomController = new DiningRoomController(
             configController.getMenu(),

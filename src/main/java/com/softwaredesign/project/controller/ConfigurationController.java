@@ -43,6 +43,27 @@ public class ConfigurationController extends BaseController {
     private void setupBaseComponents() {
         // Create basic components needed for the restaurant
         this.inventory = new Inventory();
+        
+        // Add required ingredients to the inventory
+        // Burger ingredients
+        inventory.addIngredient("Beef Patty", 100, 2.50, StationType.GRILL);
+        inventory.addIngredient("Bun", 100, 0.50, StationType.PLATE);
+        inventory.addIngredient("Lettuce", 100, 0.30, StationType.PREP);
+        inventory.addIngredient("Tomato", 100, 0.40, StationType.PREP);
+        inventory.addIngredient("Cheese", 100, 0.75, StationType.PREP);
+        
+        // Kebab ingredients
+        inventory.addIngredient("Lamb", 100, 3.00, StationType.GRILL);
+        inventory.addIngredient("Pita Bread", 100, 0.60, StationType.PLATE);
+        inventory.addIngredient("Onion", 100, 0.25, StationType.PREP);
+        inventory.addIngredient("Tzatziki", 100, 0.80, StationType.PREP);
+        
+        // Condiments
+        inventory.addIngredient("Mustard", 100, 0.20, StationType.PREP);
+        inventory.addIngredient("Ketchup", 100, 0.20, StationType.PREP);
+        inventory.addIngredient("Mayo", 100, 0.25, StationType.PREP);
+        inventory.addIngredient("Pickle", 100, 0.30, StationType.PREP);
+        
         this.collectionPoint = new CollectionPoint();
         this.stationManager = new StationManager(collectionPoint);
         this.orderManager = new OrderManager(collectionPoint, stationManager);
@@ -52,13 +73,64 @@ public class ConfigurationController extends BaseController {
 
     // Methods to read from views and create restaurant entities
     public void createRestaurantComponents() {
-        ChefConfigurationView chefView = (ChefConfigurationView) mediator.getView("ChefConfiguration");
-        DiningConfigurationView diningView = (DiningConfigurationView) mediator.getView("DiningConfiguration");
-        MenuConfigurationView menuView = (MenuConfigurationView) mediator.getView("MenuConfiguration");
-
-        createChefs(chefView.getChefs());
-        createWaitersAndTables(diningView.getWaiters(), diningView.getNumberOfTables());
-        createMenuItems(menuView.getSelectedRecipes());
+        try {
+            System.out.println("[ConfigurationController] Creating restaurant components...");
+            
+            // Get views
+            ChefConfigurationView chefView = (ChefConfigurationView) mediator.getView("ChefConfiguration");
+            DiningConfigurationView diningView = (DiningConfigurationView) mediator.getView("DiningConfiguration");
+            MenuConfigurationView menuView = (MenuConfigurationView) mediator.getView("MenuConfiguration");
+            
+            if (chefView != null && diningView != null && menuView != null) {
+                createChefs(chefView.getChefs());
+                createWaitersAndTables(diningView.getWaiters(), diningView.getNumberOfTables());
+                createMenuItems(menuView.getSelectedRecipes());
+                System.out.println("[ConfigurationController] Restaurant components created successfully");
+            } else {
+                System.err.println("[ConfigurationController] One or more views are null, using default configuration");
+                // Use default configuration
+                createDefaultConfiguration();
+            }
+        } catch (Exception e) {
+            System.err.println("[ConfigurationController] Error creating restaurant components: " + e.getMessage());
+            e.printStackTrace();
+            // Use default configuration as fallback
+            createDefaultConfiguration();
+        }
+    }
+    
+    private void createDefaultConfiguration() {
+        System.out.println("[ConfigurationController] Creating default configuration");
+        
+        // Create default chef
+        List<String> defaultStations = Arrays.asList("Grill", "Prep", "Plate");
+        ChefStrategy strategy = new SimpleChefStrategy();
+        Chef chef = new Chef(200.0, 2, strategy, stationManager);
+        
+        // Create default stations
+        for (String stationType : defaultStations) {
+            Station station = new Station(StationType.valueOf(stationType.toUpperCase()), collectionPoint);
+            stationManager.addStation(station);
+            chef.assignToStation(StationType.valueOf(stationType.toUpperCase()));
+        }
+        
+        // Create default tables
+        SeatingPlan seatingPlan = new SeatingPlan(4, 5, menu);
+        
+        // Create default waiter
+        Waiter waiter = new Waiter(20.0, 2, orderManager, menu);
+        
+        // Assign tables to waiter
+        for (Table table : seatingPlan.getAllTables()) {
+            waiter.assignTable(table);
+        }
+        
+        waiters.add(waiter);
+        tables.addAll(seatingPlan.getAllTables());
+        
+        // Create default menu items
+        Set<String> defaultRecipes = new HashSet<>(Arrays.asList("Burger", "Kebab"));
+        createMenuItems(defaultRecipes);
     }
 
     private void createChefs(Map<String, ChefConfigurationView.ChefData> chefData) {

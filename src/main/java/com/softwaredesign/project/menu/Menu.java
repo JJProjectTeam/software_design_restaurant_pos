@@ -20,6 +20,7 @@ import com.softwaredesign.project.inventory.Ingredient;
 public class Menu {
     private final InventoryService inventoryService;
     private List<Recipe> availableRecipes;
+    private boolean recipesInitialized = false;
 
     public Menu(InventoryService inventoryService) {
         if (inventoryService == null) {
@@ -27,20 +28,38 @@ public class Menu {
         }
         this.inventoryService = inventoryService;
         this.availableRecipes = new ArrayList<>();
-        initializeSampleMenu();
+        // Don't initialize recipes immediately
+        // initializeSampleMenu();
+    }
+
+    // Call this method when gameplay actually starts
+    public void initializeRecipes() {
+        if (!recipesInitialized) {
+            initializeSampleMenu();
+            recipesInitialized = true;
+        }
     }
 
     private void initializeSampleMenu() {
+        System.out.println("[Menu] Initializing sample menu with recipes");
         // Pass inventoryService to recipe constructor
         availableRecipes.add(new BurgerRecipe(inventoryService));
     }
-
     
     public List<Recipe> getAvailableRecipes() {
+        // Make sure recipes are initialized when needed
+        if (!recipesInitialized) {
+            initializeRecipes();
+        }
         return new ArrayList<>(availableRecipes);
     }
     
     public Recipe getRandomRecipe() {
+        // Make sure recipes are initialized when needed
+        if (!recipesInitialized) {
+            initializeRecipes();
+        }
+        
         Random random = new Random();
         Recipe selectedRecipe = availableRecipes.get(random.nextInt(availableRecipes.size()));
         

@@ -28,343 +28,373 @@ public class ChefConfigurationView extends ConfigurationView {
         public int getSpeed() { return speed; }
         public double getCostPerHour() { return costPerHour; }
         public String getStrategy() { return strategy; }
-        
     }
 
+    // UI Components
     private TTableWidget chefTable;
     private TField nameField;
     private TComboBox speedCombo;
     private TComboBox strategyCombo;
-    private StationDropdown stationDropdown;
-    private TButton stationButton;
-    private TButton submitButton;
+    private TCheckBox grillCheckbox;
+    private TCheckBox prepCheckbox;
+    private TCheckBox plateCheckbox;
 
     // Getters for external access
     public Map<String, ChefData> getChefs() {
         return chefs;
     }
 
-    public void setChefs(Map<String, ChefData> newChefs) {
-        chefs.clear();
-        chefs.putAll(newChefs);
-        refreshChefTable();
-    }
-
-    private void refreshChefTable() {
-        // Clear existing table
-        while (chefTable.getRowCount() > 1) {
-            chefTable.deleteRow(1);
-        }
-
-        // Repopulate from local storage
-        for (var entry : chefs.entrySet()) {
-            var chef = entry.getValue();
-            String stations = String.join(", ", chef.stations);
-            addChefToTable(chef.name, stations, chef.speed, chef.costPerHour, chef.strategy);
-        }
-    }
-
     public ChefConfigurationView(RestaurantApplication app) {
         super(app);
+        
+        System.out.println("[ChefConfigurationView] Constructor called");
+        
+        // Initialize with a default chef to ensure there's always at least one
+        List<String> defaultStations = Arrays.asList("Grill", "Prep", "Plate");
+        chefs.put("Default Chef", new ChefData("Default Chef", defaultStations, 2, 200.0, "FIFO"));
+        
+        System.out.println("[ChefConfigurationView] Constructor completed");
     }
 
     @Override
     protected void setupSpecificElements() {
-        window.addLabel("Chef Configuration", 2, 2);
-        createChefTable();
-        createInputForm();
-        
-        // Simplified submit button without controller reference
-        submitButton = window.addButton("Submit Configuration", 2, 18, new TAction() {
-            public void DO() {
-                if (validateConfiguration()) {
-                    onNextPressed();
-                }
+        try {
+            System.out.println("[ChefConfigurationView] setupSpecificElements started");
+            
+            // Title
+            System.out.println("[ChefConfigurationView] Adding title label");
+            window.addLabel("Chef Configuration", 2, 2);
+            
+            // Create chef table
+            System.out.println("[ChefConfigurationView] Creating chef table");
+            createChefTable();
+            
+            // Create input form
+            System.out.println("[ChefConfigurationView] Creating input form");
+            createInputForm();
+            
+            // Add warning - with a small delay to ensure UI is ready
+            System.out.println("[ChefConfigurationView] Adding warning");
+            try {
+                // Make sure warning label is initialized before using it
+            //     if (warningLabel != null) {
+            //         showWarning("At least one chef must be assigned to each station type!");
+            //     } else {
+            //         System.err.println("[ChefConfigurationView] Warning label is null, cannot show warning");
+            //     }
+            } catch (Exception e) {
+                System.err.println("[ChefConfigurationView] Error showing warning: " + e.getMessage());
+                e.printStackTrace();
             }
-        });
-        
-        showWarning("Warning: At least one chef must be assigned to each station type!");
+            
+            System.out.println("[ChefConfigurationView] setupSpecificElements completed");
+        } catch (Exception e) {
+            System.err.println("[ChefConfigurationView] Error setting up elements: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void createChefTable() {
-        chefTable = window.addTable(2, 4, 130, 8, 5, 1);
-        
-        // Set column labels
-        chefTable.setColumnLabel(0, "Chef Name");
-        chefTable.setColumnLabel(1, "Stations");
-        chefTable.setColumnLabel(2, "Speed");
-        chefTable.setColumnLabel(3, "Cost/Hour");
-        chefTable.setColumnLabel(4, "Strategy");
+        try {
+            System.out.println("[ChefConfigurationView] createChefTable started");
+            
+            window.addLabel("Current Chefs:", 2, 4);
+            System.out.println("[ChefConfigurationView] Adding table widget");
+            chefTable = window.addTable(2, 6, 130, 8, 5, 1);
+            
+            // Set column labels
+            System.out.println("[ChefConfigurationView] Setting column labels");
+            chefTable.setColumnLabel(0, "Chef Name");
+            chefTable.setColumnLabel(1, "Stations");
+            chefTable.setColumnLabel(2, "Speed");
+            chefTable.setColumnLabel(3, "Cost/Hour");
+            chefTable.setColumnLabel(4, "Strategy");
 
-        // Set column widths
-        chefTable.setColumnWidth(0, 20);
-        chefTable.setColumnWidth(1, 40);
-        chefTable.setColumnWidth(2, 10);
-        chefTable.setColumnWidth(3, 15);
-        chefTable.setColumnWidth(4, 20);
+            // Set column widths
+            System.out.println("[ChefConfigurationView] Setting column widths");
+            chefTable.setColumnWidth(0, 20);
+            chefTable.setColumnWidth(1, 40);
+            chefTable.setColumnWidth(2, 10);
+            chefTable.setColumnWidth(3, 15);
+            chefTable.setColumnWidth(4, 20);
 
-        // Populate from local storage
-        refreshChefTable();
+            // Populate from local storage
+            System.out.println("[ChefConfigurationView] Refreshing chef table");
+            refreshChefTable();
+            
+            System.out.println("[ChefConfigurationView] createChefTable completed");
+        } catch (Exception e) {
+            System.err.println("[ChefConfigurationView] Error creating chef table: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void refreshChefTable() {
+        try {
+            System.out.println("[ChefConfigurationView] refreshChefTable started");
+            
+            // Clear existing table
+            System.out.println("[ChefConfigurationView] Clearing existing table rows");
+            while (chefTable.getRowCount() > 1) {
+                chefTable.deleteRow(1);
+            }
+
+            // Repopulate from local storage
+            System.out.println("[ChefConfigurationView] Repopulating table from storage, chef count: " + chefs.size());
+            for (var entry : chefs.entrySet()) {
+                System.out.println("[ChefConfigurationView] Adding chef to table: " + entry.getKey());
+                var chef = entry.getValue();
+                String stations = String.join(", ", chef.stations);
+                addChefToTable(chef.name, stations, chef.speed, chef.costPerHour, chef.strategy);
+            }
+            
+            System.out.println("[ChefConfigurationView] refreshChefTable completed");
+        } catch (Exception e) {
+            System.err.println("[ChefConfigurationView] Error refreshing chef table: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void createInputForm() {
-        List<String> speeds = new ArrayList<>();
-        List<String> strategies = new ArrayList<>();
-
-        speeds.add("1");
-        speeds.add("2");
-        speeds.add("3");
-
-        strategies.add("FIFO");
-        strategies.add("LIFO");
-
-        // Add all labels and fields in one row (y=15)
-        window.addLabel("Add New Chef:", 2, 13);
-        
-        // Name section
-        window.addLabel("Name:", 2, 15);
-        nameField = window.addField(8, 15, 15, false);
-        
-        // Speed section
-        window.addLabel("Speed:", 25, 15);
-        speedCombo = window.addComboBox(31, 15, 8, speeds, -1, 4, nullAction);
-        
-        // Station dropdown section
-        window.addLabel("Stations:", 41, 15);
-        stationButton = window.addButton("Select Stations", 48, 15, new TAction() {
-            public void DO() {
-                if (stationDropdown != null) {
-                    stationDropdown.toggle();
+        try {
+            System.out.println("[ChefConfigurationView] createInputForm started");
+            
+            System.out.println("[ChefConfigurationView] Adding 'Add New Chef' label");
+            window.addLabel("Add New Chef:", 2, 15);
+            
+            // Name field
+            System.out.println("[ChefConfigurationView] Adding name field");
+            window.addLabel("Name:", 2, 17);
+            nameField = window.addField(8, 17, 15, false);
+            
+            // Create a local nullAction instead of using the parent's
+            System.out.println("[ChefConfigurationView] Creating local nullAction");
+            TAction localNullAction = new TAction() {
+                public void DO() {
+                    System.out.println("[ChefConfigurationView] localNullAction DO method called");
+                    // Do nothing
                 }
+            };
+            
+            // Speed selection
+            System.out.println("[ChefConfigurationView] Adding speed selection");
+            window.addLabel("Speed:", 30, 17);
+            List<String> speeds = new ArrayList<>();
+            speeds.add("1");
+            speeds.add("2");
+            speeds.add("3");
+            System.out.println("[ChefConfigurationView] Creating speed combo box");
+            speedCombo = window.addComboBox(36, 17, 8, speeds, 0, 4, localNullAction);
+            
+            // Strategy selection
+            System.out.println("[ChefConfigurationView] Adding strategy selection");
+            window.addLabel("Strategy:", 50, 17);
+            List<String> strategies = new ArrayList<>();
+            strategies.add("FIFO");
+            strategies.add("LIFO");
+            System.out.println("[ChefConfigurationView] Creating strategy combo box");
+            strategyCombo = window.addComboBox(58, 17, 15, strategies, 0, 4, localNullAction);
+            
+            // Station checkboxes
+            System.out.println("[ChefConfigurationView] Adding station checkboxes");
+            window.addLabel("Stations:", 2, 19);
+            grillCheckbox = window.addCheckBox(10, 19, "Grill", false);
+            prepCheckbox = window.addCheckBox(30, 19, "Prep", false);
+            plateCheckbox = window.addCheckBox(50, 19, "Plate", false);
+            
+            // Add chef button
+            System.out.println("[ChefConfigurationView] Adding 'Add Chef' button");
+            window.addButton("Add Chef", 80, 19, new TAction() {
+                public void DO() {
+                    System.out.println("[ChefConfigurationView] Add Chef button pressed");
+                    handleAddChef();
+                }
+            });
+            
+            System.out.println("[ChefConfigurationView] createInputForm completed");
+        } catch (Exception e) {
+            System.err.println("[ChefConfigurationView] Error creating input form: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void handleAddChef() {
+        try {
+            System.out.println("[ChefConfigurationView] handleAddChef started");
+            
+            if (validateInputs()) {
+                String name = nameField.getText();
+                System.out.println("[ChefConfigurationView] Adding chef with name: " + name);
+                
+                // Get selected stations
+                List<String> selectedStations = new ArrayList<>();
+                if (grillCheckbox.isChecked()) selectedStations.add("Grill");
+                if (prepCheckbox.isChecked()) selectedStations.add("Prep");
+                if (plateCheckbox.isChecked()) selectedStations.add("Plate");
+                
+                int speed = Integer.parseInt(speedCombo.getText());
+                double costPerHour = calculateCost(speed, selectedStations.size());
+                String strategy = strategyCombo.getText();
+                
+                System.out.println("[ChefConfigurationView] Chef details - Stations: " + selectedStations + 
+                                   ", Speed: " + speed + ", Cost: " + costPerHour + ", Strategy: " + strategy);
+                
+                // Add to local storage
+                chefs.put(name, new ChefData(name, selectedStations, speed, costPerHour, strategy));
+                
+                // Add to table for display
+                addChefToTable(name, String.join(", ", selectedStations), speed, costPerHour, strategy);
+                
+                // Clear inputs
+                clearInputs();
             }
-        });
-        stationDropdown = new StationDropdown(window, 48, 16);
-        
-        // Strategy section
-        window.addLabel("Strategy:", 70, 15);
-        strategyCombo = window.addComboBox(78, 15, 15, strategies, -1, 4, nullAction);
-        
-        // Add button
-        window.addButton("Add Chef", 95, 15, new TAction() {
-            public void DO() {
-                handleAddChef();
+            
+            System.out.println("[ChefConfigurationView] handleAddChef completed");
+        } catch (Exception e) {
+            System.err.println("[ChefConfigurationView] Error handling add chef: " + e.getMessage());
+            e.printStackTrace();
+            showError("Error adding chef: " + e.getMessage());
+        }
+    }
+
+    private void addChefToTable(String name, String stations, int speed, double costPerHour, String strategy) {
+        try {
+            System.out.println("[ChefConfigurationView] addChefToTable started for chef: " + name);
+            
+            // Add to table UI
+            int row = chefTable.getRowCount()-1;
+            System.out.println("[ChefConfigurationView] Inserting row at position: " + row);
+            chefTable.insertRowBelow(row);
+            chefTable.setCellText(0, row, name);
+            chefTable.setCellText(1, row, stations);
+            chefTable.setCellText(2, row, String.valueOf(speed));
+            chefTable.setCellText(3, row, String.format("%.2f", costPerHour));
+            chefTable.setCellText(4, row, strategy);
+            
+            System.out.println("[ChefConfigurationView] addChefToTable completed");
+        } catch (Exception e) {
+            System.err.println("[ChefConfigurationView] Error adding chef to table: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private boolean validateInputs() {
+        try {
+            // Validate name
+            String name = nameField.getText();
+            if (name == null || name.trim().isEmpty()) {
+                showError("Name cannot be empty");
+                return false;
             }
-        });
+
+            // Validate at least one station is selected
+            if (!grillCheckbox.isChecked() && !prepCheckbox.isChecked() && !plateCheckbox.isChecked()) {
+                showError("Please select at least one station");
+                return false;
+            }
+
+            // Speed validation
+            String speedText = speedCombo.getText();
+            if (speedText == null || speedText.isEmpty()) {
+                showError("Please select a speed");
+                return false;
+            }
+            try {
+                int speed = Integer.parseInt(speedText);
+                if (speed < 1 || speed > 3) {
+                    showError("Invalid speed value");
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                showError("Invalid speed value");
+                return false;
+            }
+
+            // Strategy validation
+            String strategy = strategyCombo.getText();
+            if (strategy == null || strategy.isEmpty()) {
+                showError("Please select a strategy");
+                return false;
+            }
+
+            return true;
+        } catch (Exception e) {
+            System.err.println("[ChefConfigurationView] Error validating inputs: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private void clearInputs() {
+        try {
+            nameField.setText("");
+            speedCombo.setIndex(0);
+            strategyCombo.setIndex(0);
+            grillCheckbox.setChecked(false);
+            prepCheckbox.setChecked(false);
+            plateCheckbox.setChecked(false);
+        } catch (Exception e) {
+            System.err.println("[ChefConfigurationView] Error clearing inputs: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private double calculateCost(int speed, int numberOfStations) {
         return speed * numberOfStations * 100.0;
     }
 
-    private boolean validateInputs() {
-        // Validate name
-        String name = nameField.getText();
-        if (name == null || name.trim().isEmpty()) {
-            showError("Name cannot be empty");
-            return false;
-        }
-
-        // Validate at least one station is selected
-        if (stationDropdown.getTotalStations() == 0) {
-            showError("Please select at least one station");
-            return false;
-        }
-
-        // Speed validation
-        String speedText = speedCombo.getText();
-        if (speedText == null || speedText.isEmpty()) {
-            showError("Please select a speed");
-            return false;
-        }
-        try {
-            int speed = Integer.parseInt(speedText);
-            if (speed < 1 || speed > 3) {
-                showError("Invalid speed value");
-                return false;
-            }
-        } catch (NumberFormatException e) {
-            showError("Invalid speed value");
-            return false;
-        }
-
-        // Strategy validation
-        String strategy = strategyCombo.getText();
-        if (strategy == null || strategy.isEmpty()) {
-            showError("Please select a strategy");
-            return false;
-        }
-
-        return true;
-    }
-
-    private void clearInputs() {
-        nameField.setText("");
-        speedCombo.setIndex(0);
-        strategyCombo.setIndex(0);
-        stationDropdown.resetAll();
-        stationDropdown.setVisible(false);
-    }
-
     private boolean validateStationCoverage() {
-        boolean hasGrill = false;
-        boolean hasPrep = false;
-        boolean hasPlate = false;
+        try {
+            boolean hasGrill = false;
+            boolean hasPrep = false;
+            boolean hasPlate = false;
 
-        for (ChefData chef : chefs.values()) {
-            if (chef.stations.contains("Grill")) hasGrill = true;
-            if (chef.stations.contains("Prep")) hasPrep = true;
-            if (chef.stations.contains("Plate")) hasPlate = true;
+            for (ChefData chef : chefs.values()) {
+                if (chef.stations.contains("Grill")) hasGrill = true;
+                if (chef.stations.contains("Prep")) hasPrep = true;
+                if (chef.stations.contains("Plate")) hasPlate = true;
+            }
+
+            return hasGrill && hasPrep && hasPlate;
+        } catch (Exception e) {
+            System.err.println("[ChefConfigurationView] Error validating station coverage: " + e.getMessage());
+            e.printStackTrace();
+            return false;
         }
-
-        return hasGrill && hasPrep && hasPlate;
     }
 
     @Override
     protected boolean validateConfiguration() {
-        if (!validateStationCoverage()) {
-            showError("At least one chef must be assigned to each station type!");
+        try {
+            if (!validateStationCoverage()) {
+                showError("At least one chef must be assigned to each station type!");
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            System.err.println("[ChefConfigurationView] Error validating configuration: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
-        return true;
     }
 
     @Override
     protected void onNextPressed() {
-        app.showView(ViewType.DINING_CONFIGURATION);
+        try {
+            app.showView(ViewType.DINING_CONFIGURATION);
+        } catch (Exception e) {
+            System.err.println("[ChefConfigurationView] Error navigating to next view: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Override
     protected void onBackPressed() {
-        app.showView(ViewType.WELCOME);
-    }
-
-    private void addChefToTable(String name, String stations, int speed, double costPerHour, String strategy) {
-        // Add to table UI
-        int row = chefTable.getRowCount()-1;
-        chefTable.insertRowBelow(row);
-        chefTable.setCellText(0, row, name);
-        chefTable.setCellText(1, row, stations);
-        chefTable.setCellText(2, row, String.valueOf(speed));
-        chefTable.setCellText(3, row, String.format("%.2f", costPerHour));
-        chefTable.setCellText(4, row, strategy);
-    }
-
-    private void handleAddChef() {
-        if (validateInputs()) {
-            String name = nameField.getText();
-            List<String> selectedStations = stationDropdown.getSelectedStations();
-            int speed = Integer.parseInt(speedCombo.getText());
-            double costPerHour = calculateCost(speed, selectedStations.size());
-            String strategy = strategyCombo.getText();
-            
-            // Add to local storage
-            chefs.put(name, new ChefData(name, selectedStations, speed, costPerHour, strategy));
-            
-            // Add to table for display
-            addChefToTable(name, String.join(", ", selectedStations), speed, costPerHour, strategy);
-            
-            // Clear inputs
-            clearInputs();
-        }
-    }
-
-    private class StationCount {
-        private String type;
-        private int count;
-        private TLabel countLabel;
-        
-        public StationCount(String type, TWindow window, int x, int y) {
-            this.type = type;
-            this.count = 0;
-            
-            window.addLabel(type + ":", x, y);
-            window.addButton("-", x + type.length() + 2, y, new TAction() {
-                public void DO() {
-                    if (count > 0) {
-                        count--;
-                        updateLabel();
-                    }
-                }
-            });
-            
-            countLabel = window.addLabel("0", x + type.length() + 5, y);
-            
-            window.addButton("+", x + type.length() + 8, y, new TAction() {
-                public void DO() {
-                    count++;
-                    updateLabel();
-                }
-            });
-        }
-        
-        private void updateLabel() {
-            countLabel.setLabel(String.valueOf(count));
-        }
-        
-        public void reset() {
-            count = 0;
-            updateLabel();
-        }
-        
-        public String getType() { return type; }
-        public int getCount() { return count; }
-    }
-
-    private class StationDropdown extends TWindow {
-        private StationCount[] stations;
-        private boolean isVisible = false;
-        
-        public StationDropdown(TWindow parent, int x, int y) {
-            super(parent.getApplication(), "Stations", x, y, 25, 10);
-            stations = new StationCount[3];
-            
-            stations[0] = new StationCount("Grill", this, 2, 2);
-            stations[1] = new StationCount("Prep", this, 2, 4);
-            stations[2] = new StationCount("Plate", this, 2, 6);
-            
-            this.setVisible(false);
-        }
-        
-        public void toggle() {
-            isVisible = !isVisible;
-            this.setVisible(isVisible);
-            if (isVisible) {
-                this.activate();
-            }
-        }
-
-        @Override
-        public void onClose() {
-            isVisible = false;
-            this.setVisible(false);
-        }
-
-        public StationCount getStation(int index) {
-            return stations[index];
-        }
-        
-        public void resetAll() {
-            for (StationCount station : stations) {
-                station.reset();
-            }
-        }
-        
-        public int getTotalStations() {
-            int total = 0;
-            for (StationCount station : stations) {
-                total += station.getCount();
-            }
-            return total;
-        }
-        
-        public List<String> getSelectedStations() {
-            List<String> selected = new ArrayList<>();
-            for (StationCount station : stations) {
-                for (int i = 0; i < station.getCount(); i++) {
-                    selected.add(station.getType());
-                }
-            }
-            return selected;
+        try {
+            app.showView(ViewType.WELCOME);
+        } catch (Exception e) {
+            System.err.println("[ChefConfigurationView] Error navigating to previous view: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

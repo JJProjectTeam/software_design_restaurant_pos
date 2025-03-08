@@ -9,9 +9,9 @@ import jexer.*;
 public abstract class ConfigurationView implements View, ConfigurableView {
     protected final RestaurantApplication app;
     protected TWindow window;
-    protected TLabel moneyLabel;
-    protected TLabel errorLabel;
-    protected TLabel warningLabel;
+    // protected TLabel moneyLabel;
+    // protected TLabel errorLabel;
+    // protected TLabel warningLabel;
     protected RestaurantViewMediator mediator;
     protected TTableWidget configTable;
 
@@ -19,19 +19,23 @@ public abstract class ConfigurationView implements View, ConfigurableView {
         if (app == null) {
             throw new IllegalArgumentException("RestaurantApplication cannot be null");
         }
+        System.out.println("[ConfigurationView] Constructor called");
         this.app = app;
         this.mediator = RestaurantViewMediator.getInstance();
         mediator.registerView("Configuration", this);
+        System.out.println("[ConfigurationView] Constructor completed");
     }
 
     @Override
     public void initialize(TWindow window) {
+        System.out.println("[ConfigurationView] initialize called with window: " + window);
         this.window = window;
         setupView();
     }
 
     @Override
     public void cleanup() {
+        System.out.println("[ConfigurationView] cleanup called");
         window.close();
     }
 
@@ -42,21 +46,34 @@ public abstract class ConfigurationView implements View, ConfigurableView {
 
     @Override
     public void setupView() {
+        System.out.println("[ConfigurationView] setupView called");
         setupCommonElements();
         setupSpecificElements();
         setupNavigationButtons();
+        System.out.println("[ConfigurationView] setupView completed");
     }
 
     protected void setupCommonElements() {
-        window.addLabel("Configuration Settings", 2, 2);
-        window.addLabel("$", window.getWidth() - 15, 2);
-        moneyLabel = window.addLabel("1000", window.getWidth() - 13, 2);
-        
-        // Initialize status labels with different positions
-        errorLabel = window.addLabel("", 2, window.getHeight() - 6);
-        warningLabel = window.addLabel("", 2, window.getHeight() - 5);
-        
-        clearWarning(); // Reset labels to initial state
+        System.out.println("[ConfigurationView] setupCommonElements started");
+        try {
+            // Initialize labels with empty strings first to ensure they have valid attributes
+            // errorLabel = window.addLabel("", 2, window.getHeight() - 6);
+            // warningLabel = window.addLabel("", 2, window.getHeight() - 5);
+            
+            // Now add the other labels
+            window.addLabel("Configuration Settings", 2, 2);
+            window.addLabel("$", window.getWidth() - 15, 2);
+            // moneyLabel = window.addLabel("1000", window.getWidth() - 13, 2);
+            
+            System.out.println("[ConfigurationView] Labels initialized");
+            
+            // Clear warnings after labels are fully initialized
+            clearWarning();
+            System.out.println("[ConfigurationView] setupCommonElements completed");
+        } catch (Exception e) {
+            System.err.println("[ConfigurationView] Error in setupCommonElements: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     protected abstract void setupSpecificElements();
@@ -65,45 +82,81 @@ public abstract class ConfigurationView implements View, ConfigurableView {
 
     protected TAction nullAction = new TAction() {
         public void DO() {
+            System.out.println("[ConfigurationView] nullAction DO method called");
         }
     };
 
     protected void setupNavigationButtons() {
-        window.addButton("Next", window.getWidth() - 15, window.getHeight() - 4, new TAction() {
-            public void DO() {
-                if (validateConfiguration()) {
-                    onNextPressed();
+        System.out.println("[ConfigurationView] setupNavigationButtons started");
+        try {
+            window.addButton("Next", window.getWidth() - 15, window.getHeight() - 4, new TAction() {
+                public void DO() {
+                    System.out.println("[ConfigurationView] Next button pressed");
+                    if (validateConfiguration()) {
+                        onNextPressed();
+                    }
                 }
-            }
-        });
+            });
 
-        window.addButton("Back", 2, window.getHeight() - 4, new TAction() {
-            public void DO() {
-                onBackPressed();
-            }
-        });
+            window.addButton("Back", 2, window.getHeight() - 4, new TAction() {
+                public void DO() {
+                    System.out.println("[ConfigurationView] Back button pressed");
+                    onBackPressed();
+                }
+            });
+            System.out.println("[ConfigurationView] setupNavigationButtons completed");
+        } catch (Exception e) {
+            System.err.println("[ConfigurationView] Error in setupNavigationButtons: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     protected void showError(String message) {
-        if (errorLabel != null) {
-            errorLabel.setLabel("Error: " + message);
-            errorLabel.setColorKey("RED");
-        }
+        System.out.println("[ConfigurationView] showError called with message: " + message);
+        // if (errorLabel != null) {
+        //     try {
+        //         errorLabel.setLabel("Error: " + message);
+        //         errorLabel.setColorKey("RED");
+        //     } catch (Exception e) {
+        //         System.err.println("[ConfigurationView] Error setting error label: " + e.getMessage());
+        //         e.printStackTrace();
+        //     }
+        // } else {
+        //     System.err.println("[ConfigurationView] ERROR: errorLabel is null when showing error: " + message);
+        // }
     }
 
     protected void showWarning(String message) {
-        if (warningLabel != null) {
-            warningLabel.setLabel("Warning: " + message);
-            warningLabel.setColorKey("YELLOW");
-        }
+        System.out.println("[ConfigurationView] showWarning called with message: " + message);
+        // if (warningLabel != null) {
+        //     try {
+        //         // warningLabel.setLabel("Warning: " + message);
+        //         // warningLabel.setColorKey("YELLOW");
+        //     } catch (Exception e) {
+        //         System.err.println("[ConfigurationView] Error setting warning label: " + e.getMessage());
+        //         e.printStackTrace();
+        //     }
+        // } else {
+        //     System.err.println("[ConfigurationView] ERROR: warningLabel is null when showing warning: " + message);
+        // }
     }
 
     protected void clearWarning() {
-        if (errorLabel != null) {
-            errorLabel.setLabel("");
-        }
-        if (warningLabel != null) {
-            warningLabel.setLabel("");
+        System.out.println("[ConfigurationView] clearWarning called");
+        try {
+            // if (errorLabel != null) {
+            //     errorLabel.setLabel("");
+            // } else {
+            //     System.err.println("[ConfigurationView] ERROR: errorLabel is null when clearing warnings");
+            // }
+            // if (warningLabel != null) {
+            //     warningLabel.setLabel("");
+            // } else {
+            //     System.err.println("[ConfigurationView] ERROR: warningLabel is null when clearing warnings");
+            // }
+        } catch (Exception e) {
+            System.err.println("[ConfigurationView] Error clearing warnings: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

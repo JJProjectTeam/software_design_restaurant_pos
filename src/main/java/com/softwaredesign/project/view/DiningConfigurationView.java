@@ -4,10 +4,10 @@ import java.util.*;
 import jexer.*;
 
 public class DiningConfigurationView extends ConfigurationView {
+    // UI Components
     private TTableWidget waiterTable;
     private TField nameField;
     private TComboBox speedCombo;
-    private TSpinner tableCountSpinner;
     private TLabel tableCountLabel;
     private int maxTables = 20;
     private int currentTableCount = 0;
@@ -28,20 +28,25 @@ public class DiningConfigurationView extends ConfigurationView {
             this.costPerHour = costPerHour;
             this.assignedTables = new ArrayList<>();
         }
+        
         public String getName() {
             return name;
         }
+        
         public int getSpeed() {
             return speed;
         }
+        
         public double getCostPerHour() {
             return costPerHour;
         }
-        
     }
 
     public DiningConfigurationView(RestaurantApplication app) {
         super(app);
+        
+        // Initialize with a default waiter
+        waiters.put("Default Waiter", new WaiterData("Default Waiter", 2, 20.0));
     }
 
     // Getters for external access
@@ -55,115 +60,174 @@ public class DiningConfigurationView extends ConfigurationView {
 
     @Override
     protected void setupSpecificElements() {
-        // Waiter table
-        createWaiterTable();
-        
-        // Table configuration
-        createTableConfiguration();
-        
-        // Waiter input form
-        createWaiterInputForm();
+        try {
+            // Title
+            window.addLabel("Dining Room Configuration", 2, 2);
+            
+            // Create waiter table
+            createWaiterTable();
+            
+            // Create table configuration
+            createTableConfiguration();
+            
+            // Create waiter input form
+            createWaiterInputForm();
+        } catch (Exception e) {
+            System.err.println("[DiningConfigurationView] Error setting up elements: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void createWaiterTable() {
-        waiterTable = window.addTable(2, 4, 100, 8, 4, 1);
-        
-        // Set column labels
-        waiterTable.setColumnLabel(0, "Waiter Name");
-        waiterTable.setColumnLabel(1, "Speed");
-        waiterTable.setColumnLabel(2, "Cost/Hour");
-        waiterTable.setColumnLabel(3, "Tables Assigned");
+        try {
+            window.addLabel("Current Waiters:", 2, 4);
+            waiterTable = window.addTable(2, 6, 100, 8, 4, 1);
+            
+            // Set column labels
+            waiterTable.setColumnLabel(0, "Waiter Name");
+            waiterTable.setColumnLabel(1, "Speed");
+            waiterTable.setColumnLabel(2, "Cost/Hour");
+            waiterTable.setColumnLabel(3, "Tables Assigned");
 
-        // Set column widths
-        waiterTable.setColumnWidth(0, 25);
-        waiterTable.setColumnWidth(1, 15);
-        waiterTable.setColumnWidth(2, 20);
-        waiterTable.setColumnWidth(3, 20);
+            // Set column widths
+            waiterTable.setColumnWidth(0, 25);
+            waiterTable.setColumnWidth(1, 15);
+            waiterTable.setColumnWidth(2, 20);
+            waiterTable.setColumnWidth(3, 20);
 
-        // Populate from local storage
-        for (var entry : waiters.entrySet()) {
-            var waiter = entry.getValue();
-            addWaiterToTable(waiter.name, waiter.speed, waiter.costPerHour);
+            // Populate from local storage
+            refreshWaiterTable();
+        } catch (Exception e) {
+            System.err.println("[DiningConfigurationView] Error creating waiter table: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void refreshWaiterTable() {
+        try {
+            // Clear existing table
+            while (waiterTable.getRowCount() > 1) {
+                waiterTable.deleteRow(1);
+            }
+
+            // Populate from local storage
+            for (var entry : waiters.entrySet()) {
+                var waiter = entry.getValue();
+                addWaiterToTable(waiter.name, waiter.speed, waiter.costPerHour);
+            }
+        } catch (Exception e) {
+            System.err.println("[DiningConfigurationView] Error refreshing waiter table: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     private void createTableConfiguration() {
-        window.addLabel("Number of Tables:", 2, 13);
-        tableCountLabel = window.addLabel("0", 25, 13);
-
-        TAction increaseTableCountAction = new TAction() {
-            public void DO() {
-                if (currentTableCount < maxTables) {
-                    currentTableCount++;
-                    updateTableCountLabel();
+        try {
+            window.addLabel("Number of Tables:", 2, 15);
+            tableCountLabel = window.addLabel("0", 25, 15);
+            
+            // Add buttons to increase/decrease table count
+            window.addButton("-", 30, 15, new TAction() {
+                public void DO() {
+                    if (currentTableCount > 0) {
+                        currentTableCount--;
+                        updateTableCountLabel();
+                    }
                 }
-            }
-        };
-        
-        TAction decreaseTableCountAction = new TAction() {
-            public void DO() {
-                if (currentTableCount > 0) {
-                    currentTableCount--;
-                    updateTableCountLabel();
+            });
+            
+            window.addButton("+", 35, 15, new TAction() {
+                public void DO() {
+                    if (currentTableCount < maxTables) {
+                        currentTableCount++;
+                        updateTableCountLabel();
+                    }
                 }
-            }
-        };
-        tableCountSpinner = window.addSpinner(35, 13, increaseTableCountAction, decreaseTableCountAction);
-        
-        window.addLabel("(Maximum " + maxTables + " tables)", 45, 13);
+            });
+            
+            window.addLabel("(Maximum " + maxTables + " tables)", 40, 15);
+        } catch (Exception e) {
+            System.err.println("[DiningConfigurationView] Error creating table configuration: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void updateTableCountLabel() {
-        tableCountLabel.setLabel(String.valueOf(currentTableCount));
+        try {
+            tableCountLabel.setLabel(String.valueOf(currentTableCount));
+        } catch (Exception e) {
+            System.err.println("[DiningConfigurationView] Error updating table count label: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void createWaiterInputForm() {
-        List<String> speeds = new ArrayList<>();
-        speeds.add("1");
-        speeds.add("2");
-        speeds.add("3");
-
-        window.addLabel("Add New Waiter:", 2, 15);
-        nameField = window.addField(20, 15, 20, false);
-        nameField.setText("");
-        
-        window.addLabel("Speed:", 45, 15);
-        speedCombo = window.addComboBox(55, 15, 10, speeds, -1, 3, nullAction);
-        
-        window.addButton("Add Waiter", 70, 15, new TAction() {
-            public void DO() {
-                addWaiter();
-            }
-        });
+        try {
+            window.addLabel("Add New Waiter:", 2, 17);
+            
+            // Name field
+            window.addLabel("Name:", 2, 19);
+            nameField = window.addField(8, 19, 20, false);
+            
+            // Speed selection
+            window.addLabel("Speed:", 30, 19);
+            List<String> speeds = new ArrayList<>();
+            speeds.add("1");
+            speeds.add("2");
+            speeds.add("3");
+            speedCombo = window.addComboBox(36, 19, 10, speeds, 0, 3, nullAction);
+            
+            // Add waiter button
+            window.addButton("Add Waiter", 50, 19, new TAction() {
+                public void DO() {
+                    addWaiter();
+                }
+            });
+        } catch (Exception e) {
+            System.err.println("[DiningConfigurationView] Error creating waiter input form: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void addWaiter() {
-        String name = nameField.getText();
-        if (name.trim().isEmpty()) {
-            showError("Please enter a waiter name");
-            return;
+        try {
+            String name = nameField.getText();
+            if (name.trim().isEmpty()) {
+                showError("Please enter a waiter name");
+                return;
+            }
+
+            int speed = Integer.parseInt(speedCombo.getText());
+            double costPerHour = calculateCost(speed);
+
+            // Add to local storage
+            waiters.put(name, new WaiterData(name, speed, costPerHour));
+            
+            // Add to table
+            addWaiterToTable(name, speed, costPerHour);
+
+            // Clear inputs
+            nameField.setText("");
+            speedCombo.setIndex(0);
+        } catch (Exception e) {
+            System.err.println("[DiningConfigurationView] Error adding waiter: " + e.getMessage());
+            e.printStackTrace();
+            showError("Error adding waiter: " + e.getMessage());
         }
-
-        int speed = Integer.parseInt(speedCombo.getText());
-        double costPerHour = calculateCost(speed);
-
-        // Add to local storage
-        waiters.put(name, new WaiterData(name, speed, costPerHour));
-        
-        addWaiterToTable(name, speed, costPerHour);
-
-        // Clear inputs
-        nameField.setText("");
-        speedCombo.setIndex(-1);
     }
 
     private void addWaiterToTable(String name, int speed, double costPerHour) {
-        int row = waiterTable.getRowCount();
-        waiterTable.insertRowBelow(row-1);
-        waiterTable.setCellText(0, row, name);
-        waiterTable.setCellText(1, row, String.valueOf(speed));
-        waiterTable.setCellText(2, row, String.format("%.2f", costPerHour));
-        waiterTable.setCellText(3, row, "0"); // Initially no tables assigned
+        try {
+            int row = waiterTable.getRowCount();
+            waiterTable.insertRowBelow(row-1);
+            waiterTable.setCellText(0, row, name);
+            waiterTable.setCellText(1, row, String.valueOf(speed));
+            waiterTable.setCellText(2, row, String.format("%.2f", costPerHour));
+            waiterTable.setCellText(3, row, "0"); // Initially no tables assigned
+        } catch (Exception e) {
+            System.err.println("[DiningConfigurationView] Error adding waiter to table: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private double calculateCost(int speed) {
@@ -172,24 +236,40 @@ public class DiningConfigurationView extends ConfigurationView {
 
     @Override
     protected boolean validateConfiguration() {
-        if (waiters.isEmpty()) {
-            showError("At least one waiter must be added");
+        try {
+            if (waiters.isEmpty()) {
+                showError("At least one waiter must be added");
+                return false;
+            }
+            if (currentTableCount == 0) {
+                showError("At least one table must be added");
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            System.err.println("[DiningConfigurationView] Error validating configuration: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
-        if (currentTableCount == 0) {
-            showError("At least one table must be added");
-            return false;
-        }
-        return true;
     }
 
     @Override
     protected void onNextPressed() {
-        app.showView(ViewType.MENU_CONFIGURATION);
+        try {
+            app.showView(ViewType.MENU_CONFIGURATION);
+        } catch (Exception e) {
+            System.err.println("[DiningConfigurationView] Error navigating to next view: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Override
     protected void onBackPressed() {
-        app.showView(ViewType.CHEF_CONFIGURATION);
+        try {
+            app.showView(ViewType.CHEF_CONFIGURATION);
+        } catch (Exception e) {
+            System.err.println("[DiningConfigurationView] Error navigating to previous view: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

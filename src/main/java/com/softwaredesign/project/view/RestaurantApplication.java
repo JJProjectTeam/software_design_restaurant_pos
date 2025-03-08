@@ -38,16 +38,20 @@ public class RestaurantApplication extends TApplication {
         System.out.println("[RestaurantApplication] Initializing views");
         for (ViewType viewType : ViewType.values()) {
             try {
+                System.out.println("[RestaurantApplication] Creating view instance for: " + viewType);
                 View view = viewType.getViewClass()
                     .getDeclaredConstructor(RestaurantApplication.class)
                     .newInstance(this);
                 views.put(viewType, view);
                 System.out.println("[RestaurantApplication] Initialized view: " + viewType);
             } catch (Exception e) {
-                System.err.println("[RestaurantApplication] Failed to initialize view: " + viewType);
+                System.err.println("[RestaurantApplication] ERROR: Failed to initialize view: " + viewType);
+                System.err.println("[RestaurantApplication] Exception: " + e.getMessage());
+                e.printStackTrace();
                 throw new RuntimeException("Failed to initialize view: " + viewType, e);
             }
         }
+        System.out.println("[RestaurantApplication] All views initialized successfully");
     }
 
     public void showView(ViewType viewType) {
@@ -57,32 +61,59 @@ public class RestaurantApplication extends TApplication {
         }
 
         System.out.println("[RestaurantApplication] Showing view: " + viewType);
-        // Create a new ArrayList to avoid concurrent modification
-        List<TWidget> widgetsToRemove = new ArrayList<>(mainWindow.getChildren());
-        
-        // Remove all widgets safely
-        for (TWidget widget : widgetsToRemove) {
-            mainWindow.remove(widget);
-        }
-
-        // Show the selected view
-        View viewToShow = views.get(viewType);
-        if (viewToShow != null) {
-            viewToShow.initialize(mainWindow);
-            // Force a refresh of the view through the mediator
-            if (viewType == ViewType.DINING_ROOM) {
-                RestaurantViewMediator.getInstance().notifyViewUpdate("DiningRoom");
+        try {
+            // Create a new ArrayList to avoid concurrent modification
+            List<TWidget> widgetsToRemove = new ArrayList<>(mainWindow.getChildren());
+            
+            // Remove all widgets safely
+            System.out.println("[RestaurantApplication] Removing " + widgetsToRemove.size() + " widgets from main window");
+            for (TWidget widget : widgetsToRemove) {
+                System.out.println("[RestaurantApplication] Removing widget: " + widget.getClass().getSimpleName());
+                mainWindow.remove(widget);
             }
-            mainWindow.show();
-            currentView = viewType;
-        } else {
-            throw new IllegalArgumentException("Unknown view: " + viewType);
+
+            // Show the selected view
+            View viewToShow = views.get(viewType);
+            if (viewToShow != null) {
+                System.out.println("[RestaurantApplication] Initializing view: " + viewType);
+                viewToShow.initialize(mainWindow);
+                
+                // Force a refresh of the view through the mediator
+                if (viewType == ViewType.DINING_ROOM) {
+                    System.out.println("[RestaurantApplication] Notifying mediator for DiningRoom update");
+                    RestaurantViewMediator.getInstance().notifyViewUpdate("DiningRoom");
+                }
+                
+                // Add a small delay to ensure all UI elements are properly initialized
+                try {
+                    System.out.println("[RestaurantApplication] Ensuring UI is ready before showing window");
+                    Thread.sleep(100);  // 100ms delay
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                
+                System.out.println("[RestaurantApplication] Showing main window");
+                mainWindow.show();
+                
+                // Force a UI update by doing a dummy operation
+                mainWindow.setTitle(mainWindow.getTitle());
+                
+                currentView = viewType;
+                System.out.println("[RestaurantApplication] View change completed to: " + viewType);
+            } else {
+                System.err.println("[RestaurantApplication] ERROR: Unknown view: " + viewType);
+                throw new IllegalArgumentException("Unknown view: " + viewType);
+            }
+        } catch (Exception e) {
+            System.err.println("[RestaurantApplication] ERROR in showView: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     public void run() {
-        // Show initial view
-        showView(ViewType.MENU_CONFIGURATION);
+        // Don't show any view here - let the RestaurantDriver handle it
+        // showView(ViewType.MENU_CONFIGURATION);
+        
         // Start the event loop
         super.run();
     }
