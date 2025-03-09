@@ -13,7 +13,6 @@ public class RestaurantViewMediator {
     private static RestaurantViewMediator instance;
     private final Map<String, List<View>> registeredViews;
     private final Map<String, BaseController> controllers;
-    private Runnable configurationListener;
     
     private RestaurantViewMediator() {
         registeredViews = new HashMap<>();
@@ -93,24 +92,7 @@ public class RestaurantViewMediator {
         return registeredViews.get(name).get(0);
     }
 
-    public void registerConfigurationListener(Runnable listener) {
-        this.configurationListener = listener;
-    }
-
-    public void notifyConfigurationComplete() {
-        if (configurationListener != null) {
-            configurationListener.run();
-        }
-    }
-    
-    /**
-     * Reset the mediator by clearing all registered views and controllers.
-     * This is used when restarting the application.
-     */
-    public void reset() {
-        System.out.println("[RestaurantViewMediator] Resetting mediator");
-        registeredViews.clear();
-        controllers.clear();
-        configurationListener = null;
+    public void notifyConfigurationComplete(){
+        getController("Configuration").onUserInput();
     }
 }

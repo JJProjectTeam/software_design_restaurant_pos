@@ -1,8 +1,18 @@
 package com.softwaredesign.project;
 
+import java.util.List;
+
 import com.softwaredesign.project.controller.*;
+import com.softwaredesign.project.inventory.InventoryService;
+import com.softwaredesign.project.kitchen.Kitchen;
 import com.softwaredesign.project.view.*;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
+import com.softwaredesign.project.menu.Menu;
+import com.softwaredesign.project.order.OrderManager;
+import com.softwaredesign.project.orderfulfillment.SeatingPlan;
+import com.softwaredesign.project.orderfulfillment.Table;
+import com.softwaredesign.project.staff.Chef;
+import com.softwaredesign.project.staff.Waiter;
 
 public class RestaurantDriver {
     private RestaurantApplication app;
@@ -10,7 +20,18 @@ public class RestaurantDriver {
     private ConfigurationController configController;
     private DiningRoomController diningRoomController;
     private KitchenController kitchenController;
+    private InventoryController inventoryController;
     private static final int TOTALSEATS = 40;
+
+    private List<Waiter> waiters;
+    private List<Chef> chefs;
+    private Kitchen kitchen;
+    private Menu menu;
+    private OrderManager orderManager;
+    private List<Table> tables;
+    private InventoryService inventoryService;
+    private SeatingPlan seatingPlan;
+    
     
     public RestaurantDriver() {
         try{
@@ -27,25 +48,25 @@ public class RestaurantDriver {
         try {
             System.out.println("[RestaurantDriver] Starting application...");
             
-            // Initialize configuration phase
             initializeConfiguration();
             
             // Show the welcome view explicitly
             app.showView(ViewType.WELCOME);
             
-            // Run the application - this starts the event loop
-            System.out.println("[RestaurantDriver] Running application...");
             app.run();
             
-            // The following code won't execute until the application is closed
-            // because app.run() starts an event loop
-            
-            // Wait for configuration to complete
             waitForConfiguration();
+
             
-            // Initialize restaurant operation phase
-            initializeOperation();
-            
+            createEntitiesFromConfiguration();
+            app.showView(ViewType.DINING_ROOM);
+
+            //TODO - this is a dummy tick placeholder
+            while (true){
+                passEntitiesToGamePlay();
+                Thread.sleep(1000);
+            }
+
         } catch (Exception e) {
             System.err.println("[RestaurantDriver] Fatal error running application: " + e.getMessage());
             e.printStackTrace();
@@ -53,21 +74,8 @@ public class RestaurantDriver {
     }
 
     private void initializeConfiguration() {
-        // Create and register configuration controller
         configController = new ConfigurationController();
-        
-        // Let the UI initialize
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            System.err.println("[RestaurantDriver] UI initialization interrupted: " + e.getMessage());
-        }
-        
-        // The welcome view is now shown in the start method
-        // app.showView(ViewType.WELCOME);
-        
-        // Register for configuration completion notification
-        mediator.registerConfigurationListener(this::onConfigurationComplete);
+        mediator.registerController("Configuration", configController);
     }
 
     private void waitForConfiguration() {
@@ -82,36 +90,45 @@ public class RestaurantDriver {
         }
     }
 
-    private void onConfigurationComplete() {
-        System.out.println("[RestaurantDriver] Configuration completed, initializing restaurant...");
-        configController.createRestaurantComponents();
-        initializeOperation();
+    public void createEntitiesFromConfiguration(){
+        this.waiters = configController.getWaiters();
+        this.chefs = configController.getChefs();
+        this.kitchen = configController.getKitchen();
+        this.menu = configController.getMenu();
+        this.orderManager = configController.getOrderManager();
+        this.inventoryService = configController.getInventoryService();
+        this.seatingPlan = configController.getSeatingPlan();
     }
 
-    private void initializeOperation() {
-        // Initialize menu recipes for gameplay
-        configController.getMenu().initializeRecipes();
-        
-        // Create operational controllers with configured components
-        diningRoomController = new DiningRoomController(
-            configController.getMenu(),
-            configController.getTables().size(),
-            TOTALSEATS
 
+
+
+    private void initializeOperation() {        
+        // Create gameplay controllers with configured components
+        diningRoomController = new DiningRoomController(
+            menu,
+            configController.getSeatingPlan()
         );
 
         kitchenController = new KitchenController(
-            configController.getKitchen()
+            kitchen
         );
 
-        // Register operational controllers with mediator
+        //TODO populate inventory
+        inventoryController = new InventoryController();
+
+        // Register gameplay controllers with mediator
         mediator.registerController("DiningRoom", diningRoomController);
         mediator.registerController("Kitchen", kitchenController);
-
-        // Switch to dining room view
-        app.showView(ViewType.DINING_ROOM);
+        mediator.registerController("Inventory", inventoryController);
         
         System.out.println("[RestaurantDriver] Restaurant initialized and ready for operation");
+    }
+    public void passEntitiesToGamePlay(){
+        //TODO this will be called on each 'tick'
+        diningRoomController.updateView();
+        kitchenController.updateView();
+        inventoryController.updateView();
     }
 
     public static void main(String[] args) {

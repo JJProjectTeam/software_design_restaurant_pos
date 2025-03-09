@@ -18,10 +18,10 @@ public class DiningRoomController extends BaseController {
     private Map<Integer, Character> tableToWaiter;
     private RestaurantViewMediator mediator;
 
-    public DiningRoomController(Menu menu, int totalTables, int totalSeats) {
+    public DiningRoomController(Menu menu, SeatingPlan seatingPlan) {
         super("DiningRoom");
         System.out.println("[DiningRoomController] Initializing controller...");
-        this.seatingPlan = new SeatingPlan(totalTables, totalSeats, menu);
+        this.seatingPlan = seatingPlan;
         this.tableToWaiter = new HashMap<>();
         this.mediator = RestaurantViewMediator.getInstance();
         

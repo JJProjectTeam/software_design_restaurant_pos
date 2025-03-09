@@ -14,25 +14,6 @@ public class MenuConfigurationView extends ConfigurationView {
         super(app);
         // Initialize with default recipes
         this.availableRecipes = new HashMap<>();
-        // Add some default recipes
-        List<String> burgerIngredients = Arrays.asList("Beef Patty", "Bun", "Lettuce", "Tomato", "Cheese");
-        List<String> kebabIngredients = Arrays.asList("Lamb", "Pita Bread", "Onion", "Tomato", "Tzatziki");
-        List<String> pizzaIngredients = Arrays.asList("Dough", "Tomato Sauce", "Cheese", "Pepperoni");
-        List<String> saladIngredients = Arrays.asList("Lettuce", "Tomato", "Cucumber", "Dressing");
-        List<String> pastaIngredients = Arrays.asList("Pasta", "Tomato Sauce", "Parmesan");
-        List<String> steakIngredients = Arrays.asList("Beef Steak", "Salt", "Pepper", "Butter");
-        List<String> fishIngredients = Arrays.asList("Fish Fillet", "Lemon", "Herbs", "Butter");
-        List<String> soupIngredients = Arrays.asList("Broth", "Vegetables", "Herbs", "Salt");
-        
-        this.availableRecipes.put("Burger", burgerIngredients);
-        this.availableRecipes.put("Kebab", kebabIngredients);
-        this.availableRecipes.put("Pizza", pizzaIngredients);
-        this.availableRecipes.put("Salad", saladIngredients);
-        this.availableRecipes.put("Pasta", pastaIngredients);
-        this.availableRecipes.put("Steak", steakIngredients);
-        this.availableRecipes.put("Fish", fishIngredients);
-        this.availableRecipes.put("Soup", soupIngredients);
-        
         this.selectedRecipeStates = new HashMap<>();
         this.selectedRecipes = new HashSet<>();
         
@@ -41,9 +22,15 @@ public class MenuConfigurationView extends ConfigurationView {
             selectedRecipeStates.put(recipe, false);
         }
     }
+    public void setAvailableRecipes(Map<String, List<String>> recipes) {
+        // Initialize all recipes as unselected
+        for (String recipe : availableRecipes.keySet()) {
+            selectedRecipeStates.put(recipe, false);
+        }
+    }
 
     @Override
-    protected void setupSpecificElements() {
+protected void setupSpecificElements() {
         try {
             // Title
             window.addLabel("Menu Configuration", 2, 2);

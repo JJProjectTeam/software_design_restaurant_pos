@@ -19,8 +19,6 @@ public abstract class ConfigurationView implements View, ConfigurableView {
         System.out.println("[ConfigurationView] Constructor called");
         this.app = app;
         this.mediator = RestaurantViewMediator.getInstance();
-        mediator.registerView("Configuration", this);
-        System.out.println("[ConfigurationView] Constructor completed");
     }
 
     @Override

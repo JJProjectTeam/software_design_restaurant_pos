@@ -6,6 +6,7 @@ import jexer.*;
 public class ChefConfigurationView extends ConfigurationView {
     // Local storage for chef data
     private Map<String, ChefData> chefs = new HashMap<>();
+    private Map<String, Integer> stationCounts = new HashMap<>();
     
     // Station counts
     private int grillStationCount = 1;
@@ -52,21 +53,23 @@ public class ChefConfigurationView extends ConfigurationView {
     public Map<String, ChefData> getChefs() {
         return chefs;
     }
+
+    public Map<String, Integer> getStationCounts() {
+        stationCounts.put("Grill", grillStationCount);
+        stationCounts.put("Prep", prepStationCount);
+        stationCounts.put("Plate", plateStationCount);
+        return stationCounts;
+    }
     
-    // Getters for station counts
-    public int getGrillStationCount() { return grillStationCount; }
-    public int getPrepStationCount() { return prepStationCount; }
-    public int getPlateStationCount() { return plateStationCount; }
 
     public ChefConfigurationView(RestaurantApplication app) {
         super(app);
-        
+        mediator.registerView("ChefConfiguration", this);
         System.out.println("[ChefConfigurationView] Constructor called");
         
         // Initialize with a default chef to ensure there's always at least one
         List<String> defaultStations = Arrays.asList("Grill", "Prep", "Plate");
         chefs.put("Default Chef", new ChefData("Default Chef", defaultStations, 2, 200.0, "FIFO"));
-        
         System.out.println("[ChefConfigurationView] Constructor completed");
     }
 
@@ -576,6 +579,7 @@ public class ChefConfigurationView extends ConfigurationView {
     @Override
     protected void onNextPressed() {
         try {
+            mediator.notifyConfigurationComplete();
             app.showView(ViewType.DINING_CONFIGURATION);
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error navigating to next view: " + e.getMessage());

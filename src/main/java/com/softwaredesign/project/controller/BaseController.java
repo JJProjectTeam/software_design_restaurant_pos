@@ -20,4 +20,6 @@ public abstract class BaseController {
      * Update all registered views with the current state
      */
     public abstract void updateView();
+    public void onUserInput(){
+    }
 }

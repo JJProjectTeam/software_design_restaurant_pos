@@ -156,7 +156,7 @@ public class RestaurantApplication extends TApplication {
             
             // Reset the mediator
             RestaurantViewMediator mediator = RestaurantViewMediator.getInstance();
-            mediator.reset();
+            // mediator.reset();
             
             // Reinitialize all views
             views.clear();

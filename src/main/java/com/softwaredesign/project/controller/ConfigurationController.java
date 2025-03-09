@@ -26,9 +26,11 @@ public class ConfigurationController extends BaseController {
     private CollectionPoint collectionPoint;
     private StationManager stationManager;
     private List<Waiter> waiters;
-    private List<Table> tables;
+    private List<Chef> chefs;
+    private List<Station> stations;
     private Menu menu;
     private RestaurantViewMediator mediator;
+    private SeatingPlan seatingPlan;
     private boolean configurationComplete = false;
 
     public ConfigurationController() {
@@ -36,16 +38,13 @@ public class ConfigurationController extends BaseController {
         this.mediator = RestaurantViewMediator.getInstance();
         mediator.registerController("Configuration", this);
         this.waiters = new ArrayList<>();
-        this.tables = new ArrayList<>();
         setupBaseComponents();
     }
 
     private void setupBaseComponents() {
-        // Create basic components needed for the restaurant
         this.inventory = new Inventory();
         
-        // Add required ingredients to the inventory
-        // Burger ingredients
+        // TODO this should NOT be done here
         inventory.addIngredient("Beef Patty", 100, 2.50, StationType.GRILL);
         inventory.addIngredient("Bun", 100, 0.50, StationType.PLATE);
         inventory.addIngredient("Lettuce", 100, 0.30, StationType.PREP);
@@ -76,14 +75,14 @@ public class ConfigurationController extends BaseController {
         System.out.println("[ConfigurationController] Creating restaurant components");
         
         // Get configuration data from views
-        ChefConfigurationView chefView = (ChefConfigurationView) mediator.getView("Configuration");
+        ChefConfigurationView chefView = (ChefConfigurationView) mediator.getView("ChefConfiguration");
         DiningConfigurationView diningView = (DiningConfigurationView) mediator.getView("DiningConfiguration");
         MenuConfigurationView menuView = (MenuConfigurationView) mediator.getView("MenuConfiguration");
         
         // Get station counts
-        int grillStationCount = chefView.getGrillStationCount();
-        int prepStationCount = chefView.getPrepStationCount();
-        int plateStationCount = chefView.getPlateStationCount();
+        int grillStationCount = chefView.getStationCounts().get("GRILL");
+        int prepStationCount = chefView.getStationCounts().get("PREP");
+        int plateStationCount = chefView.getStationCounts().get("PLATE");
         
         System.out.println("[ConfigurationController] Station counts - Grill: " + grillStationCount + 
                           ", Prep: " + prepStationCount + 
@@ -105,7 +104,7 @@ public class ConfigurationController extends BaseController {
         configurationComplete = true;
         
         // Notify mediator that configuration is complete
-        mediator.notifyConfigurationComplete();
+        // mediator.notifyConfigurationComplete();
     }
     
     private void createDefaultConfiguration() {
@@ -135,7 +134,6 @@ public class ConfigurationController extends BaseController {
         }
         
         waiters.add(waiter);
-        tables.addAll(seatingPlan.getAllTables());
         
         // Create default menu items
         Set<String> defaultRecipes = new HashSet<>(Arrays.asList("Burger", "Kebab"));
@@ -150,17 +148,17 @@ public class ConfigurationController extends BaseController {
             ChefStrategy strategy = createChefStrategy(data.getStrategy());
             
             // Create chef stations
-            List<Station> stations = new ArrayList<>();
             for (String stationType : data.getStations()) {
                 Station station = new Station(StationType.valueOf(stationType.toUpperCase()), collectionPoint);
-                stations.add(station);
                 stationManager.addStation(station);
+                stations.add(station);
             }
             
             Chef chef = new Chef(data.getCostPerHour(), data.getSpeed(), strategy, stationManager);
             for (Station station : stations) {
                 chef.assignToStation(station.getType());
             }
+            chefs.add(chef);
         }
     }
     //TODO: add actual strategies
@@ -174,9 +172,8 @@ public class ConfigurationController extends BaseController {
 
     private void createWaitersAndTables(Map<String, DiningConfigurationView.WaiterData> waiterData, int tableCount) {
         // Create tables
-        tables.clear();
         //TODO allow user to set max table size
-        SeatingPlan seatingPlan = new SeatingPlan(4, tableCount, menu);
+        SeatingPlan seatingPlan = new SeatingPlan(tableCount, tableCount, menu);
         // Create waiters
         waiters.clear();
 
@@ -287,9 +284,8 @@ public class ConfigurationController extends BaseController {
     // Getters for restaurant components
     public Kitchen getKitchen() { return kitchen; }
     public OrderManager getOrderManager() { return orderManager; }
-    public InventoryService getInventory() { return inventory; }
+    public InventoryService getInventoryService() { return inventory; }
     public List<Waiter> getWaiters() { return Collections.unmodifiableList(waiters); }
-    public List<Table> getTables() { return Collections.unmodifiableList(tables); }
     public Menu getMenu() { return menu; }
 
     public boolean isConfigurationComplete() {
@@ -299,5 +295,27 @@ public class ConfigurationController extends BaseController {
     public void updateView(){
         
     }
-    
+    @Override
+    public void onUserInput(){
+        createRestaurantComponents();
+    }
+
+    public List<Chef> getChefs() {
+        return chefs;
+    }
+    public List<Station> getStations() {
+        return stations;
+    }
+    public CollectionPoint getCollectionPoint() {
+        return collectionPoint;
+    }
+    public StationManager getStationManager() {
+        return stationManager;
+    }
+    public SeatingPlan getSeatingPlan() {
+        return seatingPlan;
+    }
+
+
+
 }
