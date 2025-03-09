@@ -23,7 +23,7 @@ public class DiningRoomView extends GamePlayView {
         this.app = app;
         this.pendingUpdates = new ArrayList<>();
         this.tableDataMap = new HashMap<>();
-        RestaurantViewMediator.getInstance().registerView("DiningRoom", this);
+        RestaurantViewMediator.getInstance().registerView(ViewType.DINING_ROOM, this);
     }
 
     @Override

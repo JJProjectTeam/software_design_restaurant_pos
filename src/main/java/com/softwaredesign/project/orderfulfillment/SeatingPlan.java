@@ -10,9 +10,10 @@ import com.softwaredesign.project.orderfulfillment.Table;
 
 public class SeatingPlan {
     private List<Table> tables;
-    private static final int MAX_SEATS_PER_TABLE = 4;
+    private int maxTableCapacity;
     
-    public SeatingPlan(int totalTables, int totalSeats, Menu menu) {
+    public SeatingPlan(int totalTables, int totalSeats, int maxTableCapacity, Menu menu) {
+        this.maxTableCapacity = maxTableCapacity;
         if (totalTables <= 0 || totalSeats <= 0) {
             throw new IllegalArgumentException("Total tables and seats must be positive");
         }
@@ -37,9 +38,9 @@ public class SeatingPlan {
         while (remainingSeats > 0) {
             for (Table table : tables) {
                 if (remainingSeats <= 0) break;
-                if (table.getTableCapacity() < MAX_SEATS_PER_TABLE) {
+                if (table.getTableCapacity() < maxTableCapacity) {
                     int addSeats = Math.min(
-                        random.nextInt(MAX_SEATS_PER_TABLE - table.getTableCapacity()) + 1,
+                        random.nextInt(maxTableCapacity - table.getTableCapacity()) + 1,
                         remainingSeats
                     );
                     tables.set(tables.indexOf(table), 
@@ -58,8 +59,8 @@ public class SeatingPlan {
         int groupSize = customerGroup.size();
         
         // Check if group is too large for any table
-        if (groupSize > MAX_SEATS_PER_TABLE) {
-            System.out.println("Sorry, we cannot accommodate groups larger than " + MAX_SEATS_PER_TABLE);
+        if (groupSize > maxTableCapacity) {
+            System.out.println("Sorry, we cannot accommodate groups larger than " + maxTableCapacity);
             return null;
         }
         

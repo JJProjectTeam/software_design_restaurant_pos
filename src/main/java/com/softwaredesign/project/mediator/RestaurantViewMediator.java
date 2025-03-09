@@ -2,6 +2,7 @@ package com.softwaredesign.project.mediator;
 
 import com.softwaredesign.project.controller.BaseController;
 import com.softwaredesign.project.view.View;
+import com.softwaredesign.project.view.ViewType;
 import com.softwaredesign.project.view.ConfigurableView;
 
 import java.util.*;
@@ -11,7 +12,7 @@ import java.util.*;
  */
 public class RestaurantViewMediator {
     private static RestaurantViewMediator instance;
-    private final Map<String, List<View>> registeredViews;
+    private final Map<ViewType, List<View>> registeredViews;
     private final Map<String, BaseController> controllers;
     
     private RestaurantViewMediator() {
@@ -29,7 +30,7 @@ public class RestaurantViewMediator {
     /**
      * Register a view with its corresponding controller type
      */
-    public void registerView(String type, View view) {
+    public void registerView(ViewType type, View view) {
         System.out.println("[RestaurantViewMediator] Registering view for type: " + type);
         registeredViews.computeIfAbsent(type, k -> new ArrayList<>()).add(view);
     }

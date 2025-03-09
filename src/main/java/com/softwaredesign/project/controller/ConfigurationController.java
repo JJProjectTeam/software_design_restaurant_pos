@@ -33,14 +33,15 @@ public class ConfigurationController extends BaseController {
     private SeatingPlan seatingPlan;
     private boolean configurationComplete = false;
 
+    //constructor registers with mediator
     public ConfigurationController() {
         super("Configuration");
         this.mediator = RestaurantViewMediator.getInstance();
         mediator.registerController("Configuration", this);
-        this.waiters = new ArrayList<>();
         setupBaseComponents();
     }
 
+    //this should set up the components
     private void setupBaseComponents() {
         this.inventory = new Inventory();
         
@@ -72,7 +73,6 @@ public class ConfigurationController extends BaseController {
 
     // Methods to read from views and create restaurant entities
     public void createRestaurantComponents() {
-        System.out.println("[ConfigurationController] Creating restaurant components");
         
         // Get configuration data from views
         ChefConfigurationView chefView = (ChefConfigurationView) mediator.getView("ChefConfiguration");
@@ -84,15 +84,11 @@ public class ConfigurationController extends BaseController {
         int prepStationCount = chefView.getStationCounts().get("PREP");
         int plateStationCount = chefView.getStationCounts().get("PLATE");
         
-        System.out.println("[ConfigurationController] Station counts - Grill: " + grillStationCount + 
-                          ", Prep: " + prepStationCount + 
-                          ", Plate: " + plateStationCount);
-        
         // Create chefs
         createChefs(chefView.getChefs());
         
         // Create waiters and tables
-        createWaitersAndTables(diningView.getWaiters(), diningView.getNumberOfTables());
+        createWaitersAndTables(diningView.getWaiters(), diningView.getNumberOfTables(), diningView.getTableCapacity());
         
         // Create menu items
         createMenuItems(menuView.getSelectedRecipes());
@@ -123,7 +119,7 @@ public class ConfigurationController extends BaseController {
         }
         
         // Create default tables
-        SeatingPlan seatingPlan = new SeatingPlan(4, 5, menu);
+        SeatingPlan seatingPlan = new SeatingPlan(4, 40, 5, menu);
         
         // Create default waiter
         Waiter waiter = new Waiter(20.0, 2, orderManager, menu);
@@ -170,10 +166,9 @@ public class ConfigurationController extends BaseController {
         };
     }
 
-    private void createWaitersAndTables(Map<String, DiningConfigurationView.WaiterData> waiterData, int tableCount) {
+    private void createWaitersAndTables(Map<String, DiningConfigurationView.WaiterData> waiterData, int tableCount, int tableCapacity) {
         // Create tables
-        //TODO allow user to set max table size
-        SeatingPlan seatingPlan = new SeatingPlan(tableCount, tableCount, menu);
+        SeatingPlan seatingPlan = new SeatingPlan(tableCount, 40, tableCapacity, menu); //TODO read from a config file for magic number for number of seats
         // Create waiters
         waiters.clear();
 

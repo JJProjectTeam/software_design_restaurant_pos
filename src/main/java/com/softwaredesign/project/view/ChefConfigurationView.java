@@ -49,6 +49,15 @@ public class ChefConfigurationView extends ConfigurationView {
     private TLabel prepCountLabel;
     private TLabel plateCountLabel;
 
+    public ChefConfigurationView(RestaurantApplication app) {
+        super(app);
+        mediator.registerView(ViewType.CHEF_CONFIGURATION, this);
+        
+        // Initialize with a default chef to ensure there's always at least one
+        List<String> defaultStations = Arrays.asList("Grill", "Prep", "Plate");
+        chefs.put("Default Chef", new ChefData("Default Chef", defaultStations, 2, 200.0, "FIFO"));
+    }
+
     // Getters for external access
     public Map<String, ChefData> getChefs() {
         return chefs;
@@ -61,17 +70,6 @@ public class ChefConfigurationView extends ConfigurationView {
         return stationCounts;
     }
     
-
-    public ChefConfigurationView(RestaurantApplication app) {
-        super(app);
-        mediator.registerView("ChefConfiguration", this);
-        System.out.println("[ChefConfigurationView] Constructor called");
-        
-        // Initialize with a default chef to ensure there's always at least one
-        List<String> defaultStations = Arrays.asList("Grill", "Prep", "Plate");
-        chefs.put("Default Chef", new ChefData("Default Chef", defaultStations, 2, 200.0, "FIFO"));
-        System.out.println("[ChefConfigurationView] Constructor completed");
-    }
 
     @Override
     protected void setupSpecificElements() {
@@ -579,7 +577,6 @@ public class ChefConfigurationView extends ConfigurationView {
     @Override
     protected void onNextPressed() {
         try {
-            mediator.notifyConfigurationComplete();
             app.showView(ViewType.DINING_CONFIGURATION);
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error navigating to next view: " + e.getMessage());

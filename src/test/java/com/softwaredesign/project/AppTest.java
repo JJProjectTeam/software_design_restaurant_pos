@@ -33,7 +33,7 @@ public class AppTest {
         CollectionPoint collectionPoint = new CollectionPoint();
         StationManager stationManager = new StationManager(collectionPoint);
         OrderManager orderManager = new OrderManager(collectionPoint, stationManager);
-        SeatingPlan seatingPlan = new SeatingPlan(5, 15, menu);
+        SeatingPlan seatingPlan = new SeatingPlan(5, 40, 15, menu);
         Waiter waiter = new Waiter(15.0, 1.0, orderManager, menu);
 
         assertNotNull("Inventory service should not be null", inventoryService);
@@ -60,7 +60,7 @@ public class AppTest {
         
         
         Menu menu = new Menu(inventoryService);
-        SeatingPlan seatingPlan = new SeatingPlan(5, 15, menu);
+        SeatingPlan seatingPlan = new SeatingPlan(5, 40,  15, menu);
         
         for (var table : seatingPlan.getAllTables()) {
             assertTrue(table.getTableCapacity() >= 1);

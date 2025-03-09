@@ -51,7 +51,7 @@ public class InventoryView extends GamePlayView {
         }
         
         // Register with mediator when view is set up
-        mediator.registerView("Inventory", this);
+        mediator.registerView(ViewType.INVENTORY, this);
     }
 
     protected void createInventoryTable() {

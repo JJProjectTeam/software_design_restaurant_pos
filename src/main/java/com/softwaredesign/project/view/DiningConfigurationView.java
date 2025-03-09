@@ -4,6 +4,8 @@ import java.util.*;
 import jexer.*;
 
 public class DiningConfigurationView extends ConfigurationView {
+
+
     // UI Components
     private TTableWidget waiterTable;
     private TField nameField;
@@ -48,7 +50,7 @@ public class DiningConfigurationView extends ConfigurationView {
 
     public DiningConfigurationView(RestaurantApplication app) {
         super(app);
-        
+        mediator.registerView(ViewType.DINING_CONFIGURATION, this);
         // Initialize with a default waiter
         waiters.put("Default Waiter", new WaiterData("Default Waiter", 2, 20.0));
     }

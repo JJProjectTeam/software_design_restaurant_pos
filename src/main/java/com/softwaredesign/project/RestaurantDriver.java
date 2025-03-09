@@ -15,6 +15,11 @@ import com.softwaredesign.project.staff.Chef;
 import com.softwaredesign.project.staff.Waiter;
 
 public class RestaurantDriver {
+
+    //CONSTANTS = move to another file
+    private static final int NUMBER_OF_SEATS = 40;
+
+
     private RestaurantApplication app;
     private RestaurantViewMediator mediator;
     private ConfigurationController configController;
@@ -59,6 +64,7 @@ public class RestaurantDriver {
 
             
             createEntitiesFromConfiguration();
+            initializeOperation();
             app.showView(ViewType.DINING_ROOM);
 
             //TODO - this is a dummy tick placeholder

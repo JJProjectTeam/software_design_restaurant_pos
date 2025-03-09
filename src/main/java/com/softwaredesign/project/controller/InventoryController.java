@@ -90,7 +90,6 @@ public class InventoryController extends BaseController {
     @Override
     public void updateView() {
         System.out.println("[InventoryController] Updating all inventory views");
-        
         // Update all ingredients
         for (String ingredient : ingredients.keySet()) {
             notifyIngredientUpdate(ingredient);
