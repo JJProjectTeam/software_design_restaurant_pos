@@ -4,9 +4,19 @@ import jexer.*;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
 import java.util.Queue;
 import java.util.LinkedList;
+import java.util.Set;
+import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class InventoryView extends GamePlayView {
+    private final RestaurantApplication app;
     private TTableWidget inventoryTable;
+    private static final String[] COLUMN_HEADERS = {"Ingredient", "Stock", "Price"};
+    private static final int[] COLUMN_WIDTHS = {20, 10, 10};
+    private static final int TABLE_Y = 3;
+    private static final int TABLE_HEIGHT = 15;
     private Queue<InventoryUpdate> pendingUpdates;
     private RestaurantViewMediator mediator;
     private boolean isInitialized;
@@ -25,9 +35,11 @@ public class InventoryView extends GamePlayView {
     
     public InventoryView(RestaurantApplication app) {
         super(app);
+        this.app = app;
         this.pendingUpdates = new LinkedList<>();
         this.mediator = RestaurantViewMediator.getInstance();
         this.isInitialized = false;
+        RestaurantViewMediator.getInstance().registerView(ViewType.INVENTORY, this);
     }
 
     @Override
@@ -39,7 +51,14 @@ public class InventoryView extends GamePlayView {
     @Override
     protected void addViewContent() {
         System.out.println("[InventoryView] Adding view content");
-        createInventoryTable();
+        window.addLabel("Inventory Status", 2, 2);
+        inventoryTable = window.addTable(2, TABLE_Y, window.getWidth() - 4, TABLE_HEIGHT, 3, 10);
+        
+        // Set column labels and widths
+        for (int i = 0; i < COLUMN_HEADERS.length; i++) {
+            inventoryTable.setColumnLabel(i, COLUMN_HEADERS[i]);
+            inventoryTable.setColumnWidth(i, COLUMN_WIDTHS[i]);
+        }
         
         // Now that the view is fully initialized
         isInitialized = true;
@@ -54,31 +73,37 @@ public class InventoryView extends GamePlayView {
         mediator.registerView(ViewType.INVENTORY, this);
     }
 
-    protected void createInventoryTable() {
-        System.out.println("[InventoryView] Creating inventory table");
-        inventoryTable = window.addTable(2,3, 100, 8, 3, 10);
-
-        inventoryTable.setColumnLabel(0, "Ingredient");
-        inventoryTable.setColumnLabel(1, "Price ($)");
-        inventoryTable.setColumnLabel(2, "Quantity");
-
-        for (int i = 0; i < inventoryTable.getColumnCount(); i++) {
-            inventoryTable.setColumnWidth(i, 10);
-        }
-        
-        System.out.println("[InventoryView] Inventory table created with " + inventoryTable.getColumnCount() + " columns");
-    }
-
-    public void onInventoryUpdate(String ingredient, double price, int quantity) {
-        System.out.println("[InventoryView] Received inventory update for " + ingredient);
-        
-        if (!isInitialized) {
-            System.out.println("[InventoryView] View not initialized yet, queueing update for " + ingredient);
-            pendingUpdates.offer(new InventoryUpdate(ingredient, price, quantity));
+    public void onInventoryUpdate(Set<String> ingredients, Map<String, Integer> stockLevels, Map<String, Double> prices) {
+        if (inventoryTable == null) {
+            System.err.println("[InventoryView] Table widget not initialized");
             return;
         }
-        
-        updateIngredient(ingredient, price, quantity);
+
+        try {
+            // Clear existing rows
+            while (inventoryTable.getRowCount() > 0) {
+                inventoryTable.deleteRow(0);
+            }
+
+            // Add new rows for each ingredient
+            List<String> sortedIngredients = new ArrayList<>(ingredients);
+            Collections.sort(sortedIngredients);
+
+            for (String ingredient : sortedIngredients) {
+                inventoryTable.insertRowBelow(inventoryTable.getRowCount());
+                int row = inventoryTable.getRowCount() - 1;
+
+                // Update cells
+                inventoryTable.setCellText(0, row, ingredient);
+                inventoryTable.setCellText(1, row, String.valueOf(stockLevels.get(ingredient)));
+                inventoryTable.setCellText(2, row, String.format("$%.2f", prices.get(ingredient)));
+            }
+
+            System.out.println("[InventoryView] Updated " + ingredients.size() + " ingredients");
+        } catch (Exception e) {
+            System.err.println("[InventoryView] Error updating inventory: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     private void updateIngredient(String ingredient, double price, int quantity) {

@@ -1,101 +1,42 @@
 package com.softwaredesign.project.controller;
 
+import com.softwaredesign.project.inventory.Inventory;
+import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
 import com.softwaredesign.project.view.ConfigurableView;
 import com.softwaredesign.project.view.InventoryView;
 import com.softwaredesign.project.view.View;
+import com.softwaredesign.project.view.ViewType;
+
 import java.util.*;
 
 public class InventoryController extends BaseController {
-    private Map<String, Integer> ingredients;
+    private Set<String> ingredients;
+    private Map<String, Integer> stockLevels;
     private Map<String, Double> prices;
     private RestaurantViewMediator mediator;
+    private Inventory inventory;
     
-    public InventoryController() {
+    public InventoryController(Inventory inventory) {
         super("Inventory");
-        this.ingredients = new HashMap<>();
+        this.inventory = inventory;
+        this.stockLevels = new HashMap<>();
         this.prices = new HashMap<>();
         this.mediator = RestaurantViewMediator.getInstance();
         mediator.registerController("Inventory", this);
-        
-        // Initialize with some default ingredients
-        initializeDefaultIngredients();
-    }
-    
-    private void initializeDefaultIngredients() {
-        // Add some default ingredients with prices
-        addIngredient("Beef Patty", 2.50, 20);
-        addIngredient("Bun", 0.50, 30);
-        addIngredient("Lettuce", 0.25, 40);
-        addIngredient("Tomato", 0.30, 25);
-        addIngredient("Cheese", 0.75, 30);
-        addIngredient("Lamb", 3.00, 15);
-        addIngredient("Pita Bread", 0.60, 25);
-        addIngredient("Onion", 0.20, 35);
-        addIngredient("Tzatziki", 1.00, 20);
-    }
-    
-    public void addIngredient(String name, double price, int quantity) {
-        ingredients.put(name, quantity);
-        prices.put(name, price);
-        notifyIngredientUpdate(name);
-    }
-    
-    public int getIngredientQuantity(String name) {
-        return ingredients.getOrDefault(name, 0);
-    }
-    
-    public double getIngredientPrice(String name) {
-        return prices.getOrDefault(name, 0.0);
-    }
-    
-    public Map<String, Integer> getIngredients() {
-        return new HashMap<>(ingredients);
-    }
-    
-    public void updateIngredientQuantity(String name, int delta) {
-        int currentQuantity = ingredients.getOrDefault(name, 0);
-        int newQuantity = currentQuantity + delta;
-        
-        if (newQuantity < 0) {
-            return;
-        }
-        
-        ingredients.put(name, newQuantity);
-        
-        notifyIngredientUpdate(name);
-    }
-    
-    private void notifyIngredientUpdate(String ingredientName) {
-        
-        int quantity = ingredients.getOrDefault(ingredientName, 0);
-        double price = prices.getOrDefault(ingredientName, 0.0);
-        
-        // Update all registered views
-        List<View> views = mediator.getViews("Inventory");
-        for (View view : views) {
-            if (view instanceof InventoryView) {
-                ((InventoryView) view).onInventoryUpdate(
-                    ingredientName,
-                    price,
-                    quantity
-                );
-            }
-        }
     }
     
     @Override
     public void updateView() {
-        // Update all ingredients
-        for (String ingredient : ingredients.keySet()) {
-            notifyIngredientUpdate(ingredient);
+        ingredients = inventory.getAllIngredients();
+        for (String ingredient : ingredients) {
+            stockLevels.put(ingredient, inventory.getStock(ingredient));
+            prices.put(ingredient, inventory.getPrice(ingredient));
         }
+        View view = mediator.getView(ViewType.INVENTORY);
+        view = (InventoryView) view;
+        ((InventoryView) view).onInventoryUpdate(ingredients, stockLevels, prices);
     }
     
-    /**
-     * Refresh all ingredients in the view
-     */
-    public void refreshAllIngredients() {
-        updateView();
-    }
+
 }

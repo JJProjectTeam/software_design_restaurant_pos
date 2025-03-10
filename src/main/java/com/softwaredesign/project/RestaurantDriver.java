@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.softwaredesign.project.controller.*;
+import com.softwaredesign.project.inventory.Inventory;
 import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.kitchen.Kitchen;
 import com.softwaredesign.project.view.*;
@@ -34,7 +35,7 @@ public class RestaurantDriver {
     private Menu menu;
     private OrderManager orderManager;
     private List<Table> tables;
-    private InventoryService inventoryService;
+    private Inventory inventory;
     private SeatingPlan seatingPlan;
     
     
@@ -117,7 +118,7 @@ public class RestaurantDriver {
         this.kitchen = configController.getKitchen();
         this.menu = configController.getMenu();
         this.orderManager = configController.getOrderManager();
-        this.inventoryService = configController.getInventoryService();
+        this.inventory = configController.getInventory();
         this.seatingPlan = configController.getSeatingPlan();
         System.out.println("SEATINGPLAN: "+ seatingPlan.getAllTables().size());
     }
@@ -125,7 +126,6 @@ public class RestaurantDriver {
     private void initializeOperation() {        
         // Create gameplay controllers with configured components
         diningRoomController = new DiningRoomController(
-            menu,
             configController.getSeatingPlan()
         );
 
@@ -134,7 +134,7 @@ public class RestaurantDriver {
         );
 
         //TODO populate inventory
-        inventoryController = new InventoryController();
+        inventoryController = new InventoryController(inventory);
 
         // Register gameplay controllers with mediator
         mediator.registerController("DiningRoom", diningRoomController);
@@ -155,3 +155,18 @@ public class RestaurantDriver {
         driver.start();
     }
 }
+//TODOS:
+/*
+ * make inventory + pass to controller and view
+ * When im not sleepy - are we just updating views with what has changed, or repainting each time? 
+ * Test updating funcionality in driver
+ * 
+ * Money system, both during game and at configuraiton
+ * 
+ * Some kind of recipeTypes, and an inventory config file that can be set up
+ * 
+ * In config file - set things like restuarant seats, initialbudget, chef/waiter charge strategy etc. 
+ * 
+ * Help menu
+ *
+ */

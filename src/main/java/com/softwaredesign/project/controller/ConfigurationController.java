@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class ConfigurationController extends BaseController {
     private Kitchen kitchen;
     private OrderManager orderManager;
-    private InventoryService inventory;
+    private Inventory inventory;
     private CollectionPoint collectionPoint;
     private StationManager stationManager;
     private List<Waiter> waiters;
@@ -324,7 +324,7 @@ public class ConfigurationController extends BaseController {
     // Getters for restaurant components
     public Kitchen getKitchen() { return kitchen; }
     public OrderManager getOrderManager() { return orderManager; }
-    public InventoryService getInventoryService() { return inventory; }
+    public Inventory getInventory() { return inventory; }
     public List<Waiter> getWaiters() { return Collections.unmodifiableList(waiters); }
     public Menu getMenu() { return menu; }
 
