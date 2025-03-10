@@ -26,6 +26,7 @@ public class DiningRoomController extends BaseController {
         this.mediator = RestaurantViewMediator.getInstance();
         mediator.registerController("DiningRoom", this);
     }
+
     @Override
     public void updateView() {
         View view = mediator.getView(ViewType.DINING_ROOM);
@@ -34,25 +35,23 @@ public class DiningRoomController extends BaseController {
         }
 
         DiningRoomView diningView = (DiningRoomView) view;
+
         for (Table table : seatingPlan.getAllTables()) {
             int tableNumber = table.getTableNumber();
             int capacity = table.getTableCapacity();
             int customerCount = table.getCustomers().size();
             String status = determineTableStatus(table);
             char orderingFlag = table.isOrdering() ? '*' : ' ';
-    
-            diningView.addTable(
+
+            diningView.onTableUpdate(
                 tableNumber,
-                capacity, 
+                capacity,
                 customerCount,
                 status,
                 orderingFlag
             );
         }
-
-        diningView.updateAllTables();
     }
-
 
     private String determineTableStatus(Table table) {
         if (table.getCustomers().isEmpty()) {

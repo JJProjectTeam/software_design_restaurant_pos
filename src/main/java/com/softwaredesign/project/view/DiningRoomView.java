@@ -11,16 +11,34 @@ import java.util.*;
 public class DiningRoomView extends GamePlayView {
     private final RestaurantApplication app;    
     private TTableWidget tableWidget;
-    private Map<Integer, TableData> tableDataMap;
+    private Queue<TableUpdate> pendingUpdates;
     private static final String[] COLUMN_HEADERS = {"Table #", "Capacity", "Customers", "Status", "Waiter"};
+    private static final int[] COLUMN_WIDTHS = {8, 10, 10, 10, 8};
     private static final int TABLE_Y = 3;
     private static final int TABLE_HEIGHT = 10;
-    private static final int[] COLUMN_WIDTHS = {8, 10, 10, 10, 8};
+    private boolean isInitialized;
+
+    private static class TableUpdate {
+        final int tableNumber;
+        final int capacity;
+        final int customers;
+        final String status;
+        final char waiterId;
+
+        TableUpdate(int tableNumber, int capacity, int customers, String status, char waiterId) {
+            this.tableNumber = tableNumber;
+            this.capacity = capacity;
+            this.customers = customers;
+            this.status = status;
+            this.waiterId = waiterId;
+        }
+    }
 
     public DiningRoomView(RestaurantApplication app) {
         super(app);
         this.app = app;
-        this.tableDataMap = new HashMap<>();
+        this.isInitialized = false;
+        this.pendingUpdates = new LinkedList<>();
         RestaurantViewMediator.getInstance().registerView(ViewType.DINING_ROOM, this);
     }
 
@@ -42,80 +60,58 @@ public class DiningRoomView extends GamePlayView {
         window.addLabel("Dining Room", 2, 2);
         tableWidget = window.addTable(2, TABLE_Y, window.getWidth() - 4, TABLE_HEIGHT, 5, 1);
         
-        // Set column labels
+        // Set column labels and widths
         for (int i = 0; i < COLUMN_HEADERS.length; i++) {
             tableWidget.setColumnLabel(i, COLUMN_HEADERS[i]);
             tableWidget.setColumnWidth(i, COLUMN_WIDTHS[i]);
         }
-    }
 
-    public void addTable(int tableNumber, int capacity, int customers, String status, char waiterId) {
-        System.out.println("[DiningRoomView] Updating table " + tableNumber);
+        isInitialized = true;
         
-        TableData data = new TableData(tableNumber, capacity, customers, status, waiterId);
-        tableDataMap.put(tableNumber, data);
+        // Process any pending updates
+        while (!pendingUpdates.isEmpty()) {
+            TableUpdate update = pendingUpdates.poll();
+            updateTableInWidget(update.tableNumber, update.capacity, update.customers, 
+                update.status, update.waiterId);
+        }
     }
 
-    public void updateAllTables() {
+    public void onTableUpdate(int tableNumber, int capacity, int customers, String status, char waiterId) {
+        TableUpdate update = new TableUpdate(tableNumber, capacity, customers, status, waiterId);
+        if (!isInitialized) {
+            System.out.println("[DiningRoomView] View not yet initialized, queueing update for table: " + tableNumber);
+            pendingUpdates.offer(update);
+        } else {
+            updateTableInWidget(tableNumber, capacity, customers, status, waiterId);
+        }
+    }
+
+    private void updateTableInWidget(int tableNumber, int capacity, int customers, String status, char waiterId) {
         if (tableWidget == null) {
             System.err.println("[DiningRoomView] Table widget not initialized");
             return;
         }
 
         try {
-            // Get sorted table numbers
-            List<Integer> tableNumbers = new ArrayList<>(tableDataMap.keySet());
-            Collections.sort(tableNumbers);
-            
-            // Make sure we have at least one row
+            // Make sure we have enough rows
             if (tableWidget.getRowCount() == 0) {
                 tableWidget.insertRowAbove(0);
             }
-                
-            // Update or add rows as needed
-            for (int i = 0; i < tableNumbers.size(); i++) {
-                TableData data = tableDataMap.get(tableNumbers.get(i));
-                
-                // Add new row if needed
-                while (i >= tableWidget.getRowCount()) {
-                    tableWidget.insertRowBelow(tableWidget.getRowCount() - 1);
-                }
-                
-                // Update cells
-                tableWidget.setCellText(0, i, String.valueOf(data.tableNumber));
-                tableWidget.setCellText(1, i, String.valueOf(data.capacity));
-                tableWidget.setCellText(2, i, String.valueOf(data.customers));
-                tableWidget.setCellText(3, i, data.status);
-                tableWidget.setCellText(4, i, String.valueOf(data.waiterId));
+            while (tableNumber >= tableWidget.getRowCount()) {
+                tableWidget.insertRowBelow(tableWidget.getRowCount() - 1);
             }
             
-            // Clear any extra rows
-            for (int i = tableNumbers.size(); i < tableWidget.getRowCount(); i++) {
-                for (int col = 0; col < COLUMN_HEADERS.length; col++) {
-                    tableWidget.setCellText(col, i, "");
-                }
-            }
+            // Update cells
+            tableWidget.setCellText(0, tableNumber - 1, String.valueOf(tableNumber));
+            tableWidget.setCellText(1, tableNumber - 1, String.valueOf(capacity));
+            tableWidget.setCellText(2, tableNumber - 1, String.valueOf(customers));
+            tableWidget.setCellText(3, tableNumber - 1, status);
+            tableWidget.setCellText(4, tableNumber - 1, String.valueOf(waiterId));
 
-            System.out.println("[DiningRoomView] Updated " + tableDataMap.size() + " tables, cleared remaining rows");
+            System.out.println("[DiningRoomView] Updated table " + tableNumber);
         } catch (Exception e) {
-            System.err.println("[DiningRoomView] Error updating tables: " + e.getMessage());
+            System.err.println("[DiningRoomView] Error updating table " + tableNumber + ": " + e.getMessage());
             e.printStackTrace();
-        }
-    }
-
-    private static class TableData {
-        final int tableNumber;
-        final int capacity;
-        final int customers;
-        final String status;
-        final char waiterId;
-
-        TableData(int tableNumber, int capacity, int customers, String status, char waiterId) {
-            this.tableNumber = tableNumber;
-            this.capacity = capacity;
-            this.customers = customers;
-            this.status = status;
-            this.waiterId = waiterId;
         }
     }
 }
