@@ -5,6 +5,7 @@ import com.softwaredesign.project.orderfulfillment.SeatingPlan;
 import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.view.DiningRoomView;
 import com.softwaredesign.project.view.View;
+import com.softwaredesign.project.view.ViewType;
 import com.softwaredesign.project.customer.DineInCustomer;
 
 import java.util.HashMap;
@@ -68,21 +69,19 @@ public class DiningRoomController extends BaseController {
             char waiterId = tableToWaiter.getOrDefault(tableNumber, ' ');
             
             // Notify views through the mediator
-            List<View> views = mediator.getViews("DiningRoom");
-            for (View view : views) {
-                if (view instanceof DiningRoomView) {
-                    DiningRoomView diningView = (DiningRoomView) view;
-                    diningView.onTableUpdate(
-                        tableNumber,
-                        table.getTableCapacity(),
-                        table.getCustomers().size(),
-                        determineTableStatus(table),
-                        waiterId
+            View view = mediator.getView(ViewType.DINING_ROOM);
+            DiningRoomView diningView = (DiningRoomView) view;
+            diningView.onTableUpdate(
+                tableNumber,
+                table.getTableCapacity(),
+                table.getCustomers().size(),
+                determineTableStatus(table),
+                waiterId
                     );
                 }
-            }
+
         }
-    }
+    
 
     public void refreshAllTables() {
         updateView();

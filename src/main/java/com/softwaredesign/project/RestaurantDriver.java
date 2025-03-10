@@ -55,25 +55,39 @@ public class RestaurantDriver {
             System.out.println("[RestaurantDriver] Starting application...");
             
             initializeConfiguration();
-            
-            // Show the welcome view explicitly
             app.showView(ViewType.WELCOME);
-            
+
+            // Create a timer for the game loop
+            java.util.Timer gameTimer = new java.util.Timer();
+            gameTimer.scheduleAtFixedRate(new java.util.TimerTask() {
+                @Override
+                public void run() {
+                    try {
+                        if (configController.isConfigurationComplete()) {
+                            // Only run once when configuration is complete
+                            if (kitchen == null) {
+                                System.out.println("[RestaurantDriver] Configuration complete, initializing game");
+                                createEntitiesFromConfiguration();
+                                initializeOperation();
+                                app.showView(ViewType.DINING_ROOM);
+                            }
+                            // Regular game updates
+                            passEntitiesToGamePlay();
+                        }
+                    } catch (Exception e) {
+                        System.err.println("[RestaurantDriver] Error in game loop: " + e.getMessage());
+                        e.printStackTrace();
+                        gameTimer.cancel();
+                    }
+                }
+            }, 0, 1000); // Check every second
+
+            // This will block until the window is closed
             app.run();
             
-            waitForConfiguration();
-
-            
-            createEntitiesFromConfiguration();
-            initializeOperation();
-            passEntitiesToGamePlay();
-            app.showView(ViewType.DINING_ROOM);
-
-            //TODO - this is a dummy tick placeholder
-            while (true){
-                passEntitiesToGamePlay();
-                Thread.sleep(1000);
-            }
+            // Cleanup when window closes
+            gameTimer.cancel();
+            System.out.println("[RestaurantDriver] Application terminated");
 
         } catch (Exception e) {
             System.err.println("[RestaurantDriver] Fatal error running application: " + e.getMessage());

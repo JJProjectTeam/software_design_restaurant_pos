@@ -68,7 +68,6 @@ public class RestaurantViewMediator {
      * Get all views of a specific type
      */
     public List<View> getViews(String type) {
-        System.out.println("[RestaurantViewMediator] Getting views for type: " + type);
         return registeredViews.getOrDefault(type, new ArrayList<>());
     }
 
