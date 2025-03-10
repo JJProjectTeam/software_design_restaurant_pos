@@ -19,6 +19,10 @@ import com.softwaredesign.project.staff.chefstrategies.LongestQueueFirstStrategy
 import com.softwaredesign.project.staff.chefstrategies.OldestOrderFirstStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import java.nio.file.Paths;
+import java.nio.file.Files;
 
 public class ConfigurationController extends BaseController {
     private Kitchen kitchen;
@@ -56,50 +60,56 @@ public class ConfigurationController extends BaseController {
     //this should set up the components
     private void setupBaseComponents() {        
         try {
-            // Add base ingredients
-            //TODO YO should ingredients really be being done by strings? idk
-            inventory.addIngredient("Beef Patty", 10, 1.0, StationType.GRILL);
-            inventory.addIngredient("Bun", 10, 1.0, StationType.PREP);
-            inventory.addIngredient("Lettuce", 10, 1.0, StationType.PREP);
-            inventory.addIngredient("Tomato", 10, 1.0, StationType.PREP);
-            inventory.addIngredient("Cheese", 10, 1.0, StationType.PREP);
-            inventory.addIngredient("Kebab Meat", 10, 1.0, StationType.GRILL);
-            inventory.addIngredient("Lamb", 100, 3.00, StationType.GRILL);
-            inventory.addIngredient("Pita Bread", 100, 0.60, StationType.PLATE);
-            inventory.addIngredient("Onions", 100, 0.25, StationType.PREP);
-            inventory.addIngredient("Tomatoes", 100, 0.80, StationType.PREP);
-            
-            // Condiments
-            inventory.addIngredient("Garlic Sauce", 100, 0.20, StationType.PREP);
-            inventory.addIngredient("Ketchup", 100, 0.20, StationType.PREP);
-            inventory.addIngredient("Mayo", 100, 0.25, StationType.PREP);
-            inventory.addIngredient("Pickle", 100, 0.30, StationType.PREP);
-            
+            // Read and parse config file
+            String configPath = "src/main/config.json";
+            String jsonContent = Files.readString(Paths.get(configPath));
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode config = mapper.readTree(jsonContent);
+            JsonNode stations = config.path("inventory").path("stations");
+
+            System.out.println("[ConfigurationController] Loading ingredients from config file...");
+
+            // Iterate through each station type
+            for (StationType stationType : StationType.values()) {
+                JsonNode stationNode = stations.path(stationType.toString());
+                if (stationNode.isMissingNode()) {
+                    System.out.println("[ConfigurationController] No ingredients found for station: " + stationType);
+                    continue;
+                }
+
+                // Iterate through ingredients in this station
+                stationNode.fields().forEachRemaining(entry -> {
+                    String ingredientName = entry.getKey();
+                    JsonNode ingredientData = entry.getValue();
+                    int stock = ingredientData.path("stock").asInt();
+                    double price = ingredientData.path("price").asDouble();
+
+                    try {
+                        inventory.addIngredient(ingredientName, stock, price, stationType);
+                        System.out.println("[ConfigurationController] Added ingredient: " + ingredientName + 
+                            " (Stock: " + stock + ", Price: $" + price + ", Station: " + stationType + ")");
+                    } catch (Exception e) {
+                        System.err.println("[ConfigurationController] Error adding ingredient " + 
+                            ingredientName + ": " + e.getMessage());
+                    }
+                });
+            }
+
+            // Initialize other components
+            this.collectionPoint = new CollectionPoint();
+            this.stationManager = new StationManager(collectionPoint);
+            this.orderManager = new OrderManager(collectionPoint, stationManager);
+            this.kitchen = new Kitchen(orderManager, collectionPoint, stationManager);
+            this.menu = new Menu(inventory);
+
+            possibleRecipes.add(new BurgerRecipe(inventory));
+            possibleRecipes.add(new KebabRecipe(inventory));
+
         } catch (Exception e) {
             System.err.println("[ConfigurationController] Error setting up base components: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Failed to setup base components", e);
         }
-        
-        // Kebab ingredients
-        inventory.addIngredient("Lamb", 100, 3.00, StationType.GRILL);
-        inventory.addIngredient("Pita Bread", 100, 0.60, StationType.PLATE);
-        inventory.addIngredient("Onion", 100, 0.25, StationType.PREP);
-        inventory.addIngredient("Tzatziki", 100, 0.80, StationType.PREP);
-        
-        // Condiments
-        inventory.addIngredient("Mustard", 100, 0.20, StationType.PREP);
-        inventory.addIngredient("Ketchup", 100, 0.20, StationType.PREP);
-        inventory.addIngredient("Mayo", 100, 0.25, StationType.PREP);
-        inventory.addIngredient("Pickle", 100, 0.30, StationType.PREP);
-        
-        this.collectionPoint = new CollectionPoint();
-        this.stationManager = new StationManager(collectionPoint);
-        this.orderManager = new OrderManager(collectionPoint, stationManager);
-        this.kitchen = new Kitchen(orderManager, collectionPoint, stationManager); // Pass stationManager
-        this.menu = new Menu(inventory);
-
-        possibleRecipes.add(new BurgerRecipe(inventory));
-        possibleRecipes.add(new KebabRecipe(inventory));
     }
 
     // Methods to read from views and create restaurant entities

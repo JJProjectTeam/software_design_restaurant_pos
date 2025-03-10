@@ -16,6 +16,7 @@ public class InventoryView extends GamePlayView {
     private TTableWidget inventoryTable;
     private Queue<InventoryUpdate> pendingUpdates;
     private Map<String, Integer> ingredientRowMap;  // Track row indices for ingredients
+    private int nextRowIndex = 0;
     private static final String[] COLUMN_HEADERS = {"Ingredient", "Stock", "Price"};
     private static final int[] COLUMN_WIDTHS = {20, 10, 10};
     private static final int TABLE_Y = 3;
@@ -67,13 +68,16 @@ public class InventoryView extends GamePlayView {
 
     protected void createInventoryTable() {
         System.out.println("[InventoryView] Creating inventory table...");
-        inventoryTable = window.addTable(2, TABLE_Y, window.getWidth() - 4, TABLE_HEIGHT, 3, 1);
+        inventoryTable = window.addTable(2, TABLE_Y, window.getWidth() - 4, TABLE_HEIGHT, COLUMN_HEADERS.length, 1);
         
         // Set column labels and widths
         for (int i = 0; i < COLUMN_HEADERS.length; i++) {
             inventoryTable.setColumnLabel(i, COLUMN_HEADERS[i]);
             inventoryTable.setColumnWidth(i, COLUMN_WIDTHS[i]);
         }
+        
+        // Ensure we start with one row
+        inventoryTable.insertRowAbove(0);
     }
 
     public void onIngredientUpdate(String ingredient, int stock, double price) {
@@ -88,25 +92,28 @@ public class InventoryView extends GamePlayView {
 
     private void updateIngredientInTable(String ingredient, int stock, double price) {
         if (inventoryTable == null) {
-            System.out.println("[InventoryView] ERROR: inventoryTable is null!");
+            System.err.println("[InventoryView] Inventory table not initialized");
             return;
         }
-        
+
         try {
             int rowIndex;
             if (ingredientRowMap.containsKey(ingredient)) {
-                // Update existing row
                 rowIndex = ingredientRowMap.get(ingredient);
             } else {
-                // Create new row
+                // Make sure we have at least one row
                 if (inventoryTable.getRowCount() == 0) {
                     inventoryTable.insertRowAbove(0);
-                    rowIndex = 0;
-                } else {
-                    inventoryTable.insertRowBelow(inventoryTable.getRowCount() - 1);
-                    rowIndex = inventoryTable.getRowCount() - 1;
                 }
+                
+                // Add new row if needed
+                while (nextRowIndex >= inventoryTable.getRowCount()) {
+                    inventoryTable.insertRowBelow(inventoryTable.getRowCount() - 1);
+                }
+                
+                rowIndex = nextRowIndex++;
                 ingredientRowMap.put(ingredient, rowIndex);
+                System.out.println("[InventoryView] Created new row " + rowIndex + " for ingredient " + ingredient);
             }
 
             // Update cells
@@ -114,7 +121,6 @@ public class InventoryView extends GamePlayView {
             inventoryTable.setCellText(1, rowIndex, String.valueOf(stock));
             inventoryTable.setCellText(2, rowIndex, String.format("$%.2f", price));
 
-            System.out.println("[InventoryView] Updated ingredient " + ingredient + " at row " + rowIndex);
         } catch (Exception e) {
             System.err.println("[InventoryView] Error updating ingredient " + ingredient + ": " + e.getMessage());
             e.printStackTrace();

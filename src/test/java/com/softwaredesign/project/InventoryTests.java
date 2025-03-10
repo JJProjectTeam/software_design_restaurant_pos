@@ -39,10 +39,10 @@ public class InventoryTests {
 
     @Test
     public void testAddIngredient() {
-        inventory.addIngredient("Tomatoes", 10, 2.50);
-        assertEquals(10, inventory.getStock("Tomatoes"));
-        assertEquals(2.50, inventory.getPrice("Tomatoes"), 0.001);
-        assertTrue(outputStream.toString().contains("Stock update: Tomatoes - 10 units in stock"));
+        inventory.addIngredient("Tomato", 10, 2.50);
+        assertEquals(10, inventory.getStock("Tomato"));
+        assertEquals(2.50, inventory.getPrice("Tomato"), 0.001);
+        assertTrue(outputStream.toString().contains("Stock update: Tomato - 10 units in stock"));
     }
 
     @Test
@@ -55,13 +55,13 @@ public class InventoryTests {
 
     @Test(expected = IllegalArgumentException.class)
     public void testUseNonexistentIngredient() {
-        inventory.useIngredient("Onions", 2);
+        inventory.useIngredient("Onion", 2);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testUseMoreThanAvailable() {
-        inventory.addIngredient("Tomatoes", 5, 2.50);
-        inventory.useIngredient("Tomatoes", 6);
+        inventory.addIngredient("Tomato", 5, 2.50);
+        inventory.useIngredient("Tomato", 6);
     }
 
     @Test
@@ -77,13 +77,13 @@ public class InventoryTests {
 
     @Test
     public void testMultipleIngredients() {
-        inventory.addIngredient("Tomatoes", 10, 2.50);
+        inventory.addIngredient("Tomato", 10, 2.50);
         inventory.addIngredient("Garlic", 8, 1.00);
-        inventory.addIngredient("Onions", 15, 1.50);
+        inventory.addIngredient("Onion", 15, 1.50);
 
-        assertEquals(10, inventory.getStock("Tomatoes"));
+        assertEquals(10, inventory.getStock("Tomato"));
         assertEquals(8, inventory.getStock("Garlic"));
-        assertEquals(15, inventory.getStock("Onions"));
+        assertEquals(15, inventory.getStock("Onion"));
     }
 
     @Test
@@ -98,13 +98,13 @@ public class InventoryTests {
 
     @Test
     public void testConsecutiveStockUpdates() {
-        inventory.addIngredient("Tomatoes", 10, 2.50);
+        inventory.addIngredient("Tomato", 10, 2.50);
         outputStream.reset(); // Clear previous output
-        inventory.useIngredient("Tomatoes", 3); // 7 remaining, no warning
-        inventory.useIngredient("Tomatoes", 3); // 4 remaining, should warn
+        inventory.useIngredient("Tomato", 3); // 7 remaining, no warning
+        inventory.useIngredient("Tomato", 3); // 4 remaining, should warn
         
         String output = outputStream.toString();
-        assertTrue(output.contains("WARNING: Low stock alert for Tomatoes"));
+        assertTrue(output.contains("WARNING: Low stock alert for Tomato"));
         assertTrue(output.contains("only 4 remaining"));
     }
 

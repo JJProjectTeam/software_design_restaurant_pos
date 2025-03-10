@@ -69,10 +69,20 @@ public class RestaurantDriver {
                                 System.out.println("[RestaurantDriver] Configuration complete, initializing game");
                                 createEntitiesFromConfiguration();
                                 initializeOperation();
+                                
+                                // Show dining room view and do initial update
                                 app.showView(ViewType.DINING_ROOM);
+                                Thread.sleep(100); // Small delay for view initialization
                             }
-                            // Regular game updates
-                            passEntitiesToGamePlay();
+
+                            // Update views one at a time to avoid concurrent modification
+                            synchronized(mediator) {
+                                diningRoomController.updateView();
+                                Thread.sleep(50);
+                                kitchenController.updateView();
+                                Thread.sleep(50);
+                                inventoryController.updateView();
+                            }
                         }
                     } catch (Exception e) {
                         System.err.println("[RestaurantDriver] Error in game loop: " + e.getMessage());

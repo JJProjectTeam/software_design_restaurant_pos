@@ -86,9 +86,9 @@ public class KitchenSimulationExample {
         // Add initial ingredients to inventory with their station types
         System.out.println("Initializing Inventory:");
         System.out.println("----------------------");
-        inventory.addIngredient("Tomatoes", 100, 2.50, StationType.PREP);
+        inventory.addIngredient("Tomato", 100, 2.50, StationType.PREP);
         inventory.addIngredient("Garlic", 80, 1.00, StationType.PREP);
-        inventory.addIngredient("Onions", 150, 1.50, StationType.PREP);
+        inventory.addIngredient("Onion", 150, 1.50, StationType.PREP);
         inventory.addIngredient("Beef Patty", 200, 5.00, StationType.GRILL);
         inventory.addIngredient("Bun", 200, 5.00, StationType.PLATE);
         inventory.addIngredient("Chicken", 200, 4.00, StationType.GRILL);
