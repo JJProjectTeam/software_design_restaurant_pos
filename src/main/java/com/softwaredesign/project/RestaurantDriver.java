@@ -43,6 +43,9 @@ public class RestaurantDriver {
         try{
             this.app = new RestaurantApplication();
             this.mediator = RestaurantViewMediator.getInstance();
+            
+            // Set this driver instance in the application for restart functionality
+            this.app.setDriver(this);
         }
         catch (Exception e){
             System.err.println("[RestaurantDriver] Fatal error running application: " + e.getMessage());
@@ -153,11 +156,66 @@ public class RestaurantDriver {
         
         System.out.println("[RestaurantDriver] Restaurant initialized and ready for operation");
     }
-    public void passEntitiesToGamePlay(){
+    public synchronized void passEntitiesToGamePlay(){
         //TODO this will be called on each 'tick'
-        diningRoomController.updateView();
-        kitchenController.updateView();
-        inventoryController.updateView();
+        try {
+            if (diningRoomController != null) {
+                diningRoomController.updateView();
+            }
+            
+            if (kitchenController != null) {
+                kitchenController.updateView();
+            }
+            
+            if (inventoryController != null) {
+                inventoryController.updateView();
+            }
+        } catch (Exception e) {
+            System.err.println("[RestaurantDriver] Error updating views: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Completely restarts the application by resetting all components and reinitializing
+     */
+    public synchronized void restart() {
+        System.out.println("[RestaurantDriver] Performing full application restart");
+        
+        // Stop any ongoing operations
+        try {
+            // Reset all entity references
+            this.waiters = null;
+            this.chefs = null;
+            this.kitchen = null;
+            this.menu = null;
+            this.orderManager = null;
+            this.tables = null;
+            this.inventory = null;
+            this.seatingPlan = null;
+            
+            // Reset controllers
+            this.diningRoomController = null;
+            this.kitchenController = null;
+            this.inventoryController = null;
+            
+            // Reset configuration controller but keep the mediator
+            this.configController = null;
+            
+            // Reinitialize configuration
+            initializeConfiguration();
+            
+            // Tell the application to show the welcome view
+            // Use SwingUtilities.invokeLater to ensure UI updates happen on the EDT
+            javax.swing.SwingUtilities.invokeLater(() -> {
+                app.showView(ViewType.WELCOME);
+            });
+            
+            System.out.println("[RestaurantDriver] Application restart complete");
+        } catch (Exception e) {
+            System.err.println("[RestaurantDriver] Error during restart: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {
