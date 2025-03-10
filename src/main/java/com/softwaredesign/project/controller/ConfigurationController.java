@@ -126,13 +126,23 @@ public class ConfigurationController extends BaseController {
                     int minChefs = chefRules.path("min").asInt(1);
                     int maxChefs = chefRules.path("max").asInt(20);
                     int maxStationsPerChef = chefRules.path("maxStationsPerChef").asInt(10);
+                    int maxSpeed = chefRules.path("maxSpeed").asInt(5);
+                    double standardPayPerHour = chefRules.path("standardPayPerHour").asDouble(15.0);
+                    double payMultiplierBySpeed = chefRules.path("payMultiplierBySpeed").asDouble(1.0);
+                    double payMultiplierByStation = chefRules.path("payMultiplierByStation").asDouble(1.0);
                     
                     chefView.setMinChefs(minChefs);
                     chefView.setMaxChefs(maxChefs);
                     chefView.setMaxStationsPerChef(maxStationsPerChef);
+                    chefView.setMaxSpeed(maxSpeed);
+                    chefView.setStandardPayPerHour(standardPayPerHour);
+                    chefView.setPayMultiplierBySpeed(payMultiplierBySpeed);
+                    chefView.setPayMultiplierByStation(payMultiplierByStation);
                     
                     System.out.println("[ConfigurationController] Set chef constants - Min Chefs: " + 
-                        minChefs + ", Max Chefs: " + maxChefs + ", Max Stations Per Chef: " + maxStationsPerChef);
+                        minChefs + ", Max Chefs: " + maxChefs + ", Max Stations Per Chef: " + maxStationsPerChef +
+                        ", Max Speed: " + maxSpeed + ", Standard Pay: " + standardPayPerHour +
+                        ", Speed Multiplier: " + payMultiplierBySpeed + ", Station Multiplier: " + payMultiplierByStation);
                 }
                 
                 // Set kitchen constants
@@ -182,12 +192,19 @@ public class ConfigurationController extends BaseController {
             if (!waiterRules.isMissingNode()) {
                 int minWaiters = waiterRules.path("min").asInt(1); // Default to 1 if not found
                 int maxWaiters = waiterRules.path("max").asInt(10); // Default to 10 if not found
+                int maxSpeed = waiterRules.path("maxSpeed").asInt(5);
+                double standardPayPerHour = waiterRules.path("standardPayPerHour").asDouble(10.0);
+                double payMultiplierBySpeed = waiterRules.path("payMultiplierBySpeed").asDouble(1.0);
                 
                 diningView.setMinWaiters(minWaiters);
                 diningView.setMaxWaiters(maxWaiters);
+                diningView.setMaxSpeed(maxSpeed);
+                diningView.setStandardPayPerHour(standardPayPerHour);
+                diningView.setPayMultiplierBySpeed(payMultiplierBySpeed);
                 
                 System.out.println("[ConfigurationController] Set waiter constants - Min Waiters: " + 
-                    minWaiters + ", Max Waiters: " + maxWaiters);
+                    minWaiters + ", Max Waiters: " + maxWaiters + ", Max Speed: " + maxSpeed +
+                    ", Standard Pay: " + standardPayPerHour + ", Speed Multiplier: " + payMultiplierBySpeed);
             }
             
             // Set menu configuration constants

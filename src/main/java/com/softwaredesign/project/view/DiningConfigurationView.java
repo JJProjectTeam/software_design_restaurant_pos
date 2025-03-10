@@ -21,6 +21,9 @@ public class DiningConfigurationView extends ConfigurationView {
     private int currentTableCapacity;
     private int minWaiters;
     private int maxWaiters; 
+    private int maxSpeed = 5; // Default value
+    private double standardPayPerHour = 10.0; // Default value
+    private double payMultiplierBySpeed = 1.0; // Default value
 
     // Public setters for configuration constants
     public void setMaxTables(int maxTables) {
@@ -53,6 +56,30 @@ public class DiningConfigurationView extends ConfigurationView {
 
     public void setMaxWaiters(int maxWaiters) {
         this.maxWaiters = maxWaiters;
+    }
+
+    public void setMaxSpeed(int maxSpeed) {
+        this.maxSpeed = maxSpeed;
+        // Update the speed combo box if it exists
+        if (speedCombo != null) {
+            try {
+                List<String> speeds = new ArrayList<>();
+                for (int i = 1; i <= maxSpeed; i++) {
+                    speeds.add(String.valueOf(i));
+                }
+                speedCombo.setList(speeds);
+            } catch (Exception e) {
+                System.err.println("[DiningConfigurationView] Error updating speed combo box: " + e.getMessage());
+            }
+        }
+    }
+
+    public void setStandardPayPerHour(double standardPayPerHour) {
+        this.standardPayPerHour = standardPayPerHour;
+    }
+
+    public void setPayMultiplierBySpeed(double payMultiplierBySpeed) {
+        this.payMultiplierBySpeed = payMultiplierBySpeed;
     }
 
     // Local storage for waiter data
@@ -263,9 +290,9 @@ public class DiningConfigurationView extends ConfigurationView {
             // Speed selection
             window.addLabel("Speed:", 30, 18);
             List<String> speeds = new ArrayList<>();
-            speeds.add("1");
-            speeds.add("2");
-            speeds.add("3");
+            for (int i = 1; i <= maxSpeed; i++) {
+                speeds.add(String.valueOf(i));
+            }
             speedCombo = window.addComboBox(36, 18, 10, speeds, 0, 3, nullAction);
             
             // Add waiter button
@@ -328,7 +355,7 @@ public class DiningConfigurationView extends ConfigurationView {
     }
 
     private double calculateCost(int speed) {
-        return 15.0 + (speed - 1) * 5.0;
+        return standardPayPerHour * (1 + (speed - 1) * payMultiplierBySpeed);
     }
 
     @Override

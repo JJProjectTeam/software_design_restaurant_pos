@@ -49,8 +49,7 @@ public class KitchenView extends GamePlayView {
 
     @Override
     protected void addViewContent() {
-        window.addLabel("Kitchen", 2, 6);
-        window.addLabel("Stations", 2, 8);
+        window.addLabel("Stations", 2, 2);
         createKitchenStationsTable();
         
         // Now that the view is fully initialized
@@ -65,7 +64,7 @@ public class KitchenView extends GamePlayView {
 
     protected void createKitchenStationsTable() {
         System.out.println("[KitchenView] Creating kitchen table...");
-        kitchenStations = window.addTable(2, 10, window.getWidth() - 4, 10, 5, 10);
+        kitchenStations = window.addTable(2, 3, window.getWidth() - 4, 10, 5, 10);
 
         // Set column labels and widths
         for (int i = 0; i < COLUMN_HEADERS.length; i++) {

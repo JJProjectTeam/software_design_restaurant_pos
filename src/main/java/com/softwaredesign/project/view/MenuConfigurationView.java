@@ -5,12 +5,12 @@ import jexer.*;
 
 public class MenuConfigurationView extends ConfigurationView {
     // UI Components
-    private Map<String, List<String>> availableRecipes; // For display only
-    private Map<String, Boolean> selectedRecipeStates; // Track selection state
+    private Map<String, List<String>> availableRecipes; 
+    private Map<String, Boolean> selectedRecipeStates; 
     private Set<String> selectedRecipes; // Just store the names of selected recipes
-    private TList recipeList; // Scrollable list for recipes
-    private int minRecipes = 1; // Default value
-    private int maxRecipes = 10; // Default value
+    private TList recipeList; 
+    private int minRecipes;
+    private int maxRecipes;
 
     public MenuConfigurationView(RestaurantApplication app) {
         super(app);

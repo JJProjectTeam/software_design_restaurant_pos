@@ -50,13 +50,17 @@ public class ChefConfigurationView extends ConfigurationView {
     private TLabel plateCountLabel;
 
     // Add these instance variables at the top of the class
-    private int minChefs = 1; // Default value
-    private int maxChefs = 20; // Default value
-    private int maxStationsPerChef = 10; // Default value
-    private int minStations = 3; // Default value
-    private int maxStations = 20; // Default value
-    private int maxInstancesOfStation = 10; // Default value
-    private int minInstancesOfStation = 1; // Default value
+    private int minChefs;
+    private int maxChefs;
+    private int maxStationsPerChef;
+    private int minStations;
+    private int maxStations;
+    private int maxInstancesOfStation;
+    private int minInstancesOfStation;
+    private int maxSpeed = 5; // Default value
+    private double standardPayPerHour = 15.0; // Default value
+    private double payMultiplierBySpeed = 1.0; // Default value
+    private double payMultiplierByStation = 1.0; // Default value
 
     public ChefConfigurationView(RestaurantApplication app) {
         super(app);
@@ -290,9 +294,9 @@ public class ChefConfigurationView extends ConfigurationView {
             // Speed selection
             window.addLabel("Speed:", 30, 18);
             List<String> speeds = new ArrayList<>();
-            speeds.add("1");
-            speeds.add("2");
-            speeds.add("3");
+            for (int i = 1; i <= maxSpeed; i++) {
+                speeds.add(String.valueOf(i));
+            }
             speedCombo = window.addComboBox(36, 18, 8, speeds, 0, 4, localNullAction);
             
             // Strategy selection
@@ -471,7 +475,7 @@ public class ChefConfigurationView extends ConfigurationView {
             }
             try {
                 int speed = Integer.parseInt(speedText);
-                if (speed < 1 || speed > 3) {
+                if (speed < 1 || speed > 5) {
                     showError("Invalid speed value");
                     return false;
                 }
@@ -510,7 +514,7 @@ public class ChefConfigurationView extends ConfigurationView {
     }
 
     private double calculateCost(int speed, int numberOfStations) {
-        return speed * numberOfStations * 100.0;
+        return standardPayPerHour * (1 + (speed - 1) * payMultiplierBySpeed) * (1 + (numberOfStations - 1) * payMultiplierByStation);
     }
 
     private boolean validateStationCoverage() {
@@ -652,5 +656,33 @@ public class ChefConfigurationView extends ConfigurationView {
 
     public void setMinInstancesOfStation(int minInstancesOfStation) {
         this.minInstancesOfStation = minInstancesOfStation;
+    }
+
+    public void setMaxSpeed(int maxSpeed) {
+        this.maxSpeed = maxSpeed;
+        // Update the speed combo box if it exists
+        if (speedCombo != null) {
+            try {
+                List<String> speeds = new ArrayList<>();
+                for (int i = 1; i <= maxSpeed; i++) {
+                    speeds.add(String.valueOf(i));
+                }
+                speedCombo.setList(speeds);
+            } catch (Exception e) {
+                System.err.println("[ChefConfigurationView] Error updating speed combo box: " + e.getMessage());
+            }
+        }
+    }
+
+    public void setStandardPayPerHour(double standardPayPerHour) {
+        this.standardPayPerHour = standardPayPerHour;
+    }
+
+    public void setPayMultiplierBySpeed(double payMultiplierBySpeed) {
+        this.payMultiplierBySpeed = payMultiplierBySpeed;
+    }
+
+    public void setPayMultiplierByStation(double payMultiplierByStation) {
+        this.payMultiplierByStation = payMultiplierByStation;
     }
 }
