@@ -71,23 +71,7 @@ public class DiningRoomView extends GamePlayView {
         }
     }
 
-    public void updateFromController(BaseController controller) {
-        if (!(controller instanceof DiningRoomController)) {
-            return;
-        }
-        
-        DiningRoomController diningController = (DiningRoomController) controller;
-        // Clear existing rows except header
-        while (tableWidget.getRowCount() > 1) {
-            tableWidget.deleteRow(tableWidget.getRowCount() - 1);
-        }
-        
-        // Add all tables
-        for (Table table : diningController.getSeatingPlan().getAllTables()) {
-            onTableUpdate(table.getTableNumber(), table.getTableCapacity(), 
-                table.getCustomers().size(), determineTableStatus(table), ' ');
-        }
-    }
+    
 
     public void onTableUpdate(int tableNumber, int capacity, int customers, String status, char waiterId) {
         TableData data = new TableData(tableNumber, capacity, customers, status, waiterId);

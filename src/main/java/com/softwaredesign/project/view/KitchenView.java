@@ -80,6 +80,7 @@ public class KitchenView extends GamePlayView {
     public void onStationUpdate(int stationID, String station, int backlog, String chef, char inUse) {
         StationUpdate update = new StationUpdate(stationID, station, backlog, chef, inUse);
         if (!isInitialized) {
+            System.out.println("[KitchenView] View not yet initialized, queueing update for station: " + station);
             pendingUpdates.offer(update);
         } else {
             updateStationInTable(stationID, station, backlog, chef, inUse);
@@ -88,12 +89,14 @@ public class KitchenView extends GamePlayView {
 
     private void updateStationInTable(int stationID, String stationName, int backlog, String chef, char inUse) {
         if (kitchenStations == null || window == null) {
+            System.out.println("[KitchenView] ERROR: kitchenStations or window is null!");
             return;
         }
         
         try {
             // Check if the row exists using station name as the label/index
             if (kitchenStations.getRowLabel(stationID) == null) {
+                System.out.println("[KitchenView] Creating new row for station " + stationID);
                 kitchenStations.insertRowBelow(stationID);
                 kitchenStations.setRowLabel(stationID, Integer.toString(stationID));
             }
@@ -104,13 +107,16 @@ public class KitchenView extends GamePlayView {
             kitchenStations.setCellText(3, stationID, chef);
             kitchenStations.setCellText(4, stationID, String.valueOf(inUse));
 
+            System.out.println("[KitchenView] Successfully updated station " + stationID + " in the view");
         } catch (Exception e) {
+            System.out.println("[KitchenView] ERROR updating station " + stationID + ": " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     @Override
     public void cleanup() {
+        System.out.println("[KitchenView] Cleaning up view, unregistering from mediator");
         mediator.unregisterView("Kitchen", this);
     }
 }

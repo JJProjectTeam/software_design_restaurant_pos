@@ -10,7 +10,6 @@ import com.softwaredesign.project.view.*;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.order.OrderManager;
-import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.orderfulfillment.SeatingPlan;
 import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.staff.Chef;

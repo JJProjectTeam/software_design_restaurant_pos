@@ -22,18 +22,10 @@ public class Kitchen extends Entity {
     private List<Recipe> pendingRecipes = new ArrayList<>(); // recipes to be complete 
     private Map<Recipe, List<RecipeTask>> pendingTasks = new HashMap<>(); // tasks to be completed
     
-    public Kitchen(OrderManager orderManager, CollectionPoint collectionPoint) {
+    public Kitchen(OrderManager orderManager, CollectionPoint collectionPoint, StationManager stationManager) {
         this.orderManager = orderManager;
         this.collectionPoint = collectionPoint;
-        this.stationManager = new StationManager(collectionPoint);
-        
-        // Set the kitchen reference in/ Set the kitchen reference in each station
-        for (Station station : stationManager.getAllStations()) {
-            station.setKitchen(this);
-        }
-        
-        // Register this kitchen with the game engine
-        com.softwaredesign.project.engine.GameEngine.getInstance().registerEntity(this);
+        this.stationManager = stationManager;
     }
     
     public void setOrderManager(OrderManager orderManager) {

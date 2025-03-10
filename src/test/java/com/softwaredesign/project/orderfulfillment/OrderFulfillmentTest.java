@@ -47,7 +47,7 @@ public class OrderFulfillmentTest {
         collectionPoint = new CollectionPoint();
         StationManager stationManager = new StationManager(collectionPoint);
         orderManager = new OrderManager(collectionPoint, stationManager);
-        kitchen = new Kitchen(orderManager, collectionPoint);
+        kitchen = new Kitchen(orderManager,  collectionPoint, stationManager);
         menu = new Menu(inventoryService);
         waiter = new Waiter(15.0, 1.0, orderManager, menu);
     }

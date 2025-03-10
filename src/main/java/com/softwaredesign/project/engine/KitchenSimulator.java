@@ -42,7 +42,7 @@ public class KitchenSimulator {
         
         // Initialize components
         collectionPoint = new CollectionPoint();
-        kitchen = new Kitchen(null, collectionPoint); // Temporarily set orderManager to null
+        kitchen = new Kitchen(null, collectionPoint, null); // Temporarily set orderManager to null
         
         // Create the chef manager
         chefManager = new ChefManager();

@@ -95,7 +95,7 @@ public class ConfigurationController extends BaseController {
         this.collectionPoint = new CollectionPoint();
         this.stationManager = new StationManager(collectionPoint);
         this.orderManager = new OrderManager(collectionPoint, stationManager);
-        this.kitchen = new Kitchen(orderManager, collectionPoint);
+        this.kitchen = new Kitchen(orderManager, collectionPoint, stationManager); // Pass stationManager
         this.menu = new Menu(inventory);
 
         possibleRecipes.add(new BurgerRecipe(inventory));
@@ -169,36 +169,39 @@ public class ConfigurationController extends BaseController {
     private void createChefs(Map<String, ChefConfigurationView.ChefData> chefData) {
         System.out.println("[ConfigurationController] Creating chefs from configuration");
         chefs = new ArrayList<>();
-        stations = new ArrayList<>();  // Initialize the stations list
         
         for (ChefConfigurationView.ChefData data : chefData.values()) {
             try {
-                // Create chef strategy
                 ChefStrategy strategy = createChefStrategy(data.getStrategy());
                 
-                // Create chef with data
                 Chef chef = new Chef(
                     data.getCostPerHour(),
                     data.getSpeed(),
                     strategy, 
-                    stationManager
+                    stationManager  // Pass stationManager to chef
                 );
                 
-                // Add stations to chef's qualifications
+                // Find available stations that match chef's qualifications
                 for (String stationType : data.getStations()) {
-                    chef.assignToStation(StationType.valueOf(stationType.toUpperCase()));
+                    StationType type = StationType.valueOf(stationType.toUpperCase());
+                    // Find an unassigned station of this type
+                    for (Station station : stationManager.getAllStations()) {
+                        if (station.getType() == type && !station.hasChef()) {
+                            chef.assignToStation(type);
+                            System.out.println("[ConfigurationController] Assigned chef to " + type + " station");
+                            break;
+                        }
+                    }
                 }
                 
                 chefs.add(chef);
-                System.out.println("[ConfigurationController] Created chef: " + chef.getName() 
-                    + " with " + data.getStations().size() + " qualifications");
+                System.out.println("[ConfigurationController] Created chef: " + chef.getName());
                 
             } catch (Exception e) {
                 System.err.println("[ConfigurationController] Error creating chef: " + e.getMessage());
                 throw new RuntimeException("Failed to create chef: " + data.getName(), e);
             }
         }
-        System.out.println("[ConfigurationController] Created " + chefs.size() + " chefs");
     }
 
     //TODO: add actual strategies
@@ -285,36 +288,26 @@ public class ConfigurationController extends BaseController {
      * Create stations based on the configuration
      */
     private void createStations(int grillCount, int prepCount, int plateCount) {
+        System.out.println("[ConfigurationController] Creating stations");
+        
+        // Clear existing stations
+        
+        // Create and add stations
+        createStationsOfType(StationType.GRILL, grillCount);
+        createStationsOfType(StationType.PREP, prepCount);
+        createStationsOfType(StationType.PLATE, plateCount);
+        
+        System.out.println("[ConfigurationController] Created total stations: " + 
+            stationManager.getAllStations().size());
+    }
 
-        // Clear existing stations if any
-        stationManager = new StationManager(collectionPoint);
-        
-        // Create Grill stations
-        for (int i = 0; i < grillCount; i++) {
-            Station grillStation = new Station(StationType.GRILL, collectionPoint);
-            stationManager.addStation(grillStation);
-        }
-        
-        // Create Prep stations
-        for (int i = 0; i < prepCount; i++) {
-            Station prepStation = new Station(StationType.PREP, collectionPoint);
-            stationManager.addStation(prepStation);
-        }
-        
-        // Create Plate stations
-        for (int i = 0; i < plateCount; i++) {
-            Station plateStation = new Station(StationType.PLATE, collectionPoint);
-            stationManager.addStation(plateStation);
-        }
-        
-        // Create a new kitchen with the station manager
-        kitchen = new Kitchen(orderManager, collectionPoint);
-        
-        // Set the kitchen reference in each station
-        for (Station station : stationManager.getAllStations()) {
+    private void createStationsOfType(StationType type, int count) {
+        for (int i = 0; i < count; i++) {
+            Station station = new Station(type, collectionPoint);
             station.setKitchen(kitchen);
+            stationManager.addStation(station);
+            System.out.println("[ConfigurationController] Created " + type + " station " + (i + 1));
         }
-        
     }
 
     // Getters for restaurant components
