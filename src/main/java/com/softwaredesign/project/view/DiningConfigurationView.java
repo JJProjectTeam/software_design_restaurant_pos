@@ -13,10 +13,47 @@ public class DiningConfigurationView extends ConfigurationView {
     private TComboBox speedCombo;
     private TLabel tableCountLabel;
     private TLabel tableCapacityLabel;
-    private int maxTables = 20;
-    private int currentTableCount = 0;
-    private int maxCapacity = 10;
-    private int currentTableCapacity = 0;
+    private TLabel maxTablesLabel;
+    private TLabel maxCapacityLabel; 
+    private int maxTables;
+    private int currentTableCount;
+    private int maxCapacity;
+    private int currentTableCapacity;
+    private int minWaiters;
+    private int maxWaiters; 
+
+    // Public setters for configuration constants
+    public void setMaxTables(int maxTables) {
+        this.maxTables = maxTables;
+        // Update the label if it exists
+        if (maxTablesLabel != null) {
+            try {
+                maxTablesLabel.setLabel("(Maximum " + maxTables + " tables)");
+            } catch (Exception e) {
+                System.err.println("[DiningConfigurationView] Error updating max tables label: " + e.getMessage());
+            }
+        }
+    }
+
+    public void setMaxCapacity(int maxCapacity) {
+        this.maxCapacity = maxCapacity;
+        // Update the label if it exists
+        if (maxCapacityLabel != null) {
+            try {
+                maxCapacityLabel.setLabel("(Maximum " + maxCapacity + " seats per table)");
+            } catch (Exception e) {
+                System.err.println("[DiningConfigurationView] Error updating max capacity label: " + e.getMessage());
+            }
+        }
+    }
+
+    public void setMinWaiters(int minWaiters) {
+        this.minWaiters = minWaiters;
+    }
+
+    public void setMaxWaiters(int maxWaiters) {
+        this.maxWaiters = maxWaiters;
+    }
 
     // Local storage for waiter data
     private Map<String, WaiterData> waiters = new HashMap<>();
@@ -165,7 +202,7 @@ public class DiningConfigurationView extends ConfigurationView {
                 }
             });
             
-            window.addLabel("(Maximum " + maxTables + " tables)", 40, 20);
+            maxTablesLabel = window.addLabel("(Maximum " + maxTables + " tables)", 40, 20);
             
             // Table capacity configuration
             window.addLabel("Table Capacity:", 2, 22);
@@ -190,7 +227,7 @@ public class DiningConfigurationView extends ConfigurationView {
                 }
             });
             
-            window.addLabel("(Maximum " + maxCapacity + " seats per table)", 40, 22);
+            maxCapacityLabel = window.addLabel("(Maximum " + maxCapacity + " seats per table)", 40, 22);
         } catch (Exception e) {
             System.err.println("[DiningConfigurationView] Error creating table configuration: " + e.getMessage());
             e.printStackTrace();
@@ -297,8 +334,12 @@ public class DiningConfigurationView extends ConfigurationView {
     @Override
     protected boolean validateConfiguration() {
         try {
-            if (waiters.isEmpty()) {
-                showError("At least one waiter must be added");
+            if (waiters.size() < minWaiters) {
+                showError("At least " + minWaiters + " waiter(s) must be added");
+                return false;
+            }
+            if (waiters.size() > maxWaiters) {
+                showError("Maximum number of waiters (" + maxWaiters + ") exceeded");
                 return false;
             }
             if (currentTableCount == 0) {
@@ -354,9 +395,9 @@ public class DiningConfigurationView extends ConfigurationView {
                 return;
             }
             
-            // Don't allow removing the last waiter
-            if (waiters.size() <= 1) {
-                showError("Cannot remove the last waiter. At least one waiter is required.");
+            // Don't allow removing waiters below minimum
+            if (waiters.size() <= minWaiters) {
+                showError("Cannot remove waiter. At least " + minWaiters + " waiter(s) required.");
                 return;
             }
             

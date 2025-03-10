@@ -28,6 +28,10 @@
         "maxInstancesOfStation": 10, 
         "minInstancesOfStation": 1
     },
+    "menuRules": {
+        "minRecipes": 1,
+        "maxRecipes": 10
+    },
     "inventory": {
         "individualStockEnabled": true,
         "defaultStock": 100,

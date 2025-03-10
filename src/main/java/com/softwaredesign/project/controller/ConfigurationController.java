@@ -105,10 +105,112 @@ public class ConfigurationController extends BaseController {
             possibleRecipes.add(new BurgerRecipe(inventory));
             possibleRecipes.add(new KebabRecipe(inventory));
 
+            // Configure views with constants from config
+            configureViews(config);
+
         } catch (Exception e) {
             System.err.println("[ConfigurationController] Error setting up base components: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Failed to setup base components", e);
+        }
+    }
+
+    private void configureViews(JsonNode config) {
+        try {
+            // Get chef configuration view
+            ChefConfigurationView chefView = (ChefConfigurationView) mediator.getView(ViewType.CHEF_CONFIGURATION);
+            if (chefView != null) {
+                // Set chef constants
+                JsonNode chefRules = config.path("staffRules").path("chefs");
+                if (!chefRules.isMissingNode()) {
+                    int minChefs = chefRules.path("min").asInt(1);
+                    int maxChefs = chefRules.path("max").asInt(20);
+                    int maxStationsPerChef = chefRules.path("maxStationsPerChef").asInt(10);
+                    
+                    chefView.setMinChefs(minChefs);
+                    chefView.setMaxChefs(maxChefs);
+                    chefView.setMaxStationsPerChef(maxStationsPerChef);
+                    
+                    System.out.println("[ConfigurationController] Set chef constants - Min Chefs: " + 
+                        minChefs + ", Max Chefs: " + maxChefs + ", Max Stations Per Chef: " + maxStationsPerChef);
+                }
+                
+                // Set kitchen constants
+                JsonNode kitchenRules = config.path("kitchenRules");
+                if (!kitchenRules.isMissingNode()) {
+                    int minStations = kitchenRules.path("minStations").asInt(3);
+                    int maxStations = kitchenRules.path("maxStations").asInt(20);
+                    int maxInstancesOfStation = kitchenRules.path("maxInstancesOfStation").asInt(10);
+                    int minInstancesOfStation = kitchenRules.path("minInstancesOfStation").asInt(1);
+                    
+                    chefView.setMinStations(minStations);
+                    chefView.setMaxStations(maxStations);
+                    chefView.setMaxInstancesOfStation(maxInstancesOfStation);
+                    chefView.setMinInstancesOfStation(minInstancesOfStation);
+                    
+                    System.out.println("[ConfigurationController] Set kitchen constants - Min Stations: " + 
+                        minStations + ", Max Stations: " + maxStations + 
+                        ", Min Instances: " + minInstancesOfStation + 
+                        ", Max Instances: " + maxInstancesOfStation);
+                }
+            } else {
+                System.err.println("[ConfigurationController] Chef configuration view not found");
+            }
+            
+            // Get dining configuration view
+            DiningConfigurationView diningView = (DiningConfigurationView) mediator.getView(ViewType.DINING_CONFIGURATION);
+            if (diningView == null) {
+                System.err.println("[ConfigurationController] Dining configuration view not found");
+                return;
+            }
+
+            // Set dining room constants
+            JsonNode diningRoomRules = config.path("diningRoomRules");
+            if (!diningRoomRules.isMissingNode()) {
+                int maxTables = diningRoomRules.path("maxTables").asInt(20); // Default to 20 if not found
+                int maxCapacity = diningRoomRules.path("maxCapacity").asInt(10); // Default to 10 if not found
+                
+                diningView.setMaxTables(maxTables);
+                diningView.setMaxCapacity(maxCapacity);
+                
+                System.out.println("[ConfigurationController] Set dining room constants - Max Tables: " + 
+                    maxTables + ", Max Capacity: " + maxCapacity);
+            }
+
+            // Set waiter constants
+            JsonNode waiterRules = config.path("staffRules").path("waiters");
+            if (!waiterRules.isMissingNode()) {
+                int minWaiters = waiterRules.path("min").asInt(1); // Default to 1 if not found
+                int maxWaiters = waiterRules.path("max").asInt(10); // Default to 10 if not found
+                
+                diningView.setMinWaiters(minWaiters);
+                diningView.setMaxWaiters(maxWaiters);
+                
+                System.out.println("[ConfigurationController] Set waiter constants - Min Waiters: " + 
+                    minWaiters + ", Max Waiters: " + maxWaiters);
+            }
+            
+            // Set menu configuration constants
+            MenuConfigurationView menuView = (MenuConfigurationView) mediator.getView(ViewType.MENU_CONFIGURATION);
+            if (menuView != null) {
+                JsonNode menuRules = config.path("menuRules");
+                if (!menuRules.isMissingNode()) {
+                    int minRecipes = menuRules.path("minRecipes").asInt(1); // Default to 1 if not found
+                    int maxRecipes = menuRules.path("maxRecipes").asInt(10); // Default to 10 if not found
+                    
+                    menuView.setMinRecipes(minRecipes);
+                    menuView.setMaxRecipes(maxRecipes);
+                    
+                    System.out.println("[ConfigurationController] Set menu constants - Min Recipes: " + 
+                        minRecipes + ", Max Recipes: " + maxRecipes);
+                }
+            } else {
+                System.err.println("[ConfigurationController] Menu configuration view not found");
+            }
+            
+        } catch (Exception e) {
+            System.err.println("[ConfigurationController] Error configuring views: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

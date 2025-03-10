@@ -49,6 +49,15 @@ public class ChefConfigurationView extends ConfigurationView {
     private TLabel prepCountLabel;
     private TLabel plateCountLabel;
 
+    // Add these instance variables at the top of the class
+    private int minChefs = 1; // Default value
+    private int maxChefs = 20; // Default value
+    private int maxStationsPerChef = 10; // Default value
+    private int minStations = 3; // Default value
+    private int maxStations = 20; // Default value
+    private int maxInstancesOfStation = 10; // Default value
+    private int minInstancesOfStation = 1; // Default value
+
     public ChefConfigurationView(RestaurantApplication app) {
         super(app);
         mediator.registerView(ViewType.CHEF_CONFIGURATION, this);
@@ -149,22 +158,22 @@ public class ChefConfigurationView extends ConfigurationView {
             // Add buttons to increase/decrease grill count
             window.addButton("-", 30, 25, new TAction() {
                 public void DO() {
-                    if (grillStationCount > 1) {
+                    if (grillStationCount > minInstancesOfStation) {
                         grillStationCount--;
                         updateStationCountLabels();
                     } else {
-                        showError("Must have at least one Grill station");
+                        showError("Must have at least " + minInstancesOfStation + " Grill station(s)");
                     }
                 }
             });
             
             window.addButton("+", 35, 25, new TAction() {
                 public void DO() {
-                    if (grillStationCount < 5) {
+                    if (grillStationCount < maxInstancesOfStation) {
                         grillStationCount++;
                         updateStationCountLabels();
                     } else {
-                        showError("Maximum 5 Grill stations allowed");
+                        showError("Maximum " + maxInstancesOfStation + " Grill stations allowed");
                     }
                 }
             });
@@ -176,22 +185,22 @@ public class ChefConfigurationView extends ConfigurationView {
             // Add buttons to increase/decrease prep count
             window.addButton("-", 30, 27, new TAction() {
                 public void DO() {
-                    if (prepStationCount > 1) {
+                    if (prepStationCount > minInstancesOfStation) {
                         prepStationCount--;
                         updateStationCountLabels();
                     } else {
-                        showError("Must have at least one Prep station");
+                        showError("Must have at least " + minInstancesOfStation + " Prep station(s)");
                     }
                 }
             });
             
             window.addButton("+", 35, 27, new TAction() {
                 public void DO() {
-                    if (prepStationCount < 5) {
+                    if (prepStationCount < maxInstancesOfStation) {
                         prepStationCount++;
                         updateStationCountLabels();
                     } else {
-                        showError("Maximum 5 Prep stations allowed");
+                        showError("Maximum " + maxInstancesOfStation + " Prep stations allowed");
                     }
                 }
             });
@@ -203,22 +212,22 @@ public class ChefConfigurationView extends ConfigurationView {
             // Add buttons to increase/decrease plate count
             window.addButton("-", 30, 29, new TAction() {
                 public void DO() {
-                    if (plateStationCount > 1) {
+                    if (plateStationCount > minInstancesOfStation) {
                         plateStationCount--;
                         updateStationCountLabels();
                     } else {
-                        showError("Must have at least one Plate station");
+                        showError("Must have at least " + minInstancesOfStation + " Plate station(s)");
                     }
                 }
             });
             
             window.addButton("+", 35, 29, new TAction() {
                 public void DO() {
-                    if (plateStationCount < 5) {
+                    if (plateStationCount < maxInstancesOfStation) {
                         plateStationCount++;
                         updateStationCountLabels();
                     } else {
-                        showError("Maximum 5 Plate stations allowed");
+                        showError("Maximum " + maxInstancesOfStation + " Plate stations allowed");
                     }
                 }
             });
@@ -314,7 +323,6 @@ public class ChefConfigurationView extends ConfigurationView {
 
     private void handleAddChef() {
         try {
-            
             if (validateInputs()) {
                 String name = nameField.getText();
                 
@@ -324,17 +332,28 @@ public class ChefConfigurationView extends ConfigurationView {
                     return;
                 }
                 
+                // Check if maximum number of chefs is reached
+                if (chefs.size() >= maxChefs) {
+                    showError("Maximum number of chefs (" + maxChefs + ") reached!");
+                    return;
+                }
+                
                 // Get selected stations
                 List<String> selectedStations = new ArrayList<>();
                 if (grillCheckbox.isChecked()) selectedStations.add("Grill");
                 if (prepCheckbox.isChecked()) selectedStations.add("Prep");
                 if (plateCheckbox.isChecked()) selectedStations.add("Plate");
                 
+                // Check if maximum stations per chef is exceeded
+                if (selectedStations.size() > maxStationsPerChef) {
+                    showError("Maximum number of stations per chef (" + maxStationsPerChef + ") exceeded!");
+                    return;
+                }
+                
                 int speed = Integer.parseInt(speedCombo.getText());
                 double costPerHour = calculateCost(speed, selectedStations.size());
                 String strategy = strategyCombo.getText();
                 
-
                 // Add to local storage
                 chefs.put(name, new ChefData(name, selectedStations, speed, costPerHour, strategy));
                 
@@ -344,7 +363,6 @@ public class ChefConfigurationView extends ConfigurationView {
                 // Clear inputs
                 clearInputs();
             }
-            
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error handling add chef: " + e.getMessage());
             e.printStackTrace();
@@ -518,15 +536,64 @@ public class ChefConfigurationView extends ConfigurationView {
     @Override
     protected boolean validateConfiguration() {
         try {
-            // Check if there are no chefs
-            if (chefs.isEmpty()) {
-                showError("You must add at least one chef!");
+            // Check if there are enough chefs
+            if (chefs.size() < minChefs) {
+                showError("You must add at least " + minChefs + " chef(s)!");
+                return false;
+            }
+            
+            // Check if there are too many chefs
+            if (chefs.size() > maxChefs) {
+                showError("Maximum number of chefs (" + maxChefs + ") exceeded!");
                 return false;
             }
             
             // Check if all station types are covered
             if (!validateStationCoverage()) {
                 showError("At least one chef must be assigned to each station type!");
+                return false;
+            }
+            
+            // Check total station count
+            int totalStations = grillStationCount + prepStationCount + plateStationCount;
+            if (totalStations < minStations) {
+                showError("You must have at least " + minStations + " total stations!");
+                return false;
+            }
+            
+            if (totalStations > maxStations) {
+                showError("Maximum number of total stations (" + maxStations + ") exceeded!");
+                return false;
+            }
+            
+            // Check individual station counts
+            if (grillStationCount < minInstancesOfStation) {
+                showError("You must have at least " + minInstancesOfStation + " Grill station(s)!");
+                return false;
+            }
+            
+            if (prepStationCount < minInstancesOfStation) {
+                showError("You must have at least " + minInstancesOfStation + " Prep station(s)!");
+                return false;
+            }
+            
+            if (plateStationCount < minInstancesOfStation) {
+                showError("You must have at least " + minInstancesOfStation + " Plate station(s)!");
+                return false;
+            }
+            
+            if (grillStationCount > maxInstancesOfStation) {
+                showError("Maximum number of Grill stations (" + maxInstancesOfStation + ") exceeded!");
+                return false;
+            }
+            
+            if (prepStationCount > maxInstancesOfStation) {
+                showError("Maximum number of Prep stations (" + maxInstancesOfStation + ") exceeded!");
+                return false;
+            }
+            
+            if (plateStationCount > maxInstancesOfStation) {
+                showError("Maximum number of Plate stations (" + maxInstancesOfStation + ") exceeded!");
                 return false;
             }
             
@@ -556,5 +623,34 @@ public class ChefConfigurationView extends ConfigurationView {
             System.err.println("[ChefConfigurationView] Error navigating to previous view: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    // Add these setter methods
+    public void setMinChefs(int minChefs) {
+        this.minChefs = minChefs;
+    }
+
+    public void setMaxChefs(int maxChefs) {
+        this.maxChefs = maxChefs;
+    }
+
+    public void setMaxStationsPerChef(int maxStationsPerChef) {
+        this.maxStationsPerChef = maxStationsPerChef;
+    }
+
+    public void setMinStations(int minStations) {
+        this.minStations = minStations;
+    }
+
+    public void setMaxStations(int maxStations) {
+        this.maxStations = maxStations;
+    }
+
+    public void setMaxInstancesOfStation(int maxInstancesOfStation) {
+        this.maxInstancesOfStation = maxInstancesOfStation;
+    }
+
+    public void setMinInstancesOfStation(int minInstancesOfStation) {
+        this.minInstancesOfStation = minInstancesOfStation;
     }
 }
