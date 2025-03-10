@@ -18,6 +18,7 @@ import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.LongestQueueFirstStrategy;
 import com.softwaredesign.project.staff.chefstrategies.OldestOrderFirstStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
+import java.util.stream.Collectors;
 
 public class ConfigurationController extends BaseController {
     private Kitchen kitchen;
@@ -33,24 +34,56 @@ public class ConfigurationController extends BaseController {
     private SeatingPlan seatingPlan;
     private boolean configurationComplete = false;
 
+    //TODO this should probably be loaded from a config or something!!! Not hard coded here
+    private List<Recipe> possibleRecipes = new ArrayList<>();
+
     //constructor registers with mediator
     public ConfigurationController() {
         super("Configuration");
+        System.out.println("[ConfigurationController] Initializing controller");
+        this.inventory = new Inventory(); // Initialize with concrete Inventory class
         this.mediator = RestaurantViewMediator.getInstance();
-        mediator.registerController("Configuration", this);
+        this.possibleRecipes = new ArrayList<>(); // Initialize the list
+        
+        // Order matters here
         setupBaseComponents();
+        mediator.registerController("Configuration", this);
+        
+        // Only initialize menu after everything else is set up
+        System.out.println("[ConfigurationController] Delayed menu initialization");
+        initializeMenuConfiguration();
+        
+        System.out.println("[ConfigurationController] Controller initialized");
     }
 
     //this should set up the components
-    private void setupBaseComponents() {
-        this.inventory = new Inventory();
-        
-        // TODO this should NOT be done here
-        inventory.addIngredient("Beef Patty", 100, 2.50, StationType.GRILL);
-        inventory.addIngredient("Bun", 100, 0.50, StationType.PLATE);
-        inventory.addIngredient("Lettuce", 100, 0.30, StationType.PREP);
-        inventory.addIngredient("Tomato", 100, 0.40, StationType.PREP);
-        inventory.addIngredient("Cheese", 100, 0.75, StationType.PREP);
+    private void setupBaseComponents() {        
+        System.out.println("[ConfigurationController] Setting up base components");
+        try {
+            // Add base ingredients
+            //TODO YO should ingredients really be being done by strings? idk
+            inventory.addIngredient("Beef Patty", 10, 1.0, StationType.GRILL);
+            inventory.addIngredient("Bun", 10, 1.0, StationType.PREP);
+            inventory.addIngredient("Lettuce", 10, 1.0, StationType.PREP);
+            inventory.addIngredient("Tomato", 10, 1.0, StationType.PREP);
+            inventory.addIngredient("Cheese", 10, 1.0, StationType.PREP);
+            inventory.addIngredient("Kebab Meat", 10, 1.0, StationType.GRILL);
+            inventory.addIngredient("Lamb", 100, 3.00, StationType.GRILL);
+            inventory.addIngredient("Pita Bread", 100, 0.60, StationType.PLATE);
+            inventory.addIngredient("Onions", 100, 0.25, StationType.PREP);
+            inventory.addIngredient("Tomatoes", 100, 0.80, StationType.PREP);
+            
+            // Condiments
+            inventory.addIngredient("Garlic Sauce", 100, 0.20, StationType.PREP);
+            inventory.addIngredient("Ketchup", 100, 0.20, StationType.PREP);
+            inventory.addIngredient("Mayo", 100, 0.25, StationType.PREP);
+            inventory.addIngredient("Pickle", 100, 0.30, StationType.PREP);
+            
+            System.out.println("[ConfigurationController] Base ingredients added to inventory");
+        } catch (Exception e) {
+            System.err.println("[ConfigurationController] Error setting up base components: " + e.getMessage());
+            throw new RuntimeException("Failed to setup base components", e);
+        }
         
         // Kebab ingredients
         inventory.addIngredient("Lamb", 100, 3.00, StationType.GRILL);
@@ -69,15 +102,18 @@ public class ConfigurationController extends BaseController {
         this.orderManager = new OrderManager(collectionPoint, stationManager);
         this.kitchen = new Kitchen(orderManager, collectionPoint);
         this.menu = new Menu(inventory);
+
+        possibleRecipes.add(new BurgerRecipe(inventory));
+        possibleRecipes.add(new KebabRecipe(inventory));
     }
 
     // Methods to read from views and create restaurant entities
     public void createRestaurantComponents() {
         
         // Get configuration data from views
-        ChefConfigurationView chefView = (ChefConfigurationView) mediator.getView("ChefConfiguration");
-        DiningConfigurationView diningView = (DiningConfigurationView) mediator.getView("DiningConfiguration");
-        MenuConfigurationView menuView = (MenuConfigurationView) mediator.getView("MenuConfiguration");
+        ChefConfigurationView chefView = (ChefConfigurationView) mediator.getView(ViewType.CHEF_CONFIGURATION);
+        DiningConfigurationView diningView = (DiningConfigurationView) mediator.getView(ViewType.DINING_CONFIGURATION);
+        MenuConfigurationView menuView = (MenuConfigurationView) mediator.getView(ViewType.MENU_CONFIGURATION);
         
         // Get station counts
         int grillStationCount = chefView.getStationCounts().get("GRILL");
@@ -288,7 +324,8 @@ public class ConfigurationController extends BaseController {
     }
 
     public void updateView(){
-        
+        System.out.println("[ConfigurationController] Updating views");
+        initializeMenuConfiguration();
     }
     @Override
     public void onUserInput(){
@@ -311,6 +348,29 @@ public class ConfigurationController extends BaseController {
         return seatingPlan;
     }
 
-
-
+    private void initializeMenuConfiguration() {
+        try {
+            System.out.println("[ConfigurationController] Getting menu configuration view");
+            MenuConfigurationView menuView = (MenuConfigurationView) mediator.getView(ViewType.MENU_CONFIGURATION);
+            if (menuView == null) {
+                throw new RuntimeException("Menu configuration view not found");
+            }
+            
+            // Convert recipes to view format
+            Map<String, List<String>> recipeData = new HashMap<>();
+            for (Recipe recipe : possibleRecipes) {
+                List<String> ingredients = recipe.getIngredients().stream()
+                    .map(Ingredient::getName)
+                    .collect(Collectors.toList());
+                recipeData.put(recipe.getName(), ingredients);
+            }
+            
+            System.out.println("[ConfigurationController] Setting possible recipes: " + recipeData.keySet());
+            menuView.setPossibleRecipes(recipeData);
+            
+        } catch (Exception e) {
+            System.err.println("[ConfigurationController] Error initializing menu: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }

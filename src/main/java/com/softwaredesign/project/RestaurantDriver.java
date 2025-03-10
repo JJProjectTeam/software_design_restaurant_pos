@@ -1,5 +1,6 @@
 package com.softwaredesign.project;
 
+import java.util.HashMap;
 import java.util.List;
 
 import com.softwaredesign.project.controller.*;
@@ -9,6 +10,7 @@ import com.softwaredesign.project.view.*;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.order.OrderManager;
+import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.orderfulfillment.SeatingPlan;
 import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.staff.Chef;
@@ -18,7 +20,6 @@ public class RestaurantDriver {
 
     //CONSTANTS = move to another file
     private static final int NUMBER_OF_SEATS = 40;
-
 
     private RestaurantApplication app;
     private RestaurantViewMediator mediator;

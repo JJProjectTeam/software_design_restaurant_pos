@@ -12,6 +12,9 @@ public class MenuConfigurationView extends ConfigurationView {
 
     public MenuConfigurationView(RestaurantApplication app) {
         super(app);
+        System.out.println("[MenuConfigurationView] Registering with mediator");
+        mediator.registerView(ViewType.MENU_CONFIGURATION, this);
+        System.out.println("[MenuConfigurationView] Registration complete");
         // Initialize with default recipes
         this.availableRecipes = new HashMap<>();
         this.selectedRecipeStates = new HashMap<>();
@@ -29,8 +32,27 @@ public class MenuConfigurationView extends ConfigurationView {
         }
     }
 
+    public void setPossibleRecipes(Map<String, List<String>> recipes) {
+        System.out.println("[MenuConfigurationView] Setting possible recipes: " + recipes.keySet());
+        this.availableRecipes = new HashMap<>(recipes);
+        this.selectedRecipeStates = new HashMap<>();
+        
+        // Initialize selection states for NEW recipes
+        for (String recipe : recipes.keySet()) { // Change this line to use recipes instead of availableRecipes
+            selectedRecipeStates.put(recipe, false);
+        }
+        
+        // Update the display if already initialized
+        if (window != null) {
+            System.out.println("[MenuConfigurationView] Window exists, updating display");
+            updateListDisplay();
+        } else {
+            System.out.println("[MenuConfigurationView] Window not yet initialized");
+        }
+    }
+
     @Override
-protected void setupSpecificElements() {
+    protected void setupSpecificElements() {
         try {
             // Title
             window.addLabel("Menu Configuration", 2, 2);
@@ -39,6 +61,7 @@ protected void setupSpecificElements() {
             window.addLabel("Available Recipes:", 2, 4);
             window.addLabel("(Select the items you want to include in your menu)", 2, 5);
             
+            System.out.println("[MenuConfigurationView] Setting up with " + availableRecipes.size() + " recipes");
             createRecipeSelectionArea();
             
         } catch (Exception e) {
