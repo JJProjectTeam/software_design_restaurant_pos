@@ -288,26 +288,37 @@ public class ConfigurationController extends BaseController {
      * Create stations based on the configuration
      */
     private void createStations(int grillCount, int prepCount, int plateCount) {
-        System.out.println("[ConfigurationController] Creating stations");
+        System.out.println("[ConfigurationController] Creating stations - Grill: " + grillCount + 
+            ", Prep: " + prepCount + ", Plate: " + plateCount);
         
         // Clear existing stations
+        stationManager.clearStations();
         
-        // Create and add stations
-        createStationsOfType(StationType.GRILL, grillCount);
-        createStationsOfType(StationType.PREP, prepCount);
-        createStationsOfType(StationType.PLATE, plateCount);
+        int stationId = 0; // Keep track of total station count
         
-        System.out.println("[ConfigurationController] Created total stations: " + 
-            stationManager.getAllStations().size());
+        // Create stations
+        stationId = createStationsOfType(StationType.GRILL, grillCount, stationId);
+        stationId = createStationsOfType(StationType.PREP, prepCount, stationId);
+        stationId = createStationsOfType(StationType.PLATE, plateCount, stationId);
+        
+        // Verify creation
+        Map<StationType, Long> counts = stationManager.getAllStations().stream()
+            .collect(Collectors.groupingBy(Station::getType, Collectors.counting()));
+        
+        System.out.println("[ConfigurationController] Station counts after creation:");
+        counts.forEach((type, count) -> System.out.println("  " + type + ": " + count));
     }
 
-    private void createStationsOfType(StationType type, int count) {
+    private int createStationsOfType(StationType type, int count, int startId) {
+        System.out.println("[ConfigurationController] Creating " + count + " " + type + " stations starting at ID " + startId);
         for (int i = 0; i < count; i++) {
             Station station = new Station(type, collectionPoint);
             station.setKitchen(kitchen);
             stationManager.addStation(station);
-            System.out.println("[ConfigurationController] Created " + type + " station " + (i + 1));
+            System.out.println("[ConfigurationController] Created " + type + " station " + startId);
+            startId++;
         }
+        return startId;
     }
 
     // Getters for restaurant components

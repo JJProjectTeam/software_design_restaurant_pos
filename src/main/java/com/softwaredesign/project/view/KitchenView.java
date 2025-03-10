@@ -2,6 +2,8 @@ package com.softwaredesign.project.view;
 
 import jexer.*;
 import java.util.Queue;
+import java.util.Map;
+import java.util.HashMap;
 
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
 
@@ -10,6 +12,9 @@ import java.util.LinkedList;
 public class KitchenView extends GamePlayView {
     private TTableWidget kitchenStations;
     private Queue<StationUpdate> pendingUpdates;
+    private Map<Integer, StationUpdate> stationDataMap;  // Add this to store station data
+    private static final String[] COLUMN_HEADERS = {"ID", "Station", "Backlog", "Chef", "In Use"};
+    private static final int[] COLUMN_WIDTHS = {5, 10, 8, 15, 7};
     private RestaurantViewMediator mediator;
     private boolean isInitialized;
 
@@ -34,8 +39,8 @@ public class KitchenView extends GamePlayView {
         this.mediator = RestaurantViewMediator.getInstance();
         this.isInitialized = false;
         this.pendingUpdates = new LinkedList<>();
+        this.stationDataMap = new HashMap<>();  // Initialize the map
         mediator.registerView(ViewType.KITCHEN, this);
-
     }
 
     @Override
@@ -61,21 +66,14 @@ public class KitchenView extends GamePlayView {
 
     protected void createKitchenStationsTable() {
         System.out.println("[KitchenView] Creating kitchen table...");
-        kitchenStations = window.addTable(2, 3, 100, 10, 5, 10);
+        kitchenStations = window.addTable(2, 10, window.getWidth() - 4, 10, 5, 10);
 
-        kitchenStations.setColumnLabel(0, "ID");
-        kitchenStations.setColumnLabel(1, "Station");
-        kitchenStations.setColumnLabel(2, "Backlog");
-        kitchenStations.setColumnLabel(3, "Chef");
-        kitchenStations.setColumnLabel(4, "In Use");
-
-        for (int i = 0; i < kitchenStations.getColumnCount(); i++) {
-            kitchenStations.setColumnWidth(i, 10);
+        // Set column labels and widths
+        for (int i = 0; i < COLUMN_HEADERS.length; i++) {
+            kitchenStations.setColumnLabel(i, COLUMN_HEADERS[i]);
+            kitchenStations.setColumnWidth(i, COLUMN_WIDTHS[i]);
         }
-        
     }
-
-
 
     public void onStationUpdate(int stationID, String station, int backlog, String chef, char inUse) {
         StationUpdate update = new StationUpdate(stationID, station, backlog, chef, inUse);
@@ -88,24 +86,25 @@ public class KitchenView extends GamePlayView {
     }
 
     private void updateStationInTable(int stationID, String stationName, int backlog, String chef, char inUse) {
-        if (kitchenStations == null || window == null) {
-            System.out.println("[KitchenView] ERROR: kitchenStations or window is null!");
+        if (kitchenStations == null) {
+            System.out.println("[KitchenView] ERROR: kitchenStations is null!");
             return;
         }
         
         try {
-            // Check if the row exists using station name as the label/index
-            if (kitchenStations.getRowLabel(stationID) == null) {
-                System.out.println("[KitchenView] Creating new row for station " + stationID);
-                kitchenStations.insertRowBelow(stationID);
-                kitchenStations.setRowLabel(stationID, Integer.toString(stationID));
+            // Find or create row for this station
+            int targetRow = stationID;
+            
+            // Add rows if needed
+            while (kitchenStations.getRowCount() <= targetRow) {
+                kitchenStations.insertRowBelow(kitchenStations.getRowCount() - 1);
             }
 
-            kitchenStations.setCellText(0, stationID, Integer.toString(stationID));
-            kitchenStations.setCellText(1, stationID, stationName);
-            kitchenStations.setCellText(2, stationID, String.valueOf(backlog));
-            kitchenStations.setCellText(3, stationID, chef);
-            kitchenStations.setCellText(4, stationID, String.valueOf(inUse));
+            kitchenStations.setCellText(0, targetRow, Integer.toString(stationID));
+            kitchenStations.setCellText(1, targetRow, stationName);
+            kitchenStations.setCellText(2, targetRow, String.valueOf(backlog));
+            kitchenStations.setCellText(3, targetRow, chef);
+            kitchenStations.setCellText(4, targetRow, String.valueOf(inUse));
 
             System.out.println("[KitchenView] Successfully updated station " + stationID + " in the view");
         } catch (Exception e) {
