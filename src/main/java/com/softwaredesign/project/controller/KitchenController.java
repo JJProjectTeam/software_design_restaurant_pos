@@ -35,6 +35,9 @@ public class KitchenController extends BaseController {
     @Override
     public void updateView() {
         View view = mediator.getView(ViewType.KITCHEN);
+        if (!(view instanceof KitchenView)) {
+            return;
+        }
         view = (KitchenView) view;
         System.out.println("[KitchenController] Updating view for " + 
             kitchen.getStationManager().getAllStations().size() + " stations");

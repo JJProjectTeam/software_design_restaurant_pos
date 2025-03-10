@@ -12,30 +12,29 @@ import java.util.*;
 
 public class InventoryController extends BaseController {
     private Set<String> ingredients;
-    private Map<String, Integer> stockLevels;
-    private Map<String, Double> prices;
     private RestaurantViewMediator mediator;
     private Inventory inventory;
     
     public InventoryController(Inventory inventory) {
         super("Inventory");
         this.inventory = inventory;
-        this.stockLevels = new HashMap<>();
-        this.prices = new HashMap<>();
         this.mediator = RestaurantViewMediator.getInstance();
         mediator.registerController("Inventory", this);
     }
     
     @Override
     public void updateView() {
+        View view = mediator.getView(ViewType.INVENTORY);
+        if (!(view instanceof InventoryView)) {
+            return;
+        }
+        view = (InventoryView) view;
         ingredients = inventory.getAllIngredients();
         for (String ingredient : ingredients) {
-            stockLevels.put(ingredient, inventory.getStock(ingredient));
-            prices.put(ingredient, inventory.getPrice(ingredient));
+            int stock = inventory.getStock(ingredient);
+            double price = inventory.getPrice(ingredient);
+            ((InventoryView) view).onIngredientUpdate(ingredient, stock, price);
         }
-        View view = mediator.getView(ViewType.INVENTORY);
-        view = (InventoryView) view;
-        ((InventoryView) view).onInventoryUpdate(ingredients, stockLevels, prices);
     }
     
 

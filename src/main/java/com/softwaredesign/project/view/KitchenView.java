@@ -36,11 +36,10 @@ public class KitchenView extends GamePlayView {
 
     public KitchenView(RestaurantApplication app) {
         super(app);
-        this.mediator = RestaurantViewMediator.getInstance();
         this.isInitialized = false;
         this.pendingUpdates = new LinkedList<>();
         this.stationDataMap = new HashMap<>();  // Initialize the map
-        mediator.registerView(ViewType.KITCHEN, this);
+        RestaurantViewMediator.getInstance().registerView(ViewType.KITCHEN, this);
     }
 
     @Override

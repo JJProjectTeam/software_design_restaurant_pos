@@ -9,35 +9,36 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
 public class InventoryView extends GamePlayView {
     private final RestaurantApplication app;
     private TTableWidget inventoryTable;
+    private Queue<InventoryUpdate> pendingUpdates;
+    private Map<String, Integer> ingredientRowMap;  // Track row indices for ingredients
     private static final String[] COLUMN_HEADERS = {"Ingredient", "Stock", "Price"};
     private static final int[] COLUMN_WIDTHS = {20, 10, 10};
     private static final int TABLE_Y = 3;
     private static final int TABLE_HEIGHT = 15;
-    private Queue<InventoryUpdate> pendingUpdates;
-    private RestaurantViewMediator mediator;
     private boolean isInitialized;
-    
+
     private static class InventoryUpdate {
         final String ingredient;
+        final int stock;
         final double price;
-        final int quantity;
-        
-        InventoryUpdate(String ingredient, double price, int quantity) {
+
+        InventoryUpdate(String ingredient, int stock, double price) {
             this.ingredient = ingredient;
+            this.stock = stock;
             this.price = price;
-            this.quantity = quantity;
         }
     }
-    
+
     public InventoryView(RestaurantApplication app) {
         super(app);
         this.app = app;
         this.pendingUpdates = new LinkedList<>();
-        this.mediator = RestaurantViewMediator.getInstance();
+        this.ingredientRowMap = new HashMap<>();
         this.isInitialized = false;
         RestaurantViewMediator.getInstance().registerView(ViewType.INVENTORY, this);
     }
@@ -52,90 +53,70 @@ public class InventoryView extends GamePlayView {
     protected void addViewContent() {
         System.out.println("[InventoryView] Adding view content");
         window.addLabel("Inventory Status", 2, 2);
-        inventoryTable = window.addTable(2, TABLE_Y, window.getWidth() - 4, TABLE_HEIGHT, 3, 10);
+        createInventoryTable();
+        
+        isInitialized = true;
+        
+        // Process any pending updates
+        while (!pendingUpdates.isEmpty()) {
+            InventoryUpdate update = pendingUpdates.poll();
+            updateIngredientInTable(update.ingredient, update.stock, update.price);
+        }
+        
+    }
+
+    protected void createInventoryTable() {
+        System.out.println("[InventoryView] Creating inventory table...");
+        inventoryTable = window.addTable(2, TABLE_Y, window.getWidth() - 4, TABLE_HEIGHT, 3, 1);
         
         // Set column labels and widths
         for (int i = 0; i < COLUMN_HEADERS.length; i++) {
             inventoryTable.setColumnLabel(i, COLUMN_HEADERS[i]);
             inventoryTable.setColumnWidth(i, COLUMN_WIDTHS[i]);
         }
-        
-        // Now that the view is fully initialized
-        isInitialized = true;
-        
-        // Process any pending updates
-        while (!pendingUpdates.isEmpty()) {
-            InventoryUpdate update = pendingUpdates.poll();
-            updateIngredient(update.ingredient, update.price, update.quantity);
-        }
-        
-        // Register with mediator when view is set up
-        mediator.registerView(ViewType.INVENTORY, this);
     }
 
-    public void onInventoryUpdate(Set<String> ingredients, Map<String, Integer> stockLevels, Map<String, Double> prices) {
+    public void onIngredientUpdate(String ingredient, int stock, double price) {
+        InventoryUpdate update = new InventoryUpdate(ingredient, stock, price);
+        if (!isInitialized) {
+            System.out.println("[InventoryView] View not yet initialized, queueing update for ingredient: " + ingredient);
+            pendingUpdates.offer(update);
+        } else {
+            updateIngredientInTable(ingredient, stock, price);
+        }
+    }
+
+    private void updateIngredientInTable(String ingredient, int stock, double price) {
         if (inventoryTable == null) {
-            System.err.println("[InventoryView] Table widget not initialized");
-            return;
-        }
-
-        try {
-            // Clear existing rows
-            while (inventoryTable.getRowCount() > 0) {
-                inventoryTable.deleteRow(0);
-            }
-
-            // Add new rows for each ingredient
-            List<String> sortedIngredients = new ArrayList<>(ingredients);
-            Collections.sort(sortedIngredients);
-
-            for (String ingredient : sortedIngredients) {
-                inventoryTable.insertRowBelow(inventoryTable.getRowCount()-1);
-                int row = inventoryTable.getRowCount() - 1;
-
-                // Update cells
-                inventoryTable.setCellText(0, row, ingredient);
-                inventoryTable.setCellText(1, row, String.valueOf(stockLevels.get(ingredient)));
-                inventoryTable.setCellText(2, row, String.format("$%.2f", prices.get(ingredient)));
-            }
-
-            System.out.println("[InventoryView] Updated " + ingredients.size() + " ingredients");
-        } catch (Exception e) {
-            System.err.println("[InventoryView] Error updating inventory: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-    
-    private void updateIngredient(String ingredient, double price, int quantity) {
-        if (inventoryTable == null || window == null) {
-            System.out.println("[InventoryView] ERROR: inventoryTable or window is null!");
+            System.out.println("[InventoryView] ERROR: inventoryTable is null!");
             return;
         }
         
         try {
-            // Find if row exists for this ingredient
-            int rowIndex = -1;
-            for (int i = 0; i < inventoryTable.getRowCount(); i++) {
-                if (inventoryTable.getCellText(0, i).equals(ingredient)) {
-                    rowIndex = i;
-                    break;
+            int rowIndex;
+            if (ingredientRowMap.containsKey(ingredient)) {
+                // Update existing row
+                rowIndex = ingredientRowMap.get(ingredient);
+            } else {
+                // Create new row
+                if (inventoryTable.getRowCount() == 0) {
+                    inventoryTable.insertRowAbove(0);
+                    rowIndex = 0;
+                } else {
+                    inventoryTable.insertRowBelow(inventoryTable.getRowCount() - 1);
+                    rowIndex = inventoryTable.getRowCount() - 1;
                 }
-            }
-            
-            // If ingredient not found, add new row
-            if (rowIndex == -1) {
-                System.out.println("[InventoryView] Creating new row for ingredient " + ingredient);
-                rowIndex = inventoryTable.getRowCount();
-                inventoryTable.insertRowBelow(rowIndex);
+                ingredientRowMap.put(ingredient, rowIndex);
             }
 
+            // Update cells
             inventoryTable.setCellText(0, rowIndex, ingredient);
-            inventoryTable.setCellText(1, rowIndex, String.format("%.2f", price));
-            inventoryTable.setCellText(2, rowIndex, Integer.toString(quantity));
-            
-            System.out.println("[InventoryView] Successfully updated ingredient " + ingredient + " in the view");
+            inventoryTable.setCellText(1, rowIndex, String.valueOf(stock));
+            inventoryTable.setCellText(2, rowIndex, String.format("$%.2f", price));
+
+            System.out.println("[InventoryView] Updated ingredient " + ingredient + " at row " + rowIndex);
         } catch (Exception e) {
-            System.out.println("[InventoryView] ERROR updating ingredient " + ingredient + ": " + e.getMessage());
+            System.err.println("[InventoryView] Error updating ingredient " + ingredient + ": " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -146,8 +127,11 @@ public class InventoryView extends GamePlayView {
         super.initialize(window);
     }
 
+    @Override
     public void cleanup() {
-        System.out.println("[InventoryView] Cleaning up view, unregistering from mediator");
-        mediator.unregisterView("Inventory", this);
+        System.out.println("[InventoryView] Cleaning up view");
+        if (window != null) {
+            window.close();
+        }
     }
 }
