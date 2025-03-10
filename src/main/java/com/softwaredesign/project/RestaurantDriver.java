@@ -66,6 +66,7 @@ public class RestaurantDriver {
             
             createEntitiesFromConfiguration();
             initializeOperation();
+            passEntitiesToGamePlay();
             app.showView(ViewType.DINING_ROOM);
 
             //TODO - this is a dummy tick placeholder
@@ -105,10 +106,8 @@ public class RestaurantDriver {
         this.orderManager = configController.getOrderManager();
         this.inventoryService = configController.getInventoryService();
         this.seatingPlan = configController.getSeatingPlan();
+        System.out.println("SEATINGPLAN: "+ seatingPlan.getAllTables().size());
     }
-
-
-
 
     private void initializeOperation() {        
         // Create gameplay controllers with configured components

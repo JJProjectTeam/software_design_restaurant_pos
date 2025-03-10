@@ -64,35 +64,33 @@ public class ChefConfigurationView extends ConfigurationView {
     }
 
     public Map<String, Integer> getStationCounts() {
-        stationCounts.put("Grill", grillStationCount);
-        stationCounts.put("Prep", prepStationCount);
-        stationCounts.put("Plate", plateStationCount);
-        return stationCounts;
+        System.out.println("[ChefConfigurationView] Getting station counts - Grill: " + grillStationCount 
+            + ", Prep: " + prepStationCount + ", Plate: " + plateStationCount);
+        
+        Map<String, Integer> counts = new HashMap<>();
+        counts.put("GRILL", grillStationCount);
+        counts.put("PREP", prepStationCount);
+        counts.put("PLATE", plateStationCount);
+        return counts;
     }
     
 
     @Override
     protected void setupSpecificElements() {
         try {
-            System.out.println("[ChefConfigurationView] setupSpecificElements started");
             
             // Title
-            System.out.println("[ChefConfigurationView] Adding title label");
             window.addLabel("Chef Configuration", 2, 2);
             
             // Create chef table
-            System.out.println("[ChefConfigurationView] Creating chef table");
             createChefTable();
             
             // Create station count configuration
-            System.out.println("[ChefConfigurationView] Creating station count configuration");
             createStationCountConfiguration();
             
             // Create input form
-            System.out.println("[ChefConfigurationView] Creating input form");
             createInputForm();
             
-            System.out.println("[ChefConfigurationView] setupSpecificElements completed");
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error setting up elements: " + e.getMessage());
             e.printStackTrace();
@@ -101,14 +99,12 @@ public class ChefConfigurationView extends ConfigurationView {
 
     private void createChefTable() {
         try {
-            System.out.println("[ChefConfigurationView] createChefTable started");
             
             window.addLabel("Current Chefs:", 2, 4);
             System.out.println("[ChefConfigurationView] Adding table widget");
             chefTable = window.addTable(2, 6, 130, 8, 5, 1);
             
             // Set column labels
-            System.out.println("[ChefConfigurationView] Setting column labels");
             chefTable.setColumnLabel(0, "Chef Name");
             chefTable.setColumnLabel(1, "Stations");
             chefTable.setColumnLabel(2, "Speed");
@@ -116,7 +112,6 @@ public class ChefConfigurationView extends ConfigurationView {
             chefTable.setColumnLabel(4, "Strategy");
 
             // Set column widths
-            System.out.println("[ChefConfigurationView] Setting column widths");
             chefTable.setColumnWidth(0, 20);
             chefTable.setColumnWidth(1, 40);
             chefTable.setColumnWidth(2, 10);
@@ -124,7 +119,6 @@ public class ChefConfigurationView extends ConfigurationView {
             chefTable.setColumnWidth(4, 20);
 
             // Populate from local storage
-            System.out.println("[ChefConfigurationView] Refreshing chef table");
             refreshChefTable();
             
             // Add a field and button to remove a chef
@@ -137,7 +131,6 @@ public class ChefConfigurationView extends ConfigurationView {
                 }
             });
             
-            System.out.println("[ChefConfigurationView] createChefTable completed");
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error creating chef table: " + e.getMessage());
             e.printStackTrace();
@@ -146,7 +139,6 @@ public class ChefConfigurationView extends ConfigurationView {
     
     private void createStationCountConfiguration() {
         try {
-            System.out.println("[ChefConfigurationView] createStationCountConfiguration started");
             
             window.addLabel("Station Counts:", 2, 23);
             
@@ -231,7 +223,6 @@ public class ChefConfigurationView extends ConfigurationView {
                 }
             });
             
-            System.out.println("[ChefConfigurationView] createStationCountConfiguration completed");
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error creating station count configuration: " + e.getMessage());
             e.printStackTrace();
@@ -251,16 +242,13 @@ public class ChefConfigurationView extends ConfigurationView {
 
     private void refreshChefTable() {
         try {
-            System.out.println("[ChefConfigurationView] refreshChefTable started");
             
             // Clear existing table
-            System.out.println("[ChefConfigurationView] Clearing existing table rows");
             while (chefTable.getRowCount() > 1) {
                 chefTable.deleteRow(1);
             }
 
             // Repopulate from local storage
-            System.out.println("[ChefConfigurationView] Repopulating table from storage, chef count: " + chefs.size());
             for (var entry : chefs.entrySet()) {
                 System.out.println("[ChefConfigurationView] Adding chef to table: " + entry.getKey());
                 var chef = entry.getValue();
@@ -268,7 +256,6 @@ public class ChefConfigurationView extends ConfigurationView {
                 addChefToTable(chef.name, stations, chef.speed, chef.costPerHour, chef.strategy);
             }
             
-            System.out.println("[ChefConfigurationView] refreshChefTable completed");
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error refreshing chef table: " + e.getMessage());
             e.printStackTrace();
@@ -277,61 +264,48 @@ public class ChefConfigurationView extends ConfigurationView {
 
     private void createInputForm() {
         try {
-            System.out.println("[ChefConfigurationView] createInputForm started");
             
-            System.out.println("[ChefConfigurationView] Adding 'Add New Chef' label");
             window.addLabel("Add New Chef:", 2, 16);
             
             // Name field
-            System.out.println("[ChefConfigurationView] Adding name field");
             window.addLabel("Name:", 2, 18);
             nameField = window.addField(8, 18, 15, false);
             
             // Create a local nullAction instead of using the parent's
-            System.out.println("[ChefConfigurationView] Creating local nullAction");
             TAction localNullAction = new TAction() {
                 public void DO() {
-                    System.out.println("[ChefConfigurationView] localNullAction DO method called");
                     // Do nothing
                 }
             };
             
             // Speed selection
-            System.out.println("[ChefConfigurationView] Adding speed selection");
             window.addLabel("Speed:", 30, 18);
             List<String> speeds = new ArrayList<>();
             speeds.add("1");
             speeds.add("2");
             speeds.add("3");
-            System.out.println("[ChefConfigurationView] Creating speed combo box");
             speedCombo = window.addComboBox(36, 18, 8, speeds, 0, 4, localNullAction);
             
             // Strategy selection
-            System.out.println("[ChefConfigurationView] Adding strategy selection");
             window.addLabel("Strategy:", 50, 18);
             List<String> strategies = new ArrayList<>();
             strategies.add("FIFO");
             strategies.add("LIFO");
-            System.out.println("[ChefConfigurationView] Creating strategy combo box");
             strategyCombo = window.addComboBox(58, 18, 15, strategies, 0, 4, localNullAction);
             
             // Station checkboxes
-            System.out.println("[ChefConfigurationView] Adding station checkboxes");
             window.addLabel("Stations:", 2, 20);
             grillCheckbox = window.addCheckBox(10, 20, "Grill", false);
             prepCheckbox = window.addCheckBox(30, 20, "Prep", false);
             plateCheckbox = window.addCheckBox(50, 20, "Plate", false);
             
             // Add chef button
-            System.out.println("[ChefConfigurationView] Adding 'Add Chef' button");
             window.addButton("Add Chef", 80, 20, new TAction() {
                 public void DO() {
-                    System.out.println("[ChefConfigurationView] Add Chef button pressed");
                     handleAddChef();
                 }
             });
             
-            System.out.println("[ChefConfigurationView] createInputForm completed");
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error creating input form: " + e.getMessage());
             e.printStackTrace();
@@ -340,11 +314,9 @@ public class ChefConfigurationView extends ConfigurationView {
 
     private void handleAddChef() {
         try {
-            System.out.println("[ChefConfigurationView] handleAddChef started");
             
             if (validateInputs()) {
                 String name = nameField.getText();
-                System.out.println("[ChefConfigurationView] Adding chef with name: " + name);
                 
                 // Check if a chef with this name already exists
                 if (chefs.containsKey(name)) {
@@ -362,9 +334,7 @@ public class ChefConfigurationView extends ConfigurationView {
                 double costPerHour = calculateCost(speed, selectedStations.size());
                 String strategy = strategyCombo.getText();
                 
-                System.out.println("[ChefConfigurationView] Chef details - Stations: " + selectedStations + 
-                                   ", Speed: " + speed + ", Cost: " + costPerHour + ", Strategy: " + strategy);
-                
+
                 // Add to local storage
                 chefs.put(name, new ChefData(name, selectedStations, speed, costPerHour, strategy));
                 
@@ -375,7 +345,6 @@ public class ChefConfigurationView extends ConfigurationView {
                 clearInputs();
             }
             
-            System.out.println("[ChefConfigurationView] handleAddChef completed");
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error handling add chef: " + e.getMessage());
             e.printStackTrace();
@@ -385,7 +354,6 @@ public class ChefConfigurationView extends ConfigurationView {
 
     private void removeChef() {
         try {
-            System.out.println("[ChefConfigurationView] removeChef started");
             
             // Get the chef name from the field
             String chefName = removeNameField.getText();
@@ -437,7 +405,6 @@ public class ChefConfigurationView extends ConfigurationView {
             // Clear the remove field
             removeNameField.setText("");
             
-            System.out.println("[ChefConfigurationView] Chef removed: " + chefName);
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error removing chef: " + e.getMessage());
             e.printStackTrace();
@@ -447,11 +414,9 @@ public class ChefConfigurationView extends ConfigurationView {
 
     private void addChefToTable(String name, String stations, int speed, double costPerHour, String strategy) {
         try {
-            System.out.println("[ChefConfigurationView] addChefToTable started for chef: " + name);
             
             // Add to table UI
             int row = chefTable.getRowCount()-1;
-            System.out.println("[ChefConfigurationView] Inserting row at position: " + row);
             chefTable.insertRowBelow(row);
             chefTable.setCellText(0, row, name);
             chefTable.setCellText(1, row, stations);
@@ -459,7 +424,6 @@ public class ChefConfigurationView extends ConfigurationView {
             chefTable.setCellText(3, row, String.format("%.2f", costPerHour));
             chefTable.setCellText(4, row, strategy);
             
-            System.out.println("[ChefConfigurationView] addChefToTable completed");
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error adding chef to table: " + e.getMessage());
             e.printStackTrace();

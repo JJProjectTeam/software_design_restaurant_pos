@@ -233,6 +233,7 @@ public class MenuConfigurationView extends ConfigurationView {
         try {
             // Ensure selections are synced before proceeding
             syncSelections();
+            mediator.notifyConfigurationComplete();
             app.showView(ViewType.DINING_ROOM);
         } catch (Exception e) {
             System.err.println("[MenuConfigurationView] Error navigating to next view: " + e.getMessage());

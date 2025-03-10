@@ -40,7 +40,6 @@ public class ConfigurationController extends BaseController {
     //constructor registers with mediator
     public ConfigurationController() {
         super("Configuration");
-        System.out.println("[ConfigurationController] Initializing controller");
         this.inventory = new Inventory(); // Initialize with concrete Inventory class
         this.mediator = RestaurantViewMediator.getInstance();
         this.possibleRecipes = new ArrayList<>(); // Initialize the list
@@ -50,15 +49,12 @@ public class ConfigurationController extends BaseController {
         mediator.registerController("Configuration", this);
         
         // Only initialize menu after everything else is set up
-        System.out.println("[ConfigurationController] Delayed menu initialization");
         initializeMenuConfiguration();
         
-        System.out.println("[ConfigurationController] Controller initialized");
     }
 
     //this should set up the components
     private void setupBaseComponents() {        
-        System.out.println("[ConfigurationController] Setting up base components");
         try {
             // Add base ingredients
             //TODO YO should ingredients really be being done by strings? idk
@@ -79,7 +75,6 @@ public class ConfigurationController extends BaseController {
             inventory.addIngredient("Mayo", 100, 0.25, StationType.PREP);
             inventory.addIngredient("Pickle", 100, 0.30, StationType.PREP);
             
-            System.out.println("[ConfigurationController] Base ingredients added to inventory");
         } catch (Exception e) {
             System.err.println("[ConfigurationController] Error setting up base components: " + e.getMessage());
             throw new RuntimeException("Failed to setup base components", e);
@@ -134,14 +129,13 @@ public class ConfigurationController extends BaseController {
         
         // Set configuration as complete
         configurationComplete = true;
+        System.out.println("[ConfigurationController] Configuration complete");
         
         // Notify mediator that configuration is complete
         // mediator.notifyConfigurationComplete();
     }
     
-    private void createDefaultConfiguration() {
-        System.out.println("[ConfigurationController] Creating default configuration");
-        
+    private void createDefaultConfiguration() {        
         // Create default chef
         List<String> defaultStations = Arrays.asList("Grill", "Prep", "Plate");
         ChefStrategy strategy = new SimpleChefStrategy();
@@ -155,7 +149,7 @@ public class ConfigurationController extends BaseController {
         }
         
         // Create default tables
-        SeatingPlan seatingPlan = new SeatingPlan(4, 40, 5, menu);
+        seatingPlan = new SeatingPlan(4, 40, 5, menu);
         
         // Create default waiter
         Waiter waiter = new Waiter(20.0, 2, orderManager, menu);
@@ -173,26 +167,40 @@ public class ConfigurationController extends BaseController {
     }
 
     private void createChefs(Map<String, ChefConfigurationView.ChefData> chefData) {
-        for (var entry : chefData.entrySet()) {
-            var data = entry.getValue();
-            
-            // Create chef strategy based on selection
-            ChefStrategy strategy = createChefStrategy(data.getStrategy());
-            
-            // Create chef stations
-            for (String stationType : data.getStations()) {
-                Station station = new Station(StationType.valueOf(stationType.toUpperCase()), collectionPoint);
-                stationManager.addStation(station);
-                stations.add(station);
+        System.out.println("[ConfigurationController] Creating chefs from configuration");
+        chefs = new ArrayList<>();
+        stations = new ArrayList<>();  // Initialize the stations list
+        
+        for (ChefConfigurationView.ChefData data : chefData.values()) {
+            try {
+                // Create chef strategy
+                ChefStrategy strategy = createChefStrategy(data.getStrategy());
+                
+                // Create chef with data
+                Chef chef = new Chef(
+                    data.getCostPerHour(),
+                    data.getSpeed(),
+                    strategy, 
+                    stationManager
+                );
+                
+                // Add stations to chef's qualifications
+                for (String stationType : data.getStations()) {
+                    chef.assignToStation(StationType.valueOf(stationType.toUpperCase()));
+                }
+                
+                chefs.add(chef);
+                System.out.println("[ConfigurationController] Created chef: " + chef.getName() 
+                    + " with " + data.getStations().size() + " qualifications");
+                
+            } catch (Exception e) {
+                System.err.println("[ConfigurationController] Error creating chef: " + e.getMessage());
+                throw new RuntimeException("Failed to create chef: " + data.getName(), e);
             }
-            
-            Chef chef = new Chef(data.getCostPerHour(), data.getSpeed(), strategy, stationManager);
-            for (Station station : stations) {
-                chef.assignToStation(station.getType());
-            }
-            chefs.add(chef);
         }
+        System.out.println("[ConfigurationController] Created " + chefs.size() + " chefs");
     }
+
     //TODO: add actual strategies
     private ChefStrategy createChefStrategy(String strategyName) {
         return switch (strategyName.toUpperCase()) {
@@ -203,38 +211,47 @@ public class ConfigurationController extends BaseController {
     }
 
     private void createWaitersAndTables(Map<String, DiningConfigurationView.WaiterData> waiterData, int tableCount, int tableCapacity) {
+        // Initialize waiters list first
+        this.waiters = new ArrayList<>();
+
         // Create tables
-        SeatingPlan seatingPlan = new SeatingPlan(tableCount, 40, tableCapacity, menu); //TODO read from a config file for magic number for number of seats
-        // Create waiters
-        waiters.clear();
+        System.out.println("[ConfigurationController] Creating tables - Count: " + tableCount + ", Capacity: " + tableCapacity);
+        seatingPlan = new SeatingPlan(tableCount, 40, tableCapacity, menu);
+        System.out.println("[ConfigurationController] Created seating plan with " + seatingPlan.getAllTables().size() + " tables");
 
         // Get all tables from seating plan
         List<Table> allTables = seatingPlan.getAllTables();
+        
+        // Calculate table distribution
         int tablesPerWaiter = allTables.size() / waiterData.size();
         int extraTables = allTables.size() % waiterData.size();
-        int tableIndex = 0; // Track which tables have been assigned
+        int tableIndex = 0;
 
+        System.out.println("[ConfigurationController] Distributing " + allTables.size() + " tables among " + waiterData.size() + " waiters");
+        
         for (var entry : waiterData.entrySet()) {
             var data = entry.getValue();
             Waiter waiter = new Waiter(data.getCostPerHour(), data.getSpeed(), orderManager, menu);
             
-            // Calculate how many tables this waiter should get
+            // Calculate tables for this waiter
             int tablesToAssign = tablesPerWaiter + (waiters.size() < extraTables ? 1 : 0);
+            System.out.println("[ConfigurationController] Assigning " + tablesToAssign + " tables to waiter");
             
-            // Assign tables to this waiter
+            // Assign tables
             for (int i = 0; i < tablesToAssign && tableIndex < allTables.size(); i++) {
                 waiter.assignTable(allTables.get(tableIndex));
                 tableIndex++;
             }
             
             waiters.add(waiter);
+            System.out.println("[ConfigurationController] Added waiter with " + tablesToAssign + " tables");
         }
+        
+        System.out.println("[ConfigurationController] Created " + waiters.size() + " waiters");
     }
 
     private void createMenuItems(Set<String> selectedRecipes) {
-        // The Menu class doesn't have a method to clear or add items directly
-        // Instead, we'll create a new Menu with the selected recipes
-        
+
         // First, create a new Menu with the inventory service
         this.menu = new Menu(inventory);
         
@@ -256,12 +273,7 @@ public class ConfigurationController extends BaseController {
                     continue;
                 }
                 
-                // The Menu class doesn't have an explicit method to add items
-                // We'll need to modify the Menu class to support this, or use reflection
-                // For now, we'll just log that we would add the recipe
-                System.out.println("Would add recipe to menu: " + recipeName);
-                
-                // In a real implementation, you'd do something like:
+                //TODO i dont think we mande a menuuuu
                 // menu.addRecipe(recipe);
             } catch (Exception e) {
                 System.err.println("Error creating menu item: " + recipeName + " - " + e.getMessage());
@@ -273,10 +285,7 @@ public class ConfigurationController extends BaseController {
      * Create stations based on the configuration
      */
     private void createStations(int grillCount, int prepCount, int plateCount) {
-        System.out.println("[ConfigurationController] Creating stations - Grill: " + grillCount + 
-                          ", Prep: " + prepCount + 
-                          ", Plate: " + plateCount);
-        
+
         // Clear existing stations if any
         stationManager = new StationManager(collectionPoint);
         
@@ -284,21 +293,18 @@ public class ConfigurationController extends BaseController {
         for (int i = 0; i < grillCount; i++) {
             Station grillStation = new Station(StationType.GRILL, collectionPoint);
             stationManager.addStation(grillStation);
-            System.out.println("[ConfigurationController] Created Grill station " + (i + 1));
         }
         
         // Create Prep stations
         for (int i = 0; i < prepCount; i++) {
             Station prepStation = new Station(StationType.PREP, collectionPoint);
             stationManager.addStation(prepStation);
-            System.out.println("[ConfigurationController] Created Prep station " + (i + 1));
         }
         
         // Create Plate stations
         for (int i = 0; i < plateCount; i++) {
             Station plateStation = new Station(StationType.PLATE, collectionPoint);
             stationManager.addStation(plateStation);
-            System.out.println("[ConfigurationController] Created Plate station " + (i + 1));
         }
         
         // Create a new kitchen with the station manager
@@ -309,7 +315,6 @@ public class ConfigurationController extends BaseController {
             station.setKitchen(kitchen);
         }
         
-        System.out.println("[ConfigurationController] Created kitchen with " + stationManager.getAllStations().size() + " stations");
     }
 
     // Getters for restaurant components
@@ -324,7 +329,6 @@ public class ConfigurationController extends BaseController {
     }
 
     public void updateView(){
-        System.out.println("[ConfigurationController] Updating views");
         initializeMenuConfiguration();
     }
     @Override
@@ -350,7 +354,6 @@ public class ConfigurationController extends BaseController {
 
     private void initializeMenuConfiguration() {
         try {
-            System.out.println("[ConfigurationController] Getting menu configuration view");
             MenuConfigurationView menuView = (MenuConfigurationView) mediator.getView(ViewType.MENU_CONFIGURATION);
             if (menuView == null) {
                 throw new RuntimeException("Menu configuration view not found");
@@ -365,7 +368,6 @@ public class ConfigurationController extends BaseController {
                 recipeData.put(recipe.getName(), ingredients);
             }
             
-            System.out.println("[ConfigurationController] Setting possible recipes: " + recipeData.keySet());
             menuView.setPossibleRecipes(recipeData);
             
         } catch (Exception e) {

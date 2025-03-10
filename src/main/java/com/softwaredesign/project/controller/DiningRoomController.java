@@ -20,7 +20,6 @@ public class DiningRoomController extends BaseController {
 
     public DiningRoomController(Menu menu, SeatingPlan seatingPlan) {
         super("DiningRoom");
-        System.out.println("[DiningRoomController] Initializing controller...");
         this.seatingPlan = seatingPlan;
         this.tableToWaiter = new HashMap<>();
         this.mediator = RestaurantViewMediator.getInstance();
@@ -30,13 +29,11 @@ public class DiningRoomController extends BaseController {
     }
 
     public void assignWaiterToTable(int tableNumber, char waiterId) {
-        System.out.println("[DiningRoomController] Assigning waiter " + waiterId + " to table " + tableNumber);
         tableToWaiter.put(tableNumber, waiterId);
         notifyViewsOfTableUpdate(seatingPlan.getTable(tableNumber));
     }
 
     public void addCustomerToTable(int tableNumber, DineInCustomer customer) {
-        System.out.println("[DiningRoomController] Adding customer to table " + tableNumber);
         Table table = seatingPlan.getTable(tableNumber);
         table.addCustomer(customer);
         notifyViewsOfTableUpdate(table);
@@ -65,7 +62,6 @@ public class DiningRoomController extends BaseController {
 
     @Override
     public void updateView() {
-        System.out.println("[DiningRoomController] Updating all views");
         // Update all tables
         for (Table table : seatingPlan.getAllTables()) {
             int tableNumber = table.getTableNumber();
@@ -89,7 +85,6 @@ public class DiningRoomController extends BaseController {
     }
 
     public void refreshAllTables() {
-        System.out.println("[DiningRoomController] Refreshing all tables");
         updateView();
     }
 

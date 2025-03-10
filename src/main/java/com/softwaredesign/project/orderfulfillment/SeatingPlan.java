@@ -36,6 +36,7 @@ public class SeatingPlan {
         
         // Distribute remaining seats randomly
         while (remainingSeats > 0) {
+            boolean seatsDistributed = false;
             for (Table table : tables) {
                 if (remainingSeats <= 0) break;
                 if (table.getTableCapacity() < maxTableCapacity) {
@@ -46,7 +47,15 @@ public class SeatingPlan {
                     tables.set(tables.indexOf(table), 
                              new Table(table.getTableNumber(), menu, table.getTableCapacity() + addSeats));
                     remainingSeats -= addSeats;
+                    seatsDistributed = true;
                 }
+            }
+            
+            // Break if no seats were distributed in this iteration
+            if (!seatsDistributed) {
+                System.out.println("[SeatingPlan] Warning: Could not distribute " + remainingSeats + 
+                                  " remaining seats. All tables at maximum capacity.");
+                break;
             }
         }
     }

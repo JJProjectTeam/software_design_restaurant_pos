@@ -18,7 +18,6 @@ public class KitchenController extends BaseController {
 
     public KitchenController(Kitchen kitchen) {
         super("Kitchen");
-        System.out.println("[KitchenController] Initializing controller...");
         this.kitchen = kitchen;
         this.mediator = RestaurantViewMediator.getInstance();
         this.stationIdMap = new HashMap<>();
@@ -35,7 +34,6 @@ public class KitchenController extends BaseController {
 
     @Override
     public void updateView() {
-        System.out.println("[KitchenController] Updating all station views");
         for (StationType stationType : StationType.values()) {
             updateStationView(stationType);
         }
@@ -45,7 +43,6 @@ public class KitchenController extends BaseController {
         // Get station data from model
         List<Station> stations = kitchen.getStationManager().getStationsByType(stationType);
         if (stations.isEmpty()) {
-            System.out.println("[KitchenController] No stations found for type: " + stationType);
             return;
         }
         
@@ -59,12 +56,7 @@ public class KitchenController extends BaseController {
         String chefName = station.hasChef() ? station.getAssignedChef().getName() : "None";
         char inUse = station.isBusy() ? '*' : ' ';
         
-        System.out.println("[KitchenController] Updating station " + stationName + 
-                         " (ID: " + stationId + 
-                         ", backlog: " + backlog + 
-                         ", chef: " + chefName + 
-                         ", inUse: " + inUse + ")");
-        
+
         // Update all registered views
         List<View> views = mediator.getViews("Kitchen");
         for (View view : views) {
@@ -77,7 +69,6 @@ public class KitchenController extends BaseController {
                     inUse
                 );
             } else {
-                System.out.println("[KitchenController] View is not a KitchenView, skipping update");
             }
         }
     }
@@ -86,7 +77,6 @@ public class KitchenController extends BaseController {
      * Notify views about a specific station update
      */
     public void notifyStationUpdate(StationType stationType) {
-        System.out.println("[KitchenController] Notifying views of update for station: " + stationType);
         updateStationView(stationType);
     }
     
@@ -94,7 +84,6 @@ public class KitchenController extends BaseController {
      * Refresh all stations in the view
      */
     public void refreshAllStations() {
-        System.out.println("[KitchenController] Refreshing all stations");
         updateView();
     }
 

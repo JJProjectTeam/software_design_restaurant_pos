@@ -58,18 +58,15 @@ public class InventoryController extends BaseController {
         int newQuantity = currentQuantity + delta;
         
         if (newQuantity < 0) {
-            System.out.println("[InventoryController] Warning: Ingredient " + name + " quantity would go negative");
             return;
         }
         
         ingredients.put(name, newQuantity);
-        System.out.println("[InventoryController] Updated " + name + " quantity to " + newQuantity);
         
         notifyIngredientUpdate(name);
     }
     
     private void notifyIngredientUpdate(String ingredientName) {
-        System.out.println("[InventoryController] Notifying views of update for ingredient: " + ingredientName);
         
         int quantity = ingredients.getOrDefault(ingredientName, 0);
         double price = prices.getOrDefault(ingredientName, 0.0);
@@ -89,7 +86,6 @@ public class InventoryController extends BaseController {
     
     @Override
     public void updateView() {
-        System.out.println("[InventoryController] Updating all inventory views");
         // Update all ingredients
         for (String ingredient : ingredients.keySet()) {
             notifyIngredientUpdate(ingredient);
@@ -100,7 +96,6 @@ public class InventoryController extends BaseController {
      * Refresh all ingredients in the view
      */
     public void refreshAllIngredients() {
-        System.out.println("[InventoryController] Refreshing all ingredients");
         updateView();
     }
 }

@@ -48,4 +48,7 @@ public class Table {
     public int getTableCapacity() {
         return tableCapacity;
     }
+    public void setTableCapacity(int tableCapacity) {
+        this.tableCapacity = tableCapacity;
+    }
 }
