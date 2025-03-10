@@ -109,11 +109,20 @@ public class InventoryView extends GamePlayView {
                 // Add new row if needed
                 while (nextRowIndex >= inventoryTable.getRowCount()) {
                     inventoryTable.insertRowBelow(inventoryTable.getRowCount() - 1);
+                    System.out.println("[InventoryView] Added row " + (inventoryTable.getRowCount() - 1) + " to table");
                 }
                 
                 rowIndex = nextRowIndex++;
                 ingredientRowMap.put(ingredient, rowIndex);
                 System.out.println("[InventoryView] Created new row " + rowIndex + " for ingredient " + ingredient);
+            }
+
+            // Check if the row index is valid before setting cell text
+            if (rowIndex >= inventoryTable.getRowCount()) {
+                System.out.println("[InventoryView] Row index " + rowIndex + " is out of bounds, adding more rows");
+                while (rowIndex >= inventoryTable.getRowCount()) {
+                    inventoryTable.insertRowBelow(inventoryTable.getRowCount() - 1);
+                }
             }
 
             // Update cells
@@ -130,6 +139,10 @@ public class InventoryView extends GamePlayView {
     @Override
     public void initialize(TWindow window) {
         System.out.println("[InventoryView] Initializing view");
+        // Reset the row index and map when reinitializing
+        this.nextRowIndex = 0;
+        this.ingredientRowMap.clear();
+        this.isInitialized = false;
         super.initialize(window);
     }
 
