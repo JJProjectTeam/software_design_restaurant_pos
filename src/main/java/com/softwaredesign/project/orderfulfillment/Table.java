@@ -12,6 +12,8 @@ public class Table {
     private int tableCapacity;
     private List<DineInCustomer> customers;
     private Menu menu;
+    private boolean isOrdering;
+    private boolean orderPlaced;
 
     public Table(int tableNumber, Menu menu, int tableCapacity) {
         this.tableNumber = tableNumber;
@@ -36,10 +38,13 @@ public class Table {
         if (!isEveryoneReadyToOrder()) {
             throw new IllegalStateException("Not all customers are ready to order");
         }
+        isOrdering = true;
         List<Recipe> tableOrders = new ArrayList<>();
         for (DineInCustomer customer : customers) {
             tableOrders.add(customer.selectRecipeFromMenu(menu));
         }
+        isOrdering = false;
+        orderPlaced = true;
         return tableOrders;
     }
     public int getTableNumber() {
@@ -50,5 +55,11 @@ public class Table {
     }
     public void setTableCapacity(int tableCapacity) {
         this.tableCapacity = tableCapacity;
+    }
+    public boolean isOrdering() {
+        return isOrdering;
+    }
+    public boolean isOrderPlaced() {
+        return orderPlaced;
     }
 }

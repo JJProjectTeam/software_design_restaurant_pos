@@ -90,7 +90,7 @@ public class InventoryView extends GamePlayView {
             Collections.sort(sortedIngredients);
 
             for (String ingredient : sortedIngredients) {
-                inventoryTable.insertRowBelow(inventoryTable.getRowCount());
+                inventoryTable.insertRowBelow(inventoryTable.getRowCount()-1);
                 int row = inventoryTable.getRowCount() - 1;
 
                 // Update cells

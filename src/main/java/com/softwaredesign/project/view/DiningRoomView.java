@@ -67,13 +67,18 @@ public class DiningRoomView extends GamePlayView {
             List<Integer> tableNumbers = new ArrayList<>(tableDataMap.keySet());
             Collections.sort(tableNumbers);
             
+            // Make sure we have at least one row
+            if (tableWidget.getRowCount() == 0) {
+                tableWidget.insertRowAbove(0);
+            }
+                
             // Update or add rows as needed
             for (int i = 0; i < tableNumbers.size(); i++) {
                 TableData data = tableDataMap.get(tableNumbers.get(i));
                 
                 // Add new row if needed
-                if (i >= tableWidget.getRowCount()) {
-                    tableWidget.insertRowBelow(i);
+                while (i >= tableWidget.getRowCount()) {
+                    tableWidget.insertRowBelow(tableWidget.getRowCount() - 1);
                 }
                 
                 // Update cells
@@ -84,7 +89,7 @@ public class DiningRoomView extends GamePlayView {
                 tableWidget.setCellText(4, i, String.valueOf(data.waiterId));
             }
             
-            // Clear any extra rows instead of deleting them
+            // Clear any extra rows
             for (int i = tableNumbers.size(); i < tableWidget.getRowCount(); i++) {
                 for (int col = 0; col < COLUMN_HEADERS.length; col++) {
                     tableWidget.setCellText(col, i, "");
