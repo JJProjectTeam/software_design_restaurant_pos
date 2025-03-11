@@ -74,22 +74,15 @@ public class RestaurantViewMediator {
     /**
      * Notify all views of a specific type to update
      */
-    public synchronized void notifyViewUpdate(String type) {
+    public void notifyViewUpdate(String type) {
         System.out.println("[RestaurantViewMediator] Notifying views of type " + type + " to update");
         BaseController controller = controllers.get(type);
         if (controller != null) {
             List<View> views = registeredViews.get(type);
             if (views != null) {
-                // Create a copy of the views list to avoid concurrent modification
-                List<View> viewsCopy = new ArrayList<>(views);
-                for (View view : viewsCopy) {
-                    try {
-                        if (view instanceof ConfigurableView) {
-                            ((ConfigurableView) view).onUpdate(controller);
-                        }
-                    } catch (Exception e) {
-                        System.err.println("[RestaurantViewMediator] Error updating view: " + e.getMessage());
-                        e.printStackTrace();
+                for (View view : views) {
+                    if (view instanceof ConfigurableView) {
+                        ((ConfigurableView) view).onUpdate(controller);
                     }
                 }
             }
@@ -102,7 +95,6 @@ public class RestaurantViewMediator {
     public void notifyConfigurationComplete(){
         getController("Configuration").onUserInput();
     }
-    
     /**
      * Reset the mediator by clearing all registered controllers and views
      */

@@ -15,19 +15,46 @@ import com.softwaredesign.project.orderfulfillment.SeatingPlan;
 import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.staff.Chef;
 import com.softwaredesign.project.staff.Waiter;
+import com.softwaredesign.project.engine.GameEngine;
+import com.softwaredesign.project.engine.Entity;
+import com.softwaredesign.project.staff.ChefManager;
 
+/**
+ * Main driver class for the Restaurant POS system.
+ * 
+ * TICK SYSTEM IMPLEMENTATION:
+ * --------------------------
+ * This class integrates a tick-based game loop using the GameEngine class.
+ * The tick system works as follows:
+ * 
+ * 1. The GameEngine maintains a list of Entity objects.
+ * 2. Each tick, the GameEngine calls readState() and then writeState() on all registered entities.
+ * 3. The readState() phase is for reading state and performing calculations without modifying state.
+ * 4. The writeState() phase is for updating state based on calculations from the read phase.
+ * 
+ * Currently, the following classes implement Entity and can be registered with the GameEngine:
+ * - Kitchen: Processes orders, assigns tasks to stations, and manages recipe flow
+ * - Station: Handles cooking tasks at specific stations (PREP, GRILL, PLATE)
+ * - ChefManager: Manages chefs and their work assignments
+ * 
+ * To extend the tick system to other components:
+ * 1. Make the class extend Entity
+ * 2. Implement readState() and writeState() methods
+ * 3. Register the object with the GameEngine using gameEngine.registerEntity()
+ * 
+ * For example, to make OrderManager tick-based:
+ * - Modify OrderManager to extend Entity
+ * - Implement readState() to check for new orders
+ * - Implement writeState() to process orders
+ * - Register it with the GameEngine
+ */
 public class RestaurantDriver {
-
-    //CONSTANTS = move to another file
-    private static final int NUMBER_OF_SEATS = 40;
-
     private RestaurantApplication app;
     private RestaurantViewMediator mediator;
     private ConfigurationController configController;
     private DiningRoomController diningRoomController;
     private KitchenController kitchenController;
     private InventoryController inventoryController;
-    private static final int TOTALSEATS = 40;
 
     private List<Waiter> waiters;
     private List<Chef> chefs;
@@ -38,11 +65,19 @@ public class RestaurantDriver {
     private Inventory inventory;
     private SeatingPlan seatingPlan;
     
+    // Add GameEngine instance
+    private GameEngine gameEngine;
+    
+    // Add ChefManager for managing chefs
+    private ChefManager chefManager;
     
     public RestaurantDriver() {
         try{
             this.app = new RestaurantApplication();
             this.mediator = RestaurantViewMediator.getInstance();
+            
+            // Get the GameEngine instance
+            this.gameEngine = GameEngine.getInstance();
             
             // Set this driver instance in the application for restart functionality
             this.app.setDriver(this);
@@ -73,11 +108,17 @@ public class RestaurantDriver {
                                 createEntitiesFromConfiguration();
                                 initializeOperation();
                                 
+                                // Start the game engine
+                                gameEngine.start();
+                                
                                 // Show dining room view and do initial update
                                 app.showView(ViewType.DINING_ROOM);
                                 Thread.sleep(100); // Small delay for view initialization
                             }
 
+                            // Step the game engine to update all entities
+                            gameEngine.step();
+                            
                             // Update views one at a time to avoid concurrent modification
                             synchronized(mediator) {
                                 diningRoomController.updateView();
@@ -100,6 +141,7 @@ public class RestaurantDriver {
             
             // Cleanup when window closes
             gameTimer.cancel();
+            gameEngine.stop();
             System.out.println("[RestaurantDriver] Application terminated");
 
         } catch (Exception e) {
@@ -134,6 +176,47 @@ public class RestaurantDriver {
         this.inventory = configController.getInventory();
         this.seatingPlan = configController.getSeatingPlan();
         System.out.println("SEATINGPLAN: "+ seatingPlan.getAllTables().size());
+        
+        // Create a ChefManager to manage chefs
+        this.chefManager = new ChefManager();
+        for (Chef chef : chefs) {
+            chefManager.addChef(chef);
+        }
+        
+        // Register entities with the GameEngine
+        registerEntitiesWithGameEngine();
+    }
+    
+    /**
+     * Register all entities with the GameEngine for the tick system.
+     * Note: Only classes that extend Entity can be registered.
+     * To register other classes, they would need to be modified to extend Entity
+     * and implement readState() and writeState() methods.
+     */
+    private void registerEntitiesWithGameEngine() {
+        System.out.println("[RestaurantDriver] Registering entities with GameEngine");
+        
+        // Register Kitchen if it extends Entity
+        if (kitchen instanceof Entity) {
+            gameEngine.registerEntity((Entity) kitchen);
+            System.out.println("[RestaurantDriver] Registered Kitchen with GameEngine");
+        } else {
+            System.out.println("[RestaurantDriver] Kitchen does not extend Entity, cannot register");
+        }
+        
+        // Register ChefManager (which extends Entity)
+        gameEngine.registerEntity(chefManager);
+        System.out.println("[RestaurantDriver] Registered ChefManager with GameEngine");
+        
+        // Note: The following classes would need to be modified to extend Entity
+        // before they can be registered with the GameEngine:
+        // - OrderManager
+        // - Chef (individual chefs)
+        // - Waiter
+        // - Table
+        // - Inventory
+        
+        System.out.println("[RestaurantDriver] Entity registration complete");
     }
 
     private void initializeOperation() {        
@@ -156,8 +239,12 @@ public class RestaurantDriver {
         
         System.out.println("[RestaurantDriver] Restaurant initialized and ready for operation");
     }
+    
     public synchronized void passEntitiesToGamePlay(){
-        //TODO this will be called on each 'tick'
+        // This method is now replaced by the GameEngine's step() method
+        // which calls readState() and writeState() on all registered entities
+        
+        // We still update the views after the entities have been updated
         try {
             if (diningRoomController != null) {
                 diningRoomController.updateView();
@@ -181,6 +268,9 @@ public class RestaurantDriver {
      */
     public synchronized void restart() {
         System.out.println("[RestaurantDriver] Performing full application restart");
+        
+        // Stop the game engine before restarting
+        gameEngine.stop();
         
         // Stop any ongoing operations
         try {
