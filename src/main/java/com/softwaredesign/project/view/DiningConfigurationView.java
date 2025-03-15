@@ -444,4 +444,8 @@ public class DiningConfigurationView extends ConfigurationView {
             showError("Error removing waiter: " + e.getMessage());
         }
     }
+    @Override
+    public void setBankBalance(double newBalance) {
+        super.setBankBalance(newBalance);
+    }
 }

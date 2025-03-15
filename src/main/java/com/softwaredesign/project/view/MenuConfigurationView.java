@@ -289,4 +289,8 @@ public class MenuConfigurationView extends ConfigurationView {
             e.printStackTrace();
         }
     }
+    @Override
+    public void setBankBalance(double newBalance) {
+        super.setBankBalance(newBalance);
+    }
 }

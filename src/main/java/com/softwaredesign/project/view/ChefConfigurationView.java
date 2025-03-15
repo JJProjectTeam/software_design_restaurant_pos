@@ -18,21 +18,21 @@ public class ChefConfigurationView extends ConfigurationView {
         String name;
         List<String> stations;
         int speed;
-        double costPerHour;
+        double cost;
         String strategy;
 
-        ChefData(String name, List<String> stations, int speed, double costPerHour, String strategy) {
+        ChefData(String name, List<String> stations, int speed, double cost, String strategy) {
             this.name = name;
             this.stations = new ArrayList<>(stations);
             this.speed = speed;
-            this.costPerHour = costPerHour;
+            this.cost = cost;
             this.strategy = strategy;
         }
 
         public String getName() { return name; }
         public List<String> getStations() { return stations; }
         public int getSpeed() { return speed; }
-        public double getCostPerHour() { return costPerHour; }
+        public double getCost() { return cost; }
         public String getStrategy() { return strategy; }
     }
 
@@ -58,7 +58,7 @@ public class ChefConfigurationView extends ConfigurationView {
     private int maxInstancesOfStation;
     private int minInstancesOfStation;
     private int maxSpeed = 5; // Default value
-    private double standardPayPerHour = 15.0; // Default value
+    private double standardPay = 15.0; // Default value
     private double payMultiplierBySpeed = 1.0; // Default value
     private double payMultiplierByStation = 1.0; // Default value
 
@@ -121,7 +121,7 @@ public class ChefConfigurationView extends ConfigurationView {
             chefTable.setColumnLabel(0, "Chef Name");
             chefTable.setColumnLabel(1, "Stations");
             chefTable.setColumnLabel(2, "Speed");
-            chefTable.setColumnLabel(3, "Cost/Hour");
+            chefTable.setColumnLabel(3, "Cost");
             chefTable.setColumnLabel(4, "Strategy");
 
             // Set column widths
@@ -258,6 +258,7 @@ public class ChefConfigurationView extends ConfigurationView {
             
             // Clear existing table
             while (chefTable.getRowCount() > 1) {
+                setBankBalance(bankBalance + chefs.get(chefTable.getCellText(0, 1)).getCost());
                 chefTable.deleteRow(1);
             }
 
@@ -266,7 +267,7 @@ public class ChefConfigurationView extends ConfigurationView {
                 System.out.println("[ChefConfigurationView] Adding chef to table: " + entry.getKey());
                 var chef = entry.getValue();
                 String stations = String.join(", ", chef.stations);
-                addChefToTable(chef.name, stations, chef.speed, chef.costPerHour, chef.strategy);
+                addChefToTable(chef.name, stations, chef.speed, chef.cost, chef.strategy);
             }
             
         } catch (Exception e) {
@@ -355,14 +356,14 @@ public class ChefConfigurationView extends ConfigurationView {
                 }
                 
                 int speed = Integer.parseInt(speedCombo.getText());
-                double costPerHour = calculateCost(speed, selectedStations.size());
+                double cost = calculateCost(speed, selectedStations.size());
                 String strategy = strategyCombo.getText();
                 
                 // Add to local storage
-                chefs.put(name, new ChefData(name, selectedStations, speed, costPerHour, strategy));
+                chefs.put(name, new ChefData(name, selectedStations, speed, cost, strategy));
                 
                 // Add to table for display
-                addChefToTable(name, String.join(", ", selectedStations), speed, costPerHour, strategy);
+                addChefToTable(name, String.join(", ", selectedStations), speed, cost, strategy);
                 
                 // Clear inputs
                 clearInputs();
@@ -376,7 +377,6 @@ public class ChefConfigurationView extends ConfigurationView {
 
     private void removeChef() {
         try {
-            
             // Get the chef name from the field
             String chefName = removeNameField.getText();
             
@@ -417,10 +417,16 @@ public class ChefConfigurationView extends ConfigurationView {
                 showError("Cannot remove this chef as it would leave some stations uncovered. All stations must have at least one chef assigned.");
                 return;
             }
-            
+
+            // Get the chef's cost before removing them
+            double chefCost = chefs.get(chefName).getCost();
+
             // Remove from local storage
             chefs.remove(chefName);
-            
+
+            // Adjust bank balance with the saved cost
+            setBankBalance(bankBalance + chefCost);
+        
             // Refresh the table
             refreshChefTable();
             
@@ -434,7 +440,7 @@ public class ChefConfigurationView extends ConfigurationView {
         }
     }
 
-    private void addChefToTable(String name, String stations, int speed, double costPerHour, String strategy) {
+    private void addChefToTable(String name, String stations, int speed, double cost, String strategy) {
         try {
             
             // Add to table UI
@@ -443,9 +449,11 @@ public class ChefConfigurationView extends ConfigurationView {
             chefTable.setCellText(0, row, name);
             chefTable.setCellText(1, row, stations);
             chefTable.setCellText(2, row, String.valueOf(speed));
-            chefTable.setCellText(3, row, String.format("%.2f", costPerHour));
+            chefTable.setCellText(3, row, String.format("%.2f", cost));
             chefTable.setCellText(4, row, strategy);
-            
+
+            //adjust bank balance
+            setBankBalance(bankBalance - cost);
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error adding chef to table: " + e.getMessage());
             e.printStackTrace();
@@ -511,10 +519,6 @@ public class ChefConfigurationView extends ConfigurationView {
             System.err.println("[ChefConfigurationView] Error clearing inputs: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    private double calculateCost(int speed, int numberOfStations) {
-        return standardPayPerHour * (1 + (speed - 1) * payMultiplierBySpeed) * (1 + (numberOfStations - 1) * payMultiplierByStation);
     }
 
     private boolean validateStationCoverage() {
@@ -674,8 +678,8 @@ public class ChefConfigurationView extends ConfigurationView {
         }
     }
 
-    public void setStandardPayPerHour(double standardPayPerHour) {
-        this.standardPayPerHour = standardPayPerHour;
+    public void setStandardPay(double standardPay) {
+        this.standardPay = standardPay;
     }
 
     public void setPayMultiplierBySpeed(double payMultiplierBySpeed) {
@@ -684,5 +688,12 @@ public class ChefConfigurationView extends ConfigurationView {
 
     public void setPayMultiplierByStation(double payMultiplierByStation) {
         this.payMultiplierByStation = payMultiplierByStation;
+    }
+    @Override
+    public void setBankBalance(double newBalance) {
+        super.setBankBalance(newBalance);
+    }
+    public double calculateCost(int speed, int numberOfStations) {
+        return standardPay * (speed * payMultiplierBySpeed) * (numberOfStations * payMultiplierByStation);
     }
 }

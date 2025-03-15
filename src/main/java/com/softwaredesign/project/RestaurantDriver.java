@@ -669,23 +669,16 @@ public class RestaurantDriver {
 }
 //TODOS:
 /*
- * make inventory + pass to controller and view
- * When im not sleepy - are we just updating views with what has changed, or repainting each time? 
- * Test updating funcionality in driver
  * 
- * Money system, both during game and at configuraiton
+ * Money system, both during game and at configuraiton 1
  * 
- * Some kind of recipeTypes, and an inventory config file that can be set up
+ * Help menu 4
  * 
- * In config file - set things like restuarant seats, initialbudget, chef/waiter charge strategy etc. 
+ * restart 3
  * 
- * Help menu
+ * speed multiplier 2.5
  * 
- * restart
+ * expand entities 2
  * 
- * speed multiplier
- * 
- * 5 tick delay
- * default chef goes on holiday sometimes
  *
  */

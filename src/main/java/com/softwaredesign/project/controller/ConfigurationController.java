@@ -38,15 +38,21 @@ public class ConfigurationController extends BaseController {
     private SeatingPlan seatingPlan;
     private boolean configurationComplete = false;
 
-    //TODO this should probably be loaded from a config or something!!! Not hard coded here
-    private List<Recipe> possibleRecipes = new ArrayList<>();
+    private double bankBalance;
+    private double chefStandardPay;
+    private double chefPayMultiplierBySpeed;
+    private double chefPayMultiplierByStation;
+    private double waiterStandardPay;
+    private double waiterPayMultiplierBySpeed;
+
+    private List<Recipe> possibleRecipes;
 
     //constructor registers with mediator
     public ConfigurationController() {
         super("Configuration");
         this.inventory = new Inventory(); // Initialize with concrete Inventory class
         this.mediator = RestaurantViewMediator.getInstance();
-        this.possibleRecipes = new ArrayList<>(); // Initialize the list
+        this.possibleRecipes = new ArrayList<>(); 
         
         // Order matters here
         setupBaseComponents();
@@ -68,6 +74,8 @@ public class ConfigurationController extends BaseController {
             JsonNode stations = config.path("inventory").path("stations");
 
             System.out.println("[ConfigurationController] Loading ingredients from config file...");
+
+            bankBalance = config.path("initialBudget").asDouble(1000.0);
 
             // Iterate through each station type
             for (StationType stationType : StationType.values()) {
@@ -93,6 +101,28 @@ public class ConfigurationController extends BaseController {
                             ingredientName + ": " + e.getMessage());
                     }
                 });
+            }
+            // Load pay-related configuration
+            JsonNode payConfig = config.path("staffRules");
+            
+            // Load chef pay details
+            JsonNode chefPay = payConfig.path("chefs");
+            if (!chefPay.isMissingNode()) {
+                this.chefStandardPay = chefPay.path("standardPay").asDouble(15.0);
+                this.chefPayMultiplierBySpeed = chefPay.path("payMultiplierBySpeed").asDouble(1.0); 
+                this.chefPayMultiplierByStation = chefPay.path("payMultiplierByStation").asDouble(1.0);
+                System.out.println("[ConfigurationController] Loaded chef pay config - Standard Pay: $" + 
+                chefStandardPay + ", Speed Multiplier: " + chefPayMultiplierBySpeed + 
+                    ", Station Multiplier: " + chefPayMultiplierByStation);
+            }
+
+            // Load waiter pay details
+            JsonNode waiterPay = payConfig.path("waiters");
+            if (!waiterPay.isMissingNode()) {
+                this.waiterStandardPay = waiterPay.path("standardPay").asDouble(10.0);
+                this.waiterPayMultiplierBySpeed = waiterPay.path("payMultiplierBySpeed").asDouble(1.0);
+                System.out.println("[ConfigurationController] Loaded waiter pay config - Standard Pay: $" + 
+                    waiterStandardPay + ", Speed Multiplier: " + waiterPayMultiplierBySpeed);
             }
 
             // Initialize other components
@@ -127,22 +157,20 @@ public class ConfigurationController extends BaseController {
                     int maxChefs = chefRules.path("max").asInt(20);
                     int maxStationsPerChef = chefRules.path("maxStationsPerChef").asInt(10);
                     int maxSpeed = chefRules.path("maxSpeed").asInt(5);
-                    double standardPayPerHour = chefRules.path("standardPayPerHour").asDouble(15.0);
-                    double payMultiplierBySpeed = chefRules.path("payMultiplierBySpeed").asDouble(1.0);
-                    double payMultiplierByStation = chefRules.path("payMultiplierByStation").asDouble(1.0);
                     
                     chefView.setMinChefs(minChefs);
                     chefView.setMaxChefs(maxChefs);
                     chefView.setMaxStationsPerChef(maxStationsPerChef);
                     chefView.setMaxSpeed(maxSpeed);
-                    chefView.setStandardPayPerHour(standardPayPerHour);
-                    chefView.setPayMultiplierBySpeed(payMultiplierBySpeed);
-                    chefView.setPayMultiplierByStation(payMultiplierByStation);
+                    chefView.setStandardPay(chefStandardPay);
+                    chefView.setPayMultiplierBySpeed(chefPayMultiplierBySpeed);
+                    chefView.setPayMultiplierByStation(chefPayMultiplierByStation);
+                    //todo - also for waiters
                     
                     System.out.println("[ConfigurationController] Set chef constants - Min Chefs: " + 
                         minChefs + ", Max Chefs: " + maxChefs + ", Max Stations Per Chef: " + maxStationsPerChef +
-                        ", Max Speed: " + maxSpeed + ", Standard Pay: " + standardPayPerHour +
-                        ", Speed Multiplier: " + payMultiplierBySpeed + ", Station Multiplier: " + payMultiplierByStation);
+                        ", Max Speed: " + maxSpeed + ", Standard Pay: " + chefStandardPay +
+                        ", Speed Multiplier: " + chefPayMultiplierBySpeed + ", Station Multiplier: " + chefPayMultiplierByStation);
                 }
                 
                 // Set kitchen constants
@@ -224,6 +252,8 @@ public class ConfigurationController extends BaseController {
             } else {
                 System.err.println("[ConfigurationController] Menu configuration view not found");
             }
+
+            updateBankBalance(bankBalance);
             
         } catch (Exception e) {
             System.err.println("[ConfigurationController] Error configuring views: " + e.getMessage());
@@ -255,6 +285,8 @@ public class ConfigurationController extends BaseController {
         
         // Create menu items
         createMenuItems(menuView.getSelectedRecipes());
+
+        updateBankBalance(bankBalance);
         
         // Set configuration as complete
         configurationComplete = true;
@@ -262,44 +294,6 @@ public class ConfigurationController extends BaseController {
         
         // Notify mediator that configuration is complete
         // mediator.notifyConfigurationComplete();
-    }
-    
-    private void createDefaultConfiguration() {        
-        // Define default stations
-        List<String> defaultStations = Arrays.asList("Grill", "Prep", "Plate");
-        
-        // Create default stations FIRST
-        for (String stationType : defaultStations) {
-            Station station = new Station(StationType.valueOf(stationType.toUpperCase()), collectionPoint);
-            station.setKitchen(kitchen);
-            stationManager.addStation(station);
-        }
-        
-        // Create default chef AFTER stations exist
-        ChefStrategy strategy = new SimpleChefStrategy();
-        Chef chef = new Chef(200.0, 2, strategy, stationManager);
-        
-        // Assign chef to stations
-        for (String stationType : defaultStations) {
-            chef.assignToStation(StationType.valueOf(stationType.toUpperCase()));
-        }
-        
-        // Create default tables
-        seatingPlan = new SeatingPlan(4, 40, 5, menu);
-        
-        // Create default waiter
-        Waiter waiter = new Waiter(20.0, 2, orderManager, menu);
-        
-        // Assign tables to waiter
-        for (Table table : seatingPlan.getAllTables()) {
-            waiter.assignTable(table);
-        }
-        
-        waiters.add(waiter);
-        
-        // Create default menu items
-        Set<String> defaultRecipes = new HashSet<>(Arrays.asList("Burger", "Kebab"));
-        createMenuItems(defaultRecipes);
     }
 
     private void createChefs(Map<String, ChefConfigurationView.ChefData> chefData) {
@@ -310,9 +304,11 @@ public class ConfigurationController extends BaseController {
             try {
                 ChefStrategy strategy = createChefStrategy(data.getStrategy());
                 
+                double chefCost = calculateChefCost(data.getSpeed(), data.getStations().size());
+                updateBankBalance(bankBalance - chefCost);
                 Chef chef = new Chef(
                     data.getName(),
-                    data.getCostPerHour(),
+                    chefCost,
                     data.getSpeed(),
                     strategy, 
                     stationManager  // Pass stationManager to chef
@@ -367,11 +363,14 @@ public class ConfigurationController extends BaseController {
         int extraTables = allTables.size() % waiterData.size();
         int tableIndex = 0;
 
+
         System.out.println("[ConfigurationController] Distributing " + allTables.size() + " tables among " + waiterData.size() + " waiters");
         
         for (var entry : waiterData.entrySet()) {
             var data = entry.getValue();
-            Waiter waiter = new Waiter(data.getCostPerHour(), data.getSpeed(), orderManager, menu);
+            double waiterCost = calculateWaiterCost(data.getSpeed());
+            updateBankBalance(bankBalance - waiterCost);
+            Waiter waiter = new Waiter(waiterCost, data.getSpeed(), orderManager, menu);
             
             // Calculate tables for this waiter
             int tablesToAssign = tablesPerWaiter + (waiters.size() < extraTables ? 1 : 0);
@@ -398,9 +397,9 @@ public class ConfigurationController extends BaseController {
         // For each selected recipe, create the appropriate Recipe object and add it to the menu
         for (String recipeName : selectedRecipes) {
             try {
+                //TODO change this to use available recipes list above
                 // Create the appropriate recipe based on the name
                 Recipe recipe = null;
-                
                 // This is a simplified approach - in a real implementation, you'd have a more
                 // flexible way to create recipes based on names
                 if (recipeName.equalsIgnoreCase("Burger")) {
@@ -515,5 +514,33 @@ public class ConfigurationController extends BaseController {
             System.err.println("[ConfigurationController] Error initializing menu: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    public void updateBankBalance(double newBalance) {
+        try {
+            bankBalance = newBalance;
+            // Update balance in all configuration views
+            ChefConfigurationView chefView = (ChefConfigurationView) mediator.getView(ViewType.CHEF_CONFIGURATION);
+            DiningConfigurationView diningView = (DiningConfigurationView) mediator.getView(ViewType.DINING_CONFIGURATION);
+            MenuConfigurationView menuView = (MenuConfigurationView) mediator.getView(ViewType.MENU_CONFIGURATION);
+
+            if (chefView != null) chefView.setBankBalance(newBalance);
+            if (diningView != null) diningView.setBankBalance(newBalance);
+            if (menuView != null) menuView.setBankBalance(newBalance);
+
+            System.out.println("[ConfigurationController] Updated bank balance to: $" + newBalance);
+        } catch (Exception e) {
+            System.err.println("[ConfigurationController] Error updating bank balance: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private double calculateChefCost(int speed, int numberOfStations) {
+        return chefStandardPay * (speed * chefPayMultiplierBySpeed) * 
+               (numberOfStations * chefPayMultiplierByStation);
+    }
+
+    private double calculateWaiterCost(int speed) {
+        return waiterStandardPay * (speed * waiterPayMultiplierBySpeed);
     }
 }
