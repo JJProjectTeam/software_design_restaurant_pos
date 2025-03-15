@@ -193,10 +193,10 @@ public class DiningConfigurationView extends ConfigurationView {
                 waiterTable.deleteRow(1);
             }
 
-            // Populate from local storage
+            // Populate from local storage without deducting costs again
             for (var entry : waiters.entrySet()) {
                 var waiter = entry.getValue();
-                addWaiterToTable(waiter.name, waiter.speed, waiter.costPerHour);
+                addWaiterToTable(waiter.name, waiter.speed, waiter.costPerHour, false);
             }
         } catch (Exception e) {
             System.err.println("[DiningConfigurationView] Error refreshing waiter table: " + e.getMessage());
@@ -327,8 +327,8 @@ public class DiningConfigurationView extends ConfigurationView {
             // Add to local storage
             waiters.put(name, new WaiterData(name, speed, costPerHour));
             
-            // Add to table
-            addWaiterToTable(name, speed, costPerHour);
+            // Add to table and deduct cost
+            addWaiterToTable(name, speed, costPerHour, true);
 
             // Clear inputs
             nameField.setText("");
@@ -340,7 +340,7 @@ public class DiningConfigurationView extends ConfigurationView {
         }
     }
 
-    private void addWaiterToTable(String name, int speed, double costPerHour) {
+    private void addWaiterToTable(String name, int speed, double costPerHour, boolean deductCost) {
         try {
             int row = waiterTable.getRowCount();
             waiterTable.insertRowBelow(row-1);
@@ -348,6 +348,10 @@ public class DiningConfigurationView extends ConfigurationView {
             waiterTable.setCellText(1, row, String.valueOf(speed));
             waiterTable.setCellText(2, row, String.format("%.2f", costPerHour));
             waiterTable.setCellText(3, row, "0"); // Initially no tables assigned
+            
+            if (deductCost) {
+                setBankBalance(bankBalance - costPerHour);
+            }
         } catch (Exception e) {
             System.err.println("[DiningConfigurationView] Error adding waiter to table: " + e.getMessage());
             e.printStackTrace();
@@ -427,9 +431,15 @@ public class DiningConfigurationView extends ConfigurationView {
                 showError("Cannot remove waiter. At least " + minWaiters + " waiter(s) required.");
                 return;
             }
+
+            // Get the waiter's cost before removing them
+            double waiterCost = waiters.get(waiterName).getCostPerHour();
             
             // Remove from local storage
             waiters.remove(waiterName);
+            
+            // Refund the cost to the bank balance
+            setBankBalance(bankBalance + waiterCost);
             
             // Refresh the table
             refreshWaiterTable();
@@ -444,6 +454,7 @@ public class DiningConfigurationView extends ConfigurationView {
             showError("Error removing waiter: " + e.getMessage());
         }
     }
+
     @Override
     public void setBankBalance(double newBalance) {
         super.setBankBalance(newBalance);
