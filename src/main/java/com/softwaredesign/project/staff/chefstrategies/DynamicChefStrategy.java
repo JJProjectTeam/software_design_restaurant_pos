@@ -28,9 +28,6 @@ public class DynamicChefStrategy implements ChefStrategy {
             return null;
         }
         
-        // Get a list of all stations that have work to do
-        List<Station> stationsWithWork = new ArrayList<>();
-        
         // First priority: Find empty stations with ready tasks that don't already have a chef assigned
         for (Station station : stationManager.getAllStations()) {
             // Only consider stations that don't have a chef and are in the chef's assigned stations
@@ -90,16 +87,8 @@ public class DynamicChefStrategy implements ChefStrategy {
             }
         }
         
-        // Last resort: return any unoccupied station to avoid chef standing idle
-        for (Station station : assignedStations) {
-            // Only consider stations that don't already have a chef
-            if (!station.hasChef()) {
-                return station;
-            }
-        }
-        
-        // If all else fails, return the first assigned station
-        return assignedStations.get(0);
+        // Removed fallback: do not return an unoccupied station if no pending tasks; instead, return null
+        return null;
     }
     
     /**

@@ -17,15 +17,7 @@ public class ShortestQueueFirst implements ChefStrategy {
             .min((s1, s2) -> Integer.compare(s1.getBacklogSize(), s2.getBacklogSize()))
             .orElse(null);
         
-        // If no station with backlog is available, find any unoccupied station
-        if (bestStation == null) {
-            bestStation = assignedStations.stream()
-                .filter(station -> station != null)
-                .filter(station -> !station.hasChef())
-                .findFirst()
-                .orElse(null);
-        }
-        
+        // Removed fallback: do not return any unoccupied station if no pending tasks
         return bestStation;
     }
 

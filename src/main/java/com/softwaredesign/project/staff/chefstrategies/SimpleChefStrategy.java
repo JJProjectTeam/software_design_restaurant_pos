@@ -17,30 +17,22 @@ public class SimpleChefStrategy implements ChefStrategy {
             return null;
         }
         
-        // First, look for a station that needs a chef and has a recipe assigned
+        // First, look for a station that needs a chef and has a recipe assigned and should have pending task
         for (Station station : assignedStations) {
-            // Check if the station has a recipe, is not busy, and has no chef assigned yet
             if (station.getCurrentRecipe() != null && !station.isBusy() && !station.hasChef()) {
                 return station;
             }
         }
         
-        // Next, look for any station that isn't busy and has no chef
+        // Next, look for any station that isn't busy and has no chef and has some pending work
         for (Station station : assignedStations) {
-            if (!station.isBusy() && !station.hasChef()) {
+            if (!station.isBusy() && !station.hasChef() && station.getBacklogSize() > 0) {
                 return station;
             }
         }
         
-        // If no suitable station found, return the first one that has no chef
-        for (Station station : assignedStations) {
-            if (!station.hasChef()) {
-                return station;
-            }
-        }
-        
-        // If all else fails, just return the first one
-        return assignedStations.get(0);
+        // Removed fallback: do not return any station if no station meets the work criteria
+        return null;
     }
     
     @Override

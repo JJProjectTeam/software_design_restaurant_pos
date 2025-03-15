@@ -21,15 +21,7 @@ public class OldestOrderFirstStrategy implements ChefStrategy {
             .min((s1, s2) -> s1.getOldestTaskTime().compareTo(s2.getOldestTaskTime()))
             .orElse(null);
             
-        // If no station with backlog is available, find any unoccupied station
-        if (bestStation == null) {
-            bestStation = assignedStations.stream()
-                .filter(Objects::nonNull)
-                .filter(station -> !station.hasChef())
-                .findFirst()
-                .orElse(null);
-        }
-        
+        // Removed fallback: do not return any unoccupied station if no pending tasks
         return bestStation;
     }
 
