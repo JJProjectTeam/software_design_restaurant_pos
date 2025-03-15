@@ -60,7 +60,7 @@ public class AppTest {
         
         
         Menu menu = new Menu(inventoryService);
-        SeatingPlan seatingPlan = new SeatingPlan(5, 40,  15, menu);
+        SeatingPlan seatingPlan = new SeatingPlan(5, 40,  4, menu);
         
         for (var table : seatingPlan.getAllTables()) {
             assertTrue(table.getTableCapacity() >= 1);
