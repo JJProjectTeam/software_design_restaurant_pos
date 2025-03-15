@@ -11,13 +11,15 @@ import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
 
+import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
+
 public class Waiter extends StaffMember {
     private List<Table> assignedTables;
     private OrderManager orderManager;
     private Menu menu;
 
-    public Waiter(double payPerHour, double speedMultiplier, OrderManager orderManager, Menu menu) {
-        super(payPerHour, speedMultiplier);
+    public Waiter(double payPerHour, ISpeedComponent speedDecorator, OrderManager orderManager, Menu menu) {
+        super(payPerHour, speedDecorator);
         this.assignedTables = new ArrayList<>();
         this.orderManager = orderManager;
         this.menu = menu;

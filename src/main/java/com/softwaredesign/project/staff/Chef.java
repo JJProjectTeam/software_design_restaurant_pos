@@ -9,6 +9,8 @@ import com.softwaredesign.project.kitchen.StationManager;
 import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 
+import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
+
 public class Chef extends StaffMember {
     private List<Station> assignedStations; // Stations where the chef is assigned
     private ChefStrategy workStrategy; 
@@ -18,8 +20,8 @@ public class Chef extends StaffMember {
     private boolean isWorking; // Flag to indicate if the chef is currently working on a task
     private static int chefCounter = 0;
     
-    public Chef(double payPerHour, double speedMultiplier, ChefStrategy strategy, StationManager stationManager) {
-        super(payPerHour, speedMultiplier);
+    public Chef(double payPerHour, ISpeedComponent speedDecorator, ChefStrategy strategy, StationManager stationManager) {
+        super(payPerHour, speedDecorator);
         this.assignedStations = new ArrayList<>();
         this.workStrategy = strategy;
         this.stationManager = stationManager;
@@ -27,8 +29,8 @@ public class Chef extends StaffMember {
         this.isWorking = false;
     }
     
-    public Chef(String name, double payPerHour, double speedMultiplier, ChefStrategy strategy, StationManager stationManager) {
-        super(payPerHour, speedMultiplier);
+    public Chef(String name, double payPerHour, ISpeedComponent speedDecorator, ChefStrategy strategy, StationManager stationManager) {
+        super(payPerHour, speedDecorator);
         this.assignedStations = new ArrayList<>();
         this.workStrategy = strategy;
         this.stationManager = stationManager;
