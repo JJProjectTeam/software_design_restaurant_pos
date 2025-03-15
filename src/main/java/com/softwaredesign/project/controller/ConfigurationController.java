@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.nio.file.Paths;
 import java.nio.file.Files;
+import com.softwaredesign.project.model.BudgetSingleton;
 
 public class ConfigurationController extends BaseController {
     private Kitchen kitchen;
@@ -518,8 +519,9 @@ public class ConfigurationController extends BaseController {
 
     public void updateBankBalance(double newBalance) {
         try {
-            bankBalance = newBalance;
-            // Update balance in all configuration views
+            BudgetSingleton.getInstance().setBudget(newBalance);
+            
+            // Update all configuration views
             ChefConfigurationView chefView = (ChefConfigurationView) mediator.getView(ViewType.CHEF_CONFIGURATION);
             DiningConfigurationView diningView = (DiningConfigurationView) mediator.getView(ViewType.DINING_CONFIGURATION);
             MenuConfigurationView menuView = (MenuConfigurationView) mediator.getView(ViewType.MENU_CONFIGURATION);

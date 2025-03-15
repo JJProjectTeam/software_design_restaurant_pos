@@ -481,7 +481,7 @@ public class ChefConfigurationView extends ConfigurationView {
             }
             try {
                 int speed = Integer.parseInt(speedText);
-                if (speed < 1 || speed > 5) {
+                if (speed < 1 || speed > maxSpeed) {
                     showError("Invalid speed value");
                     return false;
                 }
@@ -614,6 +614,8 @@ public class ChefConfigurationView extends ConfigurationView {
     @Override
     protected void onNextPressed() {
         try {
+            // Notify the mediator so the controller updates all views with the current budget
+            mediator.notifyBudgetChanged(bankBalance);
             app.showView(ViewType.DINING_CONFIGURATION);
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error navigating to next view: " + e.getMessage());
@@ -624,6 +626,8 @@ public class ChefConfigurationView extends ConfigurationView {
     @Override
     protected void onBackPressed() {
         try {
+            // Notify the mediator so the controller updates all views with the current budget
+            mediator.notifyBudgetChanged(bankBalance);
             app.showView(ViewType.WELCOME);
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error navigating to previous view: " + e.getMessage());

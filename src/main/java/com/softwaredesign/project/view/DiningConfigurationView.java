@@ -392,6 +392,8 @@ public class DiningConfigurationView extends ConfigurationView {
     @Override
     protected void onNextPressed() {
         try {
+            // Notify the mediator so the controller updates all views with the current budget
+            mediator.notifyBudgetChanged(bankBalance);
             app.showView(ViewType.MENU_CONFIGURATION);
         } catch (Exception e) {
             System.err.println("[DiningConfigurationView] Error navigating to next view: " + e.getMessage());
@@ -402,6 +404,8 @@ public class DiningConfigurationView extends ConfigurationView {
     @Override
     protected void onBackPressed() {
         try {
+            // Notify the mediator so the controller updates all views with the current budget
+            mediator.notifyBudgetChanged(bankBalance);
             app.showView(ViewType.CHEF_CONFIGURATION);
         } catch (Exception e) {
             System.err.println("[DiningConfigurationView] Error navigating to previous view: " + e.getMessage());

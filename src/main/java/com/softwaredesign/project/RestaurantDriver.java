@@ -1,13 +1,11 @@
 package com.softwaredesign.project;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
 import com.softwaredesign.project.controller.*;
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.kitchen.Kitchen;
 import com.softwaredesign.project.kitchen.Station;
 import com.softwaredesign.project.kitchen.StationManager;

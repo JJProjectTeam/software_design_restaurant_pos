@@ -4,6 +4,7 @@ import com.softwaredesign.project.controller.BaseController;
 import com.softwaredesign.project.view.View;
 import com.softwaredesign.project.view.ViewType;
 import com.softwaredesign.project.view.ConfigurableView;
+import com.softwaredesign.project.controller.ConfigurationController;
 
 import java.util.*;
 
@@ -95,6 +96,14 @@ public class RestaurantViewMediator {
     public void notifyConfigurationComplete(){
         getController("Configuration").onUserInput();
     }
+
+    public void notifyBudgetChanged(double newBalance) {
+        ConfigurationController configController = (ConfigurationController) getController("Configuration");
+        if (configController != null) {
+            configController.updateBankBalance(newBalance);
+        }
+    }
+
     /**
      * Reset the mediator by clearing all registered controllers and views
      */
