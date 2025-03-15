@@ -289,4 +289,13 @@ public class Chef extends StaffMember {
         }
         return false;
     }
+    public void addStationAssignment(Station station) {
+        if (!assignedStations.contains(station)) {
+            assignedStations.add(station);
+        }
+    }
+    
+    public void clearStationAssignments() {
+        assignedStations.clear();
+    }
 }
