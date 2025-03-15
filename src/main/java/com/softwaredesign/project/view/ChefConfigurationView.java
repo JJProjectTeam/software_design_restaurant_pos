@@ -255,19 +255,17 @@ public class ChefConfigurationView extends ConfigurationView {
 
     private void refreshChefTable() {
         try {
-            
-            // Clear existing table
+            // Clear existing table without adjusting the bank balance
             while (chefTable.getRowCount() > 1) {
-                setBankBalance(bankBalance + chefs.get(chefTable.getCellText(0, 1)).getCost());
                 chefTable.deleteRow(1);
             }
-
-            // Repopulate from local storage
+    
+            // Repopulate from local storage without deducting bank balance again
             for (var entry : chefs.entrySet()) {
                 System.out.println("[ChefConfigurationView] Adding chef to table: " + entry.getKey());
                 var chef = entry.getValue();
                 String stations = String.join(", ", chef.stations);
-                addChefToTable(chef.name, stations, chef.speed, chef.cost, chef.strategy);
+                addChefToTable(chef.name, stations, chef.speed, chef.cost, chef.strategy, false);
             }
             
         } catch (Exception e) {
@@ -363,7 +361,7 @@ public class ChefConfigurationView extends ConfigurationView {
                 chefs.put(name, new ChefData(name, selectedStations, speed, cost, strategy));
                 
                 // Add to table for display
-                addChefToTable(name, String.join(", ", selectedStations), speed, cost, strategy);
+                addChefToTable(name, String.join(", ", selectedStations), speed, cost, strategy, true);
                 
                 // Clear inputs
                 clearInputs();
@@ -440,20 +438,20 @@ public class ChefConfigurationView extends ConfigurationView {
         }
     }
 
-    private void addChefToTable(String name, String stations, int speed, double cost, String strategy) {
+    // Overloaded method that adds a chef row and conditionally deducts cost from the bank balance.
+    private void addChefToTable(String name, String stations, int speed, double cost, String strategy, boolean deductCost) {
         try {
-            
-            // Add to table UI
-            int row = chefTable.getRowCount()-1;
+            int row = chefTable.getRowCount() - 1;
             chefTable.insertRowBelow(row);
             chefTable.setCellText(0, row, name);
             chefTable.setCellText(1, row, stations);
             chefTable.setCellText(2, row, String.valueOf(speed));
             chefTable.setCellText(3, row, String.format("%.2f", cost));
             chefTable.setCellText(4, row, strategy);
-
-            //adjust bank balance
-            setBankBalance(bankBalance - cost);
+            
+            if (deductCost) {
+                setBankBalance(bankBalance - cost);
+            }
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error adding chef to table: " + e.getMessage());
             e.printStackTrace();
