@@ -3,16 +3,17 @@ package com.softwaredesign.project;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-import com.softwaredesign.project.menu.Menu;
+import com.softwaredesign.project.order.OrderManager;
 import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 import com.softwaredesign.project.orderfulfillment.SeatingPlan;
-import com.softwaredesign.project.order.OrderManager;
-import com.softwaredesign.project.staff.Waiter;
-import com.softwaredesign.project.inventory.InventoryService;
-import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.kitchen.Station;
 import com.softwaredesign.project.kitchen.StationManager;
 import com.softwaredesign.project.kitchen.StationType;
+import com.softwaredesign.project.menu.Menu;
+import com.softwaredesign.project.staff.Waiter;
+import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
+import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
+import com.softwaredesign.project.inventory.Inventory;
+import com.softwaredesign.project.inventory.InventoryService;
 
 public class AppTest {
     //TODO: Tests to add - waiter assignment? Can we handle if more customers come than we can seat gracefully?
@@ -34,7 +35,8 @@ public class AppTest {
         StationManager stationManager = new StationManager(collectionPoint);
         OrderManager orderManager = new OrderManager(collectionPoint, stationManager);
         SeatingPlan seatingPlan = new SeatingPlan(5, 40, 15, menu);
-        Waiter waiter = new Waiter(15.0, 1.0, orderManager, menu);
+        ISpeedComponent baseSpeed = new BaseSpeed();
+        Waiter waiter = new Waiter(15.0, baseSpeed, orderManager, menu);
 
         assertNotNull("Inventory service should not be null", inventoryService);
         assertTrue("Bun stock should be positive", inventoryService.getStock("Bun") > 0);

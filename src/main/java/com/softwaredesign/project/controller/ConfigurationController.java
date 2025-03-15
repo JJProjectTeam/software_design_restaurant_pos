@@ -18,6 +18,12 @@ import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.LongestQueueFirstStrategy;
 import com.softwaredesign.project.staff.chefstrategies.OldestOrderFirstStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
+import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
+import com.softwaredesign.project.staff.staffspeeds.CaffeineAddictDecorator;
+import com.softwaredesign.project.staff.staffspeeds.CocaineAddictDecorator;
+import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
+import com.softwaredesign.project.staff.staffspeeds.LethargicDecorator;
+
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -130,7 +136,7 @@ public class ConfigurationController extends BaseController {
                     double standardPayPerHour = chefRules.path("standardPayPerHour").asDouble(15.0);
                     double payMultiplierBySpeed = chefRules.path("payMultiplierBySpeed").asDouble(1.0);
                     double payMultiplierByStation = chefRules.path("payMultiplierByStation").asDouble(1.0);
-                    
+
                     chefView.setMinChefs(minChefs);
                     chefView.setMaxChefs(maxChefs);
                     chefView.setMaxStationsPerChef(maxStationsPerChef);
@@ -195,7 +201,6 @@ public class ConfigurationController extends BaseController {
                 int maxSpeed = waiterRules.path("maxSpeed").asInt(5);
                 double standardPayPerHour = waiterRules.path("standardPayPerHour").asDouble(10.0);
                 double payMultiplierBySpeed = waiterRules.path("payMultiplierBySpeed").asDouble(1.0);
-                
                 diningView.setMinWaiters(minWaiters);
                 diningView.setMaxWaiters(maxWaiters);
                 diningView.setMaxSpeed(maxSpeed);
@@ -277,7 +282,7 @@ public class ConfigurationController extends BaseController {
         
         // Create default chef AFTER stations exist
         ChefStrategy strategy = new SimpleChefStrategy();
-        Chef chef = new Chef(200.0, 2, strategy, stationManager);
+        Chef chef = new Chef(200.0, new BaseSpeed(), strategy, stationManager);
         
         // Assign chef to stations
         for (String stationType : defaultStations) {
@@ -288,7 +293,7 @@ public class ConfigurationController extends BaseController {
         seatingPlan = new SeatingPlan(4, 40, 5, menu);
         
         // Create default waiter
-        Waiter waiter = new Waiter(20.0, 2, orderManager, menu);
+        Waiter waiter = new Waiter(20.0, new BaseSpeed(), orderManager, menu);
         
         // Assign tables to waiter
         for (Table table : seatingPlan.getAllTables()) {
@@ -303,17 +308,44 @@ public class ConfigurationController extends BaseController {
     }
 
     private void createChefs(Map<String, ChefConfigurationView.ChefData> chefData) {
-        System.out.println("[ConfigurationController] Creating chefs from configuration");
-        chefs = new ArrayList<>();
+        JsonNode chefRules;
+        try {
+            System.out.println("[ConfigurationController] Creating chefs from configuration");
+            chefs = new ArrayList<>();
+            String configPath = "src/main/config.json";
+            String jsonContent = Files.readString(Paths.get(configPath));
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode config = mapper.readTree(jsonContent);
+            chefRules = config.path("staffRules").path("chefs");
+        } catch (Exception e) {
+            System.err.println("[ConfigurationController] Error reading config file: " + e.getMessage());
+            e.printStackTrace();
+            return;
+        }
+        double chanceOfCaffieneAddict = chefRules.path("chanceOfCaffieneAddict").asDouble(0.3);
+        double chanceOfLethargic = chefRules.path("chanceOfLethargic").asDouble(0.3);
+        double chanceOfCocaineAddict = chefRules.path("chanceOfCocaineAddict").asDouble(0.25);
         
         for (ChefConfigurationView.ChefData data : chefData.values()) {
             try {
                 ChefStrategy strategy = createChefStrategy(data.getStrategy());
+                ISpeedComponent speedComponent = new BaseSpeed(data.getSpeed());
                 
+                // Apply speed modifiers in a consistent order to maintain SOLID principles
+                if (Math.random() < chanceOfLethargic) {
+                    speedComponent = new LethargicDecorator(speedComponent);
+                }
+                if (Math.random() < chanceOfCaffieneAddict) {
+                    speedComponent = new CaffeineAddictDecorator(speedComponent);
+                }
+                if (Math.random() < chanceOfCocaineAddict) {
+                    speedComponent = new CocaineAddictDecorator(speedComponent);
+                }
+
                 Chef chef = new Chef(
                     data.getName(),
                     data.getCostPerHour(),
-                    data.getSpeed(),
+                    speedComponent,
                     strategy, 
                     stationManager  // Pass stationManager to chef
                 );
@@ -368,10 +400,39 @@ public class ConfigurationController extends BaseController {
         int tableIndex = 0;
 
         System.out.println("[ConfigurationController] Distributing " + allTables.size() + " tables among " + waiterData.size() + " waiters");
+        String configPath = "src/main/config.json";
+        JsonNode waiterRules;
+        try{
+            String jsonContent = Files.readString(Paths.get(configPath));
+            
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode config = mapper.readTree(jsonContent);
+            waiterRules = config.path("staffRules").path("waiters");
+        } catch (Exception e) {
+            System.err.println("[ConfigurationController] Error reading config file: " + e.getMessage());
+            e.printStackTrace();
+            return;
+        }
+        double chanceOfCaffieneAddict = waiterRules.path("chanceOfCaffieneAddict").asDouble(0.3);
+        double chanceOfLethargic = waiterRules.path("chanceOfLethargic").asDouble(0.3);
+        double chanceOfCocaineAddict = waiterRules.path("chanceOfCocaineAddict").asDouble(0.25);
         
         for (var entry : waiterData.entrySet()) {
             var data = entry.getValue();
-            Waiter waiter = new Waiter(data.getCostPerHour(), data.getSpeed(), orderManager, menu);
+            ISpeedComponent speedComponent = new BaseSpeed();
+            
+            // Apply speed modifiers in a consistent order to maintain SOLID principles
+            if (Math.random() < chanceOfLethargic) {
+                speedComponent = new LethargicDecorator(speedComponent);
+            }
+            if (Math.random() < chanceOfCaffieneAddict) {
+                speedComponent = new CaffeineAddictDecorator(speedComponent);
+            }
+            if (Math.random() < chanceOfCocaineAddict) {
+                speedComponent = new CocaineAddictDecorator(speedComponent);
+            }
+            
+            Waiter waiter = new Waiter(data.getCostPerHour(), speedComponent, orderManager, menu);
             
             // Calculate tables for this waiter
             int tablesToAssign = tablesPerWaiter + (waiters.size() < extraTables ? 1 : 0);
