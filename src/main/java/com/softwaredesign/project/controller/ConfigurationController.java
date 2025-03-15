@@ -244,7 +244,10 @@ public class ConfigurationController extends BaseController {
         int prepStationCount = chefView.getStationCounts().get("PREP");
         int plateStationCount = chefView.getStationCounts().get("PLATE");
         
-        // Create chefs
+        // Create stations based on configuration FIRST
+        createStations(grillStationCount, prepStationCount, plateStationCount);
+        
+        // Create chefs AFTER stations exist
         createChefs(chefView.getChefs());
         
         // Create waiters and tables
@@ -252,9 +255,6 @@ public class ConfigurationController extends BaseController {
         
         // Create menu items
         createMenuItems(menuView.getSelectedRecipes());
-        
-        // Create stations based on configuration
-        createStations(grillStationCount, prepStationCount, plateStationCount);
         
         // Set configuration as complete
         configurationComplete = true;
@@ -265,15 +265,22 @@ public class ConfigurationController extends BaseController {
     }
     
     private void createDefaultConfiguration() {        
-        // Create default chef
+        // Define default stations
         List<String> defaultStations = Arrays.asList("Grill", "Prep", "Plate");
+        
+        // Create default stations FIRST
+        for (String stationType : defaultStations) {
+            Station station = new Station(StationType.valueOf(stationType.toUpperCase()), collectionPoint);
+            station.setKitchen(kitchen);
+            stationManager.addStation(station);
+        }
+        
+        // Create default chef AFTER stations exist
         ChefStrategy strategy = new SimpleChefStrategy();
         Chef chef = new Chef(200.0, 2, strategy, stationManager);
         
-        // Create default stations
+        // Assign chef to stations
         for (String stationType : defaultStations) {
-            Station station = new Station(StationType.valueOf(stationType.toUpperCase()), collectionPoint);
-            stationManager.addStation(station);
             chef.assignToStation(StationType.valueOf(stationType.toUpperCase()));
         }
         
@@ -304,6 +311,7 @@ public class ConfigurationController extends BaseController {
                 ChefStrategy strategy = createChefStrategy(data.getStrategy());
                 
                 Chef chef = new Chef(
+                    data.getName(),
                     data.getCostPerHour(),
                     data.getSpeed(),
                     strategy, 

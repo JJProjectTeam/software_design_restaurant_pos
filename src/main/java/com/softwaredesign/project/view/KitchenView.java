@@ -64,7 +64,7 @@ public class KitchenView extends GamePlayView {
 
     protected void createKitchenStationsTable() {
         System.out.println("[KitchenView] Creating kitchen table...");
-        kitchenStations = window.addTable(2, 3, window.getWidth() - 4, 10, 5, 10);
+        kitchenStations = window.addTable(2, 3, window.getWidth() - 4, 15, 5, 10);
 
         // Set column labels and widths
         for (int i = 0; i < COLUMN_HEADERS.length; i++) {
@@ -75,9 +75,17 @@ public class KitchenView extends GamePlayView {
 
     public void onStationUpdate(int stationID, String station, int backlog, String chef, char inUse) {
         StationUpdate update = new StationUpdate(stationID, station, backlog, chef, inUse);
+        
+        // Store the update in the map regardless of initialization status
+        synchronized (stationDataMap) {
+            stationDataMap.put(stationID, update);
+        }
+        
         if (!isInitialized) {
             System.out.println("[KitchenView] View not yet initialized, queueing update for station: " + station);
-            pendingUpdates.offer(update);
+            synchronized (pendingUpdates) {
+                pendingUpdates.offer(update);
+            }
         } else {
             updateStationInTable(stationID, station, backlog, chef, inUse);
         }
@@ -90,19 +98,22 @@ public class KitchenView extends GamePlayView {
         }
         
         try {
-            // Find or create row for this station
-            int targetRow = stationID;
-            
-            // Add rows if needed
-            while (kitchenStations.getRowCount() <= targetRow) {
-                kitchenStations.insertRowBelow(kitchenStations.getRowCount() - 1);
-            }
+            // Synchronize on the table widget to prevent concurrent modification
+            synchronized (kitchenStations) {
+                // Find or create row for this station
+                int targetRow = stationID;
+                
+                // Add rows if needed
+                while (kitchenStations.getRowCount() <= targetRow) {
+                    kitchenStations.insertRowBelow(kitchenStations.getRowCount() - 1);
+                }
 
-            kitchenStations.setCellText(0, targetRow, Integer.toString(stationID));
-            kitchenStations.setCellText(1, targetRow, stationName);
-            kitchenStations.setCellText(2, targetRow, String.valueOf(backlog));
-            kitchenStations.setCellText(3, targetRow, chef);
-            kitchenStations.setCellText(4, targetRow, String.valueOf(inUse));
+                kitchenStations.setCellText(0, targetRow, Integer.toString(stationID));
+                kitchenStations.setCellText(1, targetRow, stationName);
+                kitchenStations.setCellText(2, targetRow, String.valueOf(backlog));
+                kitchenStations.setCellText(3, targetRow, chef);
+                kitchenStations.setCellText(4, targetRow, String.valueOf(inUse));
+            }
 
             System.out.println("[KitchenView] Successfully updated station " + stationID + " in the view");
         } catch (Exception e) {

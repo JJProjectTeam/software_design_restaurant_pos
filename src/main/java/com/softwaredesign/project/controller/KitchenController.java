@@ -34,24 +34,28 @@ public class KitchenController extends BaseController {
 
     @Override
     public void updateView() {
+
         View view = mediator.getView(ViewType.KITCHEN);
         if (!(view instanceof KitchenView)) {
             return;
         }
         view = (KitchenView) view;
-        System.out.println("[KitchenController] Updating view for " + 
-            kitchen.getStationManager().getAllStations().size() + " stations");
+        
+        // Create a copy of the stations list to avoid ConcurrentModificationException
+        java.util.List<Station> stationsCopy = new java.util.ArrayList<>(kitchen.getStationManager().getAllStations());
+        
+        System.out.println("[KitchenController] Updating view for " + stationsCopy.size() + " stations");
             
-        for (Station station : kitchen.getStationManager().getAllStations()) {
+        for (Station station : stationsCopy) {
             int stationID = stationIdMap.getOrDefault(station, nextStationId++);
             if (!stationIdMap.containsKey(station)) {
                 stationIdMap.put(station, stationID);
-                System.out.println("[KitchenController] Assigned new ID " + stationID + 
-                    " to " + station.getType() + " station");
+                System.out.println("[KitchenController] Assigned new ID " + stationID + " to " + station.getType() + " station");
             }
             
             String stationName = station.getType().toString();
             int backlog = station.getBacklogSize();
+            System.out.println("[KitchenController] Station " + stationName + " has backlog size " + backlog);
             String chefName = station.hasChef() ? station.getAssignedChef().getName() : "";
             char inUse = station.hasChef() ? 'X' : ' ';
             
