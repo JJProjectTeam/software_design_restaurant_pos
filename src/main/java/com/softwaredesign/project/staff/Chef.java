@@ -27,6 +27,7 @@ public class Chef extends StaffMember {
         this.stationManager = stationManager;
         this.name = "Chef " + (++chefCounter);
         this.isWorking = false;
+        System.out.println("[DEBUG] Created new chef: " + name + speedDecorator.getSpeedMultiplier());
     }
     
     public Chef(String name, double payPerHour, ISpeedComponent speedDecorator, ChefStrategy strategy, StationManager stationManager) {
@@ -36,6 +37,7 @@ public class Chef extends StaffMember {
         this.stationManager = stationManager;
         this.name = name;
         this.isWorking = false;
+        System.out.println("[DEBUG] Created new chef: " + name + speedDecorator.getSpeedMultiplier());
     }
     
     public String getName() {

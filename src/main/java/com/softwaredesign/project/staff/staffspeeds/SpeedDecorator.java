@@ -12,5 +12,4 @@ public abstract class SpeedDecorator implements ISpeedComponent {
         return decoratedSpeed.getSpeedMultiplier();
     }
 
-    protected abstract double getSpeedModifier();
 }
