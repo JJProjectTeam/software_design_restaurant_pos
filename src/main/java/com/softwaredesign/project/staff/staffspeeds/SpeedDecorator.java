@@ -3,7 +3,7 @@ package com.softwaredesign.project.staff.staffspeeds;
 public abstract class SpeedDecorator implements ISpeedComponent {
     protected final ISpeedComponent decoratedSpeed;
 
-    public SpeedDecorator(ISpeedComponent speed) {
+    protected SpeedDecorator(ISpeedComponent speed) {
         this.decoratedSpeed = speed;
     }
 
@@ -11,4 +11,6 @@ public abstract class SpeedDecorator implements ISpeedComponent {
     public double getSpeedMultiplier() {
         return decoratedSpeed.getSpeedMultiplier();
     }
+
+    protected abstract double getSpeedModifier();
 }

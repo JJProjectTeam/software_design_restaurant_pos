@@ -7,6 +7,11 @@ public class CaffeineAddictDecorator extends SpeedDecorator {
 
     @Override
     public double getSpeedMultiplier() {
-        return super.getSpeedMultiplier() * 1.5;
+        return decoratedSpeed.getSpeedMultiplier() * getSpeedModifier();
+    }
+
+    @Override
+    protected double getSpeedModifier() {
+        return 1.5; // 50% speed boost
     }
 }

@@ -7,6 +7,11 @@ public class LethargicDecorator extends SpeedDecorator {
 
     @Override
     public double getSpeedMultiplier() {
-        return super.getSpeedMultiplier() * 0.5;
+        return decoratedSpeed.getSpeedMultiplier() * getSpeedModifier();
+    }
+
+    @Override
+    protected double getSpeedModifier() {
+        return 0.7; // 30% speed reduction
     }
 }
