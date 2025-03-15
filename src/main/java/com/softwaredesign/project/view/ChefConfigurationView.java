@@ -357,6 +357,12 @@ public class ChefConfigurationView extends ConfigurationView {
                 double cost = calculateCost(speed, selectedStations.size());
                 String strategy = strategyCombo.getText();
                 
+                // Check if adding this chef would cause bank balance to go negative
+                if (bankBalance - cost < 0) {
+                    showError("Cannot hire chef. Cost of " + String.format("%.2f", cost) + " exceeds available budget of " + String.format("%.2f", bankBalance));
+                    return;
+                }
+                
                 // Add to local storage
                 chefs.put(name, new ChefData(name, selectedStations, speed, cost, strategy));
                 

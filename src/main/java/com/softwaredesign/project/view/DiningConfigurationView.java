@@ -324,6 +324,12 @@ public class DiningConfigurationView extends ConfigurationView {
             int speed = Integer.parseInt(speedCombo.getText());
             double costPerHour = calculateCost(speed);
 
+            // Check if adding this waiter would cause bank balance to go negative
+            if (bankBalance - costPerHour < 0) {
+                showError("Cannot hire waiter. Cost of " + String.format("%.2f", costPerHour) + " exceeds available budget of " + String.format("%.2f", bankBalance));
+                return;
+            }
+
             // Add to local storage
             waiters.put(name, new WaiterData(name, speed, costPerHour));
             
