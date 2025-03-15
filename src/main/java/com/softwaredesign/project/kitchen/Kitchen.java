@@ -119,11 +119,12 @@ public class Kitchen extends Entity {
             List<RecipeTask> assignedTasks = new ArrayList<>();
             
             for (RecipeTask task : recipeTasks) {
-                // Find available station for this task
-                Station station = findAvailableStationForTask(task);
+                // Instead of auto-assigning, add the task to the designated station's backlog
+                Station station = stationManager.getStation(task.getStationType());
                 if (station != null) {
-                    station.assignTask(recipe, task);
+                    station.addTask(task);
                     assignedTasks.add(task);
+                    System.out.println("[DEBUG] Queued task " + task.getName() + " in " + task.getStationType() + " station backlog");
                 }
             }
             
@@ -151,12 +152,13 @@ public class Kitchen extends Entity {
             List<RecipeTask> assignedTasks = new ArrayList<>();
             
             for (RecipeTask task : recipeTasks) {
-                // Find available station for this task
-                Station station = findAvailableStationForTask(task);
+                // Instead of auto-assigning, add the task to the station's backlog
+                Station station = stationManager.getStation(task.getStationType());
                 if (station != null) {
-                    station.assignTask(recipe, task);
+                    station.addTask(task);
                     assignedTasks.add(task);
                     assignedAnyTask = true;
+                    System.out.println("[DEBUG] Queued new task " + task.getName() + " in " + task.getStationType() + " station backlog");
                 }
             }
             
@@ -385,46 +387,6 @@ public class Kitchen extends Entity {
                                     }
                                 }
                             }
-                        }
-                    }
-                }
-            }
-            
-            // If we found tasks that are ready, try to assign them to stations
-            if (!readyTasks.isEmpty()) {
-                // Sort tasks to prioritize PREP station tasks first
-                readyTasks.sort((a, b) -> {
-                    // If both tasks are for the same station type, keep original order
-                    if (a.getStationType() == b.getStationType()) {
-                        return 0;
-                    }
-                    // If a is for PREP station, it should come first
-                    if (a.getStationType() == StationType.PREP) {
-                        return -1;
-                    }
-                    // If b is for PREP station, it should come first
-                    if (b.getStationType() == StationType.PREP) {
-                        return 1;
-                    }
-                    // Otherwise, maintain the original order
-                    return 0;
-                });
-                
-                for (RecipeTask task : readyTasks) {
-                    StationType stationType = task.getStationType();
-                    Station station = stationManager.getStation(stationType);
-                    
-                    // Very relaxed conditions for auto-assignment - just check if station isn't busy
-                    // This change will allow tasks to be assigned even if there's no chef yet
-                    if (station != null && !station.isBusy()) {
-                        System.out.println("Auto-assigning task " + task.getName() + " to " + stationType + 
-                                      " station for recipe " + recipe.getName());
-                        station.assignTask(recipe, task);
-                        
-                        // If this is a PREP task that was just assigned, make it extra visible in logs
-                        if (stationType == StationType.PREP) {
-                            System.out.println("[IMPORTANT] PREP task " + task.getName() + " assigned to PREP station. " +
-                                           "Chef can now pick up this work!");
                         }
                     }
                 }

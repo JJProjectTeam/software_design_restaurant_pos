@@ -13,10 +13,74 @@ public class DiningConfigurationView extends ConfigurationView {
     private TComboBox speedCombo;
     private TLabel tableCountLabel;
     private TLabel tableCapacityLabel;
-    private int maxTables = 20;
-    private int currentTableCount = 0;
-    private int maxCapacity = 10;
-    private int currentTableCapacity = 0;
+    private TLabel maxTablesLabel;
+    private TLabel maxCapacityLabel; 
+    private int maxTables;
+    private int currentTableCount;
+    private int maxCapacity;
+    private int currentTableCapacity;
+    private int minWaiters;
+    private int maxWaiters; 
+    private int maxSpeed = 5; // Default value
+    private double standardPayPerHour = 10.0; // Default value
+    private double payMultiplierBySpeed = 1.0; // Default value
+
+    // Public setters for configuration constants
+    public void setMaxTables(int maxTables) {
+        this.maxTables = maxTables;
+        // Update the label if it exists
+        if (maxTablesLabel != null) {
+            try {
+                maxTablesLabel.setLabel("(Maximum " + maxTables + " tables)");
+            } catch (Exception e) {
+                System.err.println("[DiningConfigurationView] Error updating max tables label: " + e.getMessage());
+            }
+        }
+    }
+
+    public void setMaxCapacity(int maxCapacity) {
+        this.maxCapacity = maxCapacity;
+        // Update the label if it exists
+        if (maxCapacityLabel != null) {
+            try {
+                maxCapacityLabel.setLabel("(Maximum " + maxCapacity + " seats per table)");
+            } catch (Exception e) {
+                System.err.println("[DiningConfigurationView] Error updating max capacity label: " + e.getMessage());
+            }
+        }
+    }
+
+    public void setMinWaiters(int minWaiters) {
+        this.minWaiters = minWaiters;
+    }
+
+    public void setMaxWaiters(int maxWaiters) {
+        this.maxWaiters = maxWaiters;
+    }
+
+    public void setMaxSpeed(int maxSpeed) {
+        this.maxSpeed = maxSpeed;
+        // Update the speed combo box if it exists
+        if (speedCombo != null) {
+            try {
+                List<String> speeds = new ArrayList<>();
+                for (int i = 1; i <= maxSpeed; i++) {
+                    speeds.add(String.valueOf(i));
+                }
+                speedCombo.setList(speeds);
+            } catch (Exception e) {
+                System.err.println("[DiningConfigurationView] Error updating speed combo box: " + e.getMessage());
+            }
+        }
+    }
+
+    public void setStandardPayPerHour(double standardPayPerHour) {
+        this.standardPayPerHour = standardPayPerHour;
+    }
+
+    public void setPayMultiplierBySpeed(double payMultiplierBySpeed) {
+        this.payMultiplierBySpeed = payMultiplierBySpeed;
+    }
 
     // Local storage for waiter data
     private Map<String, WaiterData> waiters = new HashMap<>();
@@ -165,7 +229,7 @@ public class DiningConfigurationView extends ConfigurationView {
                 }
             });
             
-            window.addLabel("(Maximum " + maxTables + " tables)", 40, 20);
+            maxTablesLabel = window.addLabel("(Maximum " + maxTables + " tables)", 40, 20);
             
             // Table capacity configuration
             window.addLabel("Table Capacity:", 2, 22);
@@ -190,7 +254,7 @@ public class DiningConfigurationView extends ConfigurationView {
                 }
             });
             
-            window.addLabel("(Maximum " + maxCapacity + " seats per table)", 40, 22);
+            maxCapacityLabel = window.addLabel("(Maximum " + maxCapacity + " seats per table)", 40, 22);
         } catch (Exception e) {
             System.err.println("[DiningConfigurationView] Error creating table configuration: " + e.getMessage());
             e.printStackTrace();
@@ -226,9 +290,9 @@ public class DiningConfigurationView extends ConfigurationView {
             // Speed selection
             window.addLabel("Speed:", 30, 18);
             List<String> speeds = new ArrayList<>();
-            speeds.add("1");
-            speeds.add("2");
-            speeds.add("3");
+            for (int i = 1; i <= maxSpeed; i++) {
+                speeds.add(String.valueOf(i));
+            }
             speedCombo = window.addComboBox(36, 18, 10, speeds, 0, 3, nullAction);
             
             // Add waiter button
@@ -291,14 +355,18 @@ public class DiningConfigurationView extends ConfigurationView {
     }
 
     private double calculateCost(int speed) {
-        return 15.0 + (speed - 1) * 5.0;
+        return standardPayPerHour * (1 + (speed - 1) * payMultiplierBySpeed);
     }
 
     @Override
     protected boolean validateConfiguration() {
         try {
-            if (waiters.isEmpty()) {
-                showError("At least one waiter must be added");
+            if (waiters.size() < minWaiters) {
+                showError("At least " + minWaiters + " waiter(s) must be added");
+                return false;
+            }
+            if (waiters.size() > maxWaiters) {
+                showError("Maximum number of waiters (" + maxWaiters + ") exceeded");
                 return false;
             }
             if (currentTableCount == 0) {
@@ -354,9 +422,9 @@ public class DiningConfigurationView extends ConfigurationView {
                 return;
             }
             
-            // Don't allow removing the last waiter
-            if (waiters.size() <= 1) {
-                showError("Cannot remove the last waiter. At least one waiter is required.");
+            // Don't allow removing waiters below minimum
+            if (waiters.size() <= minWaiters) {
+                showError("Cannot remove waiter. At least " + minWaiters + " waiter(s) required.");
                 return;
             }
             

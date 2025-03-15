@@ -10,11 +10,13 @@ import jexer.event.TMenuEvent;
 import jexer.menu.TMenu;
 
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
+import com.softwaredesign.project.RestaurantDriver;
 
 public class RestaurantApplication extends TApplication {
     private TWindow mainWindow;
     private Map<ViewType, View> views = new HashMap<>();
     private ViewType currentView;
+    private RestaurantDriver driver;
 
     public RestaurantApplication() throws Exception {
         super(BackendType.SWING);
@@ -131,32 +133,52 @@ public class RestaurantApplication extends TApplication {
     }
 
     /**
+     * Sets the driver reference for restart functionality
+     */
+    public void setDriver(RestaurantDriver driver) {
+        this.driver = driver;
+    }
+
+    /**
      * Properly restarts the application by reinitializing all views and resetting the application state.
      */
     private void restartApplication() {
         System.out.println("[RestaurantApplication] Restarting application");
         try {
-            // Clear the current view
-            currentView = null;
-            
-            // Clear all widgets from the main window
-            List<TWidget> widgetsToRemove = new ArrayList<>(mainWindow.getChildren());
-            for (TWidget widget : widgetsToRemove) {
-                mainWindow.remove(widget);
-            }
-            
-            // Reset the mediator
-            RestaurantViewMediator mediator = RestaurantViewMediator.getInstance();
-            // mediator.reset();
-            
-            // Reinitialize all views
-            views.clear();
-            initializeViews();
-            
-            // Show the welcome view
-            showView(ViewType.WELCOME);
-            
-            System.out.println("[RestaurantApplication] Application restart completed");
+            // Use SwingUtilities.invokeLater to ensure UI updates happen on the EDT
+            javax.swing.SwingUtilities.invokeLater(() -> {
+                try {
+                    // Clear the current view
+                    currentView = null;
+                    
+                    // Clear all widgets from the main window
+                    List<TWidget> widgetsToRemove = new ArrayList<>(mainWindow.getChildren());
+                    for (TWidget widget : widgetsToRemove) {
+                        mainWindow.remove(widget);
+                    }
+                    
+                    // Reset the mediator
+                    RestaurantViewMediator mediator = RestaurantViewMediator.getInstance();
+                    mediator.reset();
+                    
+                    // Reinitialize all views
+                    views.clear();
+                    initializeViews();
+                    
+                    // If driver is available, use it for a complete restart
+                    if (driver != null) {
+                        driver.restart();
+                    } else {
+                        // Fallback to just showing welcome view
+                        showView(ViewType.WELCOME);
+                    }
+                    
+                    System.out.println("[RestaurantApplication] Application restart completed");
+                } catch (Exception e) {
+                    System.err.println("[RestaurantApplication] ERROR during restart: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            });
         } catch (Exception e) {
             System.err.println("[RestaurantApplication] ERROR during restart: " + e.getMessage());
             e.printStackTrace();

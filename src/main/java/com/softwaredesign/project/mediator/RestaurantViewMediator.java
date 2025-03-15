@@ -95,4 +95,12 @@ public class RestaurantViewMediator {
     public void notifyConfigurationComplete(){
         getController("Configuration").onUserInput();
     }
+    /**
+     * Reset the mediator by clearing all registered controllers and views
+     */
+    public void reset() {
+        System.out.println("[RestaurantViewMediator] Resetting mediator - clearing all controllers and views");
+        controllers.clear();
+        registeredViews.clear();
+    }
 }

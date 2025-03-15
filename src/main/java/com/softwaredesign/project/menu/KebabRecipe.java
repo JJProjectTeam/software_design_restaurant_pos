@@ -15,8 +15,8 @@ public class KebabRecipe extends Recipe {
     protected void initializeBaseIngredients() {
         addIngredient(new Ingredient("Kebab Meat", inventoryService));
         addIngredient(new Ingredient("Pita Bread", inventoryService));
-        addIngredient(new Ingredient("Onions", inventoryService));
-        addIngredient(new Ingredient("Tomatoes", inventoryService));
+        addIngredient(new Ingredient("Onion", inventoryService));
+        addIngredient(new Ingredient("Tomato", inventoryService));
         addIngredient(new Ingredient("Garlic Sauce", inventoryService));
     }
     
@@ -24,8 +24,8 @@ public class KebabRecipe extends Recipe {
     protected void initializeTasks() {
         // Add tasks for preparing a kebab
         RecipeTask prepTask = new RecipeTask("Prepare kebab ingredients", StationType.PREP);
-        prepTask.addIngredient(new Ingredient("Onions", inventoryService));
-        prepTask.addIngredient(new Ingredient("Tomatoes", inventoryService));
+        prepTask.addIngredient(new Ingredient("Onion", inventoryService));
+        prepTask.addIngredient(new Ingredient("Tomato", inventoryService));
         tasks.add(prepTask);
         
         RecipeTask grillTask = new RecipeTask("Cook kebab meat", StationType.GRILL, 10);

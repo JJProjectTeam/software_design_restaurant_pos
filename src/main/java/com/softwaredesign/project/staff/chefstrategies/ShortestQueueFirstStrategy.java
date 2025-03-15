@@ -7,7 +7,7 @@ import com.softwaredesign.project.order.Order;
 import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.order.RecipeTask;
 
-public class ShortestQueueFirst implements ChefStrategy {
+public class ShortestQueueFirstStrategy implements ChefStrategy {
     @Override
     public Station chooseNextStation(List<Station> assignedStations) {
         // Find station with the smallest backlog that isn't busy and doesn't have a chef

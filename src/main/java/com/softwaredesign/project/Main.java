@@ -25,9 +25,9 @@
 //         // Add initial ingredients to inventory
 //         System.out.println("Initializing Inventory:");
 //         System.out.println("----------------------");
-//         inventory.addIngredient("Tomatoes", 10, 2.50);
+//         inventory.addIngredient("Tomato", 10, 2.50);
 //         inventory.addIngredient("Garlic", 8, 1.00);
-//         inventory.addIngredient("Onions", 15, 1.50);
+//         inventory.addIngredient("Onion", 15, 1.50);
 //         inventory.addIngredient("Beef Patty", 20, 5.00);
 //         inventory.addIngredient("Bun", 20, 5.00);
 //         inventory.addIngredient("Chicken", 20, 4.00);
@@ -108,9 +108,9 @@
 //         // Step 3: Display final inventory status
 //         System.out.println("\nFinal Inventory Status:");
 //         System.out.println("----------------------");
-//         System.out.println("Tomatoes: " + inventory.getStock("Tomatoes") + " units");
+//         System.out.println("Tomato: " + inventory.getStock("Tomato") + " units");
 //         System.out.println("Garlic: " + inventory.getStock("Garlic") + " units");
-//         System.out.println("Onions: " + inventory.getStock("Onions") + " units");
+//         System.out.println("Onion: " + inventory.getStock("Onion") + " units");
 //         System.out.println("Beef: " + inventory.getStock("Beef Patty") + " units");
 //         System.out.println("Chicken: " + inventory.getStock("Chicken") + " units");
 //         System.out.println("Cheese: " + inventory.getStock("Cheese") + " units");

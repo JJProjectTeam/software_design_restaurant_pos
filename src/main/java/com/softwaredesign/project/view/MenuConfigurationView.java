@@ -5,10 +5,12 @@ import jexer.*;
 
 public class MenuConfigurationView extends ConfigurationView {
     // UI Components
-    private Map<String, List<String>> availableRecipes; // For display only
-    private Map<String, Boolean> selectedRecipeStates; // Track selection state
+    private Map<String, List<String>> availableRecipes; 
+    private Map<String, Boolean> selectedRecipeStates; 
     private Set<String> selectedRecipes; // Just store the names of selected recipes
-    private TList recipeList; // Scrollable list for recipes
+    private TList recipeList; 
+    private int minRecipes;
+    private int maxRecipes;
 
     public MenuConfigurationView(RestaurantApplication app) {
         super(app);
@@ -210,14 +212,23 @@ public class MenuConfigurationView extends ConfigurationView {
         }
     }
 
+    public void setMinRecipes(int minRecipes) {
+        this.minRecipes = minRecipes;
+    }
+
+    public void setMaxRecipes(int maxRecipes) {
+        this.maxRecipes = maxRecipes;
+    }
+
     @Override
     protected boolean validateConfiguration() {
         try {
-            // Sync selections before validation
-            syncSelections();
-            
-            if (selectedRecipes.isEmpty()) {
-                showError("At least one menu item must be selected");
+            if (selectedRecipes.size() < minRecipes) {
+                showError("At least " + minRecipes + " recipe(s) must be selected");
+                return false;
+            }
+            if (selectedRecipes.size() > maxRecipes) {
+                showError("Maximum number of recipes (" + maxRecipes + ") exceeded");
                 return false;
             }
             return true;

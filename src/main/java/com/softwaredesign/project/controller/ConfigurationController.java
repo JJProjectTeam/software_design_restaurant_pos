@@ -19,6 +19,10 @@ import com.softwaredesign.project.staff.chefstrategies.LongestQueueFirstStrategy
 import com.softwaredesign.project.staff.chefstrategies.OldestOrderFirstStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import java.nio.file.Paths;
+import java.nio.file.Files;
 
 public class ConfigurationController extends BaseController {
     private Kitchen kitchen;
@@ -56,50 +60,175 @@ public class ConfigurationController extends BaseController {
     //this should set up the components
     private void setupBaseComponents() {        
         try {
-            // Add base ingredients
-            //TODO YO should ingredients really be being done by strings? idk
-            inventory.addIngredient("Beef Patty", 10, 1.0, StationType.GRILL);
-            inventory.addIngredient("Bun", 10, 1.0, StationType.PREP);
-            inventory.addIngredient("Lettuce", 10, 1.0, StationType.PREP);
-            inventory.addIngredient("Tomato", 10, 1.0, StationType.PREP);
-            inventory.addIngredient("Cheese", 10, 1.0, StationType.PREP);
-            inventory.addIngredient("Kebab Meat", 10, 1.0, StationType.GRILL);
-            inventory.addIngredient("Lamb", 100, 3.00, StationType.GRILL);
-            inventory.addIngredient("Pita Bread", 100, 0.60, StationType.PLATE);
-            inventory.addIngredient("Onions", 100, 0.25, StationType.PREP);
-            inventory.addIngredient("Tomatoes", 100, 0.80, StationType.PREP);
-            
-            // Condiments
-            inventory.addIngredient("Garlic Sauce", 100, 0.20, StationType.PREP);
-            inventory.addIngredient("Ketchup", 100, 0.20, StationType.PREP);
-            inventory.addIngredient("Mayo", 100, 0.25, StationType.PREP);
-            inventory.addIngredient("Pickle", 100, 0.30, StationType.PREP);
-            
+            // Read and parse config file
+            String configPath = "src/main/config.json";
+            String jsonContent = Files.readString(Paths.get(configPath));
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode config = mapper.readTree(jsonContent);
+            JsonNode stations = config.path("inventory").path("stations");
+
+            System.out.println("[ConfigurationController] Loading ingredients from config file...");
+
+            // Iterate through each station type
+            for (StationType stationType : StationType.values()) {
+                JsonNode stationNode = stations.path(stationType.toString());
+                if (stationNode.isMissingNode()) {
+                    System.out.println("[ConfigurationController] No ingredients found for station: " + stationType);
+                    continue;
+                }
+
+                // Iterate through ingredients in this station
+                stationNode.fields().forEachRemaining(entry -> {
+                    String ingredientName = entry.getKey();
+                    JsonNode ingredientData = entry.getValue();
+                    int stock = ingredientData.path("stock").asInt();
+                    double price = ingredientData.path("price").asDouble();
+
+                    try {
+                        inventory.addIngredient(ingredientName, stock, price, stationType);
+                        System.out.println("[ConfigurationController] Added ingredient: " + ingredientName + 
+                            " (Stock: " + stock + ", Price: $" + price + ", Station: " + stationType + ")");
+                    } catch (Exception e) {
+                        System.err.println("[ConfigurationController] Error adding ingredient " + 
+                            ingredientName + ": " + e.getMessage());
+                    }
+                });
+            }
+
+            // Initialize other components
+            this.collectionPoint = new CollectionPoint();
+            this.stationManager = new StationManager(collectionPoint);
+            this.orderManager = new OrderManager(collectionPoint, stationManager);
+            this.kitchen = new Kitchen(orderManager, collectionPoint, stationManager);
+            this.menu = new Menu(inventory);
+
+            possibleRecipes.add(new BurgerRecipe(inventory));
+            possibleRecipes.add(new KebabRecipe(inventory));
+
+            // Configure views with constants from config
+            configureViews(config);
+
         } catch (Exception e) {
             System.err.println("[ConfigurationController] Error setting up base components: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Failed to setup base components", e);
         }
-        
-        // Kebab ingredients
-        inventory.addIngredient("Lamb", 100, 3.00, StationType.GRILL);
-        inventory.addIngredient("Pita Bread", 100, 0.60, StationType.PLATE);
-        inventory.addIngredient("Onion", 100, 0.25, StationType.PREP);
-        inventory.addIngredient("Tzatziki", 100, 0.80, StationType.PREP);
-        
-        // Condiments
-        inventory.addIngredient("Mustard", 100, 0.20, StationType.PREP);
-        inventory.addIngredient("Ketchup", 100, 0.20, StationType.PREP);
-        inventory.addIngredient("Mayo", 100, 0.25, StationType.PREP);
-        inventory.addIngredient("Pickle", 100, 0.30, StationType.PREP);
-        
-        this.collectionPoint = new CollectionPoint();
-        this.stationManager = new StationManager(collectionPoint);
-        this.orderManager = new OrderManager(collectionPoint, stationManager);
-        this.kitchen = new Kitchen(orderManager, collectionPoint, stationManager); // Pass stationManager
-        this.menu = new Menu(inventory);
+    }
 
-        possibleRecipes.add(new BurgerRecipe(inventory));
-        possibleRecipes.add(new KebabRecipe(inventory));
+    private void configureViews(JsonNode config) {
+        try {
+            // Get chef configuration view
+            ChefConfigurationView chefView = (ChefConfigurationView) mediator.getView(ViewType.CHEF_CONFIGURATION);
+            if (chefView != null) {
+                // Set chef constants
+                JsonNode chefRules = config.path("staffRules").path("chefs");
+                if (!chefRules.isMissingNode()) {
+                    int minChefs = chefRules.path("min").asInt(1);
+                    int maxChefs = chefRules.path("max").asInt(20);
+                    int maxStationsPerChef = chefRules.path("maxStationsPerChef").asInt(10);
+                    int maxSpeed = chefRules.path("maxSpeed").asInt(5);
+                    double standardPayPerHour = chefRules.path("standardPayPerHour").asDouble(15.0);
+                    double payMultiplierBySpeed = chefRules.path("payMultiplierBySpeed").asDouble(1.0);
+                    double payMultiplierByStation = chefRules.path("payMultiplierByStation").asDouble(1.0);
+                    
+                    chefView.setMinChefs(minChefs);
+                    chefView.setMaxChefs(maxChefs);
+                    chefView.setMaxStationsPerChef(maxStationsPerChef);
+                    chefView.setMaxSpeed(maxSpeed);
+                    chefView.setStandardPayPerHour(standardPayPerHour);
+                    chefView.setPayMultiplierBySpeed(payMultiplierBySpeed);
+                    chefView.setPayMultiplierByStation(payMultiplierByStation);
+                    
+                    System.out.println("[ConfigurationController] Set chef constants - Min Chefs: " + 
+                        minChefs + ", Max Chefs: " + maxChefs + ", Max Stations Per Chef: " + maxStationsPerChef +
+                        ", Max Speed: " + maxSpeed + ", Standard Pay: " + standardPayPerHour +
+                        ", Speed Multiplier: " + payMultiplierBySpeed + ", Station Multiplier: " + payMultiplierByStation);
+                }
+                
+                // Set kitchen constants
+                JsonNode kitchenRules = config.path("kitchenRules");
+                if (!kitchenRules.isMissingNode()) {
+                    int minStations = kitchenRules.path("minStations").asInt(3);
+                    int maxStations = kitchenRules.path("maxStations").asInt(20);
+                    int maxInstancesOfStation = kitchenRules.path("maxInstancesOfStation").asInt(10);
+                    int minInstancesOfStation = kitchenRules.path("minInstancesOfStation").asInt(1);
+                    
+                    chefView.setMinStations(minStations);
+                    chefView.setMaxStations(maxStations);
+                    chefView.setMaxInstancesOfStation(maxInstancesOfStation);
+                    chefView.setMinInstancesOfStation(minInstancesOfStation);
+                    
+                    System.out.println("[ConfigurationController] Set kitchen constants - Min Stations: " + 
+                        minStations + ", Max Stations: " + maxStations + 
+                        ", Min Instances: " + minInstancesOfStation + 
+                        ", Max Instances: " + maxInstancesOfStation);
+                }
+            } else {
+                System.err.println("[ConfigurationController] Chef configuration view not found");
+            }
+            
+            // Get dining configuration view
+            DiningConfigurationView diningView = (DiningConfigurationView) mediator.getView(ViewType.DINING_CONFIGURATION);
+            if (diningView == null) {
+                System.err.println("[ConfigurationController] Dining configuration view not found");
+                return;
+            }
+
+            // Set dining room constants
+            JsonNode diningRoomRules = config.path("diningRoomRules");
+            if (!diningRoomRules.isMissingNode()) {
+                int maxTables = diningRoomRules.path("maxTables").asInt(20); // Default to 20 if not found
+                int maxCapacity = diningRoomRules.path("maxCapacity").asInt(10); // Default to 10 if not found
+                
+                diningView.setMaxTables(maxTables);
+                diningView.setMaxCapacity(maxCapacity);
+                
+                System.out.println("[ConfigurationController] Set dining room constants - Max Tables: " + 
+                    maxTables + ", Max Capacity: " + maxCapacity);
+            }
+
+            // Set waiter constants
+            JsonNode waiterRules = config.path("staffRules").path("waiters");
+            if (!waiterRules.isMissingNode()) {
+                int minWaiters = waiterRules.path("min").asInt(1); // Default to 1 if not found
+                int maxWaiters = waiterRules.path("max").asInt(10); // Default to 10 if not found
+                int maxSpeed = waiterRules.path("maxSpeed").asInt(5);
+                double standardPayPerHour = waiterRules.path("standardPayPerHour").asDouble(10.0);
+                double payMultiplierBySpeed = waiterRules.path("payMultiplierBySpeed").asDouble(1.0);
+                
+                diningView.setMinWaiters(minWaiters);
+                diningView.setMaxWaiters(maxWaiters);
+                diningView.setMaxSpeed(maxSpeed);
+                diningView.setStandardPayPerHour(standardPayPerHour);
+                diningView.setPayMultiplierBySpeed(payMultiplierBySpeed);
+                
+                System.out.println("[ConfigurationController] Set waiter constants - Min Waiters: " + 
+                    minWaiters + ", Max Waiters: " + maxWaiters + ", Max Speed: " + maxSpeed +
+                    ", Standard Pay: " + standardPayPerHour + ", Speed Multiplier: " + payMultiplierBySpeed);
+            }
+            
+            // Set menu configuration constants
+            MenuConfigurationView menuView = (MenuConfigurationView) mediator.getView(ViewType.MENU_CONFIGURATION);
+            if (menuView != null) {
+                JsonNode menuRules = config.path("menuRules");
+                if (!menuRules.isMissingNode()) {
+                    int minRecipes = menuRules.path("minRecipes").asInt(1); // Default to 1 if not found
+                    int maxRecipes = menuRules.path("maxRecipes").asInt(10); // Default to 10 if not found
+                    
+                    menuView.setMinRecipes(minRecipes);
+                    menuView.setMaxRecipes(maxRecipes);
+                    
+                    System.out.println("[ConfigurationController] Set menu constants - Min Recipes: " + 
+                        minRecipes + ", Max Recipes: " + maxRecipes);
+                }
+            } else {
+                System.err.println("[ConfigurationController] Menu configuration view not found");
+            }
+            
+        } catch (Exception e) {
+            System.err.println("[ConfigurationController] Error configuring views: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     // Methods to read from views and create restaurant entities
@@ -115,7 +244,10 @@ public class ConfigurationController extends BaseController {
         int prepStationCount = chefView.getStationCounts().get("PREP");
         int plateStationCount = chefView.getStationCounts().get("PLATE");
         
-        // Create chefs
+        // Create stations based on configuration FIRST
+        createStations(grillStationCount, prepStationCount, plateStationCount);
+        
+        // Create chefs AFTER stations exist
         createChefs(chefView.getChefs());
         
         // Create waiters and tables
@@ -123,9 +255,6 @@ public class ConfigurationController extends BaseController {
         
         // Create menu items
         createMenuItems(menuView.getSelectedRecipes());
-        
-        // Create stations based on configuration
-        createStations(grillStationCount, prepStationCount, plateStationCount);
         
         // Set configuration as complete
         configurationComplete = true;
@@ -136,15 +265,22 @@ public class ConfigurationController extends BaseController {
     }
     
     private void createDefaultConfiguration() {        
-        // Create default chef
+        // Define default stations
         List<String> defaultStations = Arrays.asList("Grill", "Prep", "Plate");
+        
+        // Create default stations FIRST
+        for (String stationType : defaultStations) {
+            Station station = new Station(StationType.valueOf(stationType.toUpperCase()), collectionPoint);
+            station.setKitchen(kitchen);
+            stationManager.addStation(station);
+        }
+        
+        // Create default chef AFTER stations exist
         ChefStrategy strategy = new SimpleChefStrategy();
         Chef chef = new Chef(200.0, 2, strategy, stationManager);
         
-        // Create default stations
+        // Assign chef to stations
         for (String stationType : defaultStations) {
-            Station station = new Station(StationType.valueOf(stationType.toUpperCase()), collectionPoint);
-            stationManager.addStation(station);
             chef.assignToStation(StationType.valueOf(stationType.toUpperCase()));
         }
         
@@ -175,6 +311,7 @@ public class ConfigurationController extends BaseController {
                 ChefStrategy strategy = createChefStrategy(data.getStrategy());
                 
                 Chef chef = new Chef(
+                    data.getName(),
                     data.getCostPerHour(),
                     data.getSpeed(),
                     strategy, 

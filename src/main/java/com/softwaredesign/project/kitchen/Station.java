@@ -263,22 +263,7 @@ public class Station extends Entity {
                     // Mark the task as assigned
                     task.setAssigned(true);
                     
-                    // Find and remove the order from the backlog that contains this recipe
-                    String orderId = recipe.getOrderId();
-                    if (orderId != null) {
-                        for (int i = 0; i < backlog.size(); i++) {
-                            RecipeTask backlogTask = backlog.get(i);
-                            Recipe backlogRecipe = backlogTask.getRecipe();
-                            if (backlogRecipe != null && orderId.equals(backlogRecipe.getOrderId()) && 
-                                backlogTask.getStationType() == type) {
-                                // Debug output
-                                System.out.println(type + " station removing related task " + backlogTask.getName() + 
-                                                   " for order " + orderId + " from backlog");
-                                backlog.remove(i);
-                                break;
-                            }
-                        }
-                    }
+                    // Preserve the assigned task in the backlog so that the station always shows tasks (even if in progress)
                     
                     System.out.println(type + " station assigned task: " + task.getName() + 
                                       " for recipe: " + recipe.getName());
@@ -293,97 +278,46 @@ public class Station extends Entity {
         }
     }
     
+    /**
+     * Assigns a task from a recipe to this station
+     * @param recipe The recipe the task belongs to
+     * @param task The task to assign
+     */
     public void assignTask(Recipe recipe, RecipeTask task) {
-        // Ensure the task has a reference to its recipe
-        if (task.getRecipe() == null && recipe != null) {
-            System.out.println("[FIX] Setting recipe reference for task: " + task.getName());
-            task.setRecipe(recipe);
+        if (currentTask != null) {
+            System.out.println("[DEBUG-STATION] " + type + " station already has task " + 
+                currentTask.getName() + ", not assigning " + task.getName());
+            
+            // Add to backlog instead
+            if (!backlog.contains(task)) {
+                backlog.add(task);
+                System.out.println("[DEBUG-STATION] Added " + task.getName() + " to " + type + " station backlog");
+            }
+            return;
         }
         
-        if (currentRecipe == null && currentTask == null) { // if no task is assigned
-            // Check if all dependencies are met before assigning the task
-            if (!task.areDependenciesMet()) {
-                String unmetDependencies = task.getUnmetDependenciesString();
-                System.out.println(type + " station cannot start task: " + task.getName() + 
-                              " - waiting for: " + unmetDependencies);
-                return;
-            }
-            
-            // Check if the assigned chef is already working on another task
-            if (assignedChef != null && assignedChef.isWorking()) {
-                System.out.println("Cannot assign task to " + assignedChef.getName() + 
-                               " as they are already working on another task");
-                return;
-            }
-            
-            if (task.getStationType() == this.type) { // if the task is for this station
-                currentRecipe = recipe;
-                currentTask = task;
-                // Set the chef working on this task to the currently assigned chef
-                taskChef = assignedChef;
-                cookingProgress = 0;
-                needsIngredients = true;
-                
-                // Mark the task as assigned
-                task.setAssigned(true);
-                
-                // Mark the chef as working
-                if (taskChef != null) {
-                    taskChef.setWorking(true);
-                }
-                
-                // Find and remove the task from the backlog that matches this recipe/task
-                // First, remove this specific task from the backlog
-                boolean taskRemoved = false;
-                for (int i = 0; i < backlog.size(); i++) {
-                    RecipeTask backlogTask = backlog.get(i);
-                    if (backlogTask == task) {
-                        // Debug output
-                        System.out.println(type + " station removing task " + task.getName() + " from backlog");
-                        backlog.remove(i);
-                        taskRemoved = true;
-                        break;
-                    }
-                }
-                
-                // If we didn't find the exact task, try to find a task from the same recipe
-                if (!taskRemoved && recipe != null && recipe.getOrderId() != null) {
-                    String orderId = recipe.getOrderId();
-                    for (int i = 0; i < backlog.size(); i++) {
-                        RecipeTask backlogTask = backlog.get(i);
-                        Recipe backlogRecipe = backlogTask.getRecipe();
-                        if (backlogRecipe != null && orderId.equals(backlogRecipe.getOrderId()) && 
-                            backlogTask.getStationType() == type) {
-                            // Debug output
-                            System.out.println(type + " station removing related task " + backlogTask.getName() + 
-                                             " for order " + orderId + " from backlog");
-                            backlog.remove(i);
-                            break;
-                        }
-                    }
-                }
-                
-                StringBuilder assignmentMessage = new StringBuilder();
-                assignmentMessage.append(type).append(" station assigned task: ").append(task.getName());
-                assignmentMessage.append(" for recipe: ").append(recipe.getName());
-                
-                // Add chef information if available
-                if (taskChef != null) {
-                    assignmentMessage.append(" (assigned to ").append(taskChef.getName()).append(")");
-                }
-                
-                // Add order ID if available
-                if (recipe.getOrderId() != null) {
-                    assignmentMessage.append(" (Order ID: ").append(recipe.getOrderId()).append(")");
-                }
-                
-                System.out.println(assignmentMessage.toString());
-            } else {
-                System.out.println("Cannot assign task for " + task.getStationType() + 
-                                  " to " + this.type + " station");
-            }
+        System.out.println("[DEBUG-STATION] Assigning task " + task.getName() + " to " + type + " station");
+        currentRecipe = recipe;
+        currentTask = task;
+        cookingProgress = 0;
+        needsIngredients = true;
+        
+        // If we have a chef assigned, mark them as working
+        if (assignedChef != null) {
+            assignedChef.setWorking(true);
+            System.out.println("[DEBUG-STATION] Chef " + assignedChef.getName() + 
+                " is now working on task " + task.getName());
         } else {
-            System.out.println(type + " station is busy with another task");
+            System.out.println("[DEBUG-STATION] No chef assigned to " + type + 
+                " station, task " + task.getName() + " waiting for chef");
+        }
+        
+        // Ingredients will be provided by the kitchen during its writeState method
+        // via provideIngredientsToStations()
+        if (kitchen == null) {
+            System.out.println("[DEBUG-STATION] Kitchen reference is null, cannot request ingredients");
+            // Auto-provide ingredients for testing
+            needsIngredients = false;
         }
     }
 
@@ -618,32 +552,30 @@ public class Station extends Entity {
     }
     
     /**
-     * Tries to find and assign a new task to this station
+     * Tries to pull the next task from the backlog queue if available.
      */
     private void tryAssignNewTask() {
-        System.out.println("[DEBUG] " + type + " station looking for new tasks");
-        
-        // First check if we have any ready recipes with tasks for this station
-        Recipe readyRecipe = findRecipeWithReadyTasks();
-        if (readyRecipe != null) {
-            System.out.println("[DEBUG] " + type + " station found recipe with ready tasks: " + readyRecipe.getName());
-            
-            // Find an appropriate task in this recipe
-            for (RecipeTask task : readyRecipe.getUncompletedTasks()) {
-                if (task.getStationType() == this.type && task.areDependenciesMet() && !task.isCompleted()) {
-                    System.out.println("[DEBUG] " + type + " station found ready task: " + task.getName());
-                    assignTask(readyRecipe, task);
-                    return;
-                }
+        System.out.println("[DEBUG] " + type + " station checking backlog for new tasks");
+        if (!backlog.isEmpty()) {
+            RecipeTask nextTask = backlog.remove(0);
+            Recipe recipe = nextTask.getRecipe();
+            System.out.println("[DEBUG] " + type + " station pulling queued task: " + nextTask.getName());
+            currentRecipe = recipe;
+            currentTask = nextTask;
+            cookingProgress = 0;
+            needsIngredients = true;
+
+            if (assignedChef != null) {
+                assignedChef.setWorking(true);
+                System.out.println("[DEBUG-STATION] Chef " + assignedChef.getName() + " is now working on task " + nextTask.getName());
+            } else {
+                System.out.println("[DEBUG-STATION] No chef assigned to " + type + " station, queued task " + nextTask.getName() + " remains waiting for chef assignment");
             }
+            return;
         }
-        
-        // If we have a kitchen reference, ask it to look for new recipes
-        if (kitchen != null) {
-            System.out.println("[DEBUG] " + type + " station asking kitchen for new recipes");
-            kitchen.getRecipes();  // This will populate the kitchen with any new recipes
-            kitchen.updateTaskAvailability();  // Update task dependencies
-        }
+        // Instead of asking kitchen for new recipes, simply log that we're waiting for new tasks
+        System.out.println("[DEBUG] " + type + " station backlog is empty, waiting for new tasks");
+        return;
     }
 
     public Recipe getCurrentRecipe() {

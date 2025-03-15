@@ -67,9 +67,9 @@ public class StaffTests {
         prepStation.unregisterChef();
         
         // Manually add stations to chef's assigned stations list
-        chef.getAssignedStations().clear(); // Clear any existing assignments
-        chef.getAssignedStations().add(grillStation);
-        chef.getAssignedStations().add(prepStation);
+        chef.clearStationAssignments();
+        chef.addStationAssignment(grillStation);
+        chef.addStationAssignment(prepStation);
         
         // First test with no backlog - should return null
         Station nextStation = chef.chooseNextStation();

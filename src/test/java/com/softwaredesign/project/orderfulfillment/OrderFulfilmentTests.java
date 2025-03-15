@@ -28,7 +28,7 @@ public class OrderFulfilmentTests {
         inventoryService.addIngredient("Mustard", 10, 0.5, StationType.PREP);
         
         menu = new Menu(inventoryService);
-        seatingPlan = new SeatingPlan(5, 40, 15, menu);
+        seatingPlan = new SeatingPlan(5, 40, 4, menu);
     }
 
     @Test
