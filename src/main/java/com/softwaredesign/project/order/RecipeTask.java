@@ -175,8 +175,14 @@ public class RecipeTask {
     
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            System.out.println("[DEBUG-TASK-EQUALS] Same instance comparison for task: " + name);
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            System.out.println("[DEBUG-TASK-EQUALS] Different class comparison for task: " + name);
+            return false;
+        }
         RecipeTask that = (RecipeTask) o;
         
         // Basic equality check for name and station type
@@ -187,11 +193,27 @@ public class RecipeTask {
             String thisOrderId = recipe.getOrderId();
             String thatOrderId = that.recipe.getOrderId();
             
+            System.out.println("[DEBUG-TASK-EQUALS] Comparing tasks - THIS: " + name + 
+                             " (stationType: " + stationType + 
+                             ", orderId: " + thisOrderId + "), " +
+                             "OTHER: " + that.name + 
+                             " (stationType: " + that.stationType + 
+                             ", orderId: " + thatOrderId + ")");
+            
             if (thisOrderId != null && thatOrderId != null) {
-                return basicEquality && thisOrderId.equals(thatOrderId);
+                boolean result = basicEquality && thisOrderId.equals(thatOrderId);
+                System.out.println("[DEBUG-TASK-EQUALS] Both orderIds available. Equal? " + result + 
+                                  " (basic equality: " + basicEquality + 
+                                  ", orderIds equal: " + thisOrderId.equals(thatOrderId) + ")");
+                return result;
             }
+        } else {
+            System.out.println("[DEBUG-TASK-EQUALS] At least one recipe is null. THIS recipe: " + 
+                             (recipe != null ? "available" : "null") + 
+                             ", OTHER recipe: " + (that.recipe != null ? "available" : "null"));
         }
         
+        System.out.println("[DEBUG-TASK-EQUALS] Falling back to basic equality: " + basicEquality);
         return basicEquality;
     }
     
@@ -199,9 +221,16 @@ public class RecipeTask {
     public int hashCode() {
         // Include recipe's orderId in hash if available
         if (recipe != null && recipe.getOrderId() != null) {
-            return Objects.hash(name, stationType, recipe.getOrderId());
+            int hash = Objects.hash(name, stationType, recipe.getOrderId());
+            System.out.println("[DEBUG-TASK-HASHCODE] Task " + name + 
+                              " with orderId " + recipe.getOrderId() + 
+                              " hashCode: " + hash);
+            return hash;
         }
-        return Objects.hash(name, stationType);
+        int hash = Objects.hash(name, stationType);
+        System.out.println("[DEBUG-TASK-HASHCODE] Task " + name + 
+                          " without orderId hashCode: " + hash);
+        return hash;
     }
     
     @Override

@@ -21,6 +21,14 @@ public class Meal {
     public String getOrderId() {
         return orderId;
     }
+    
+    /**
+     * Gets the name of this meal.
+     * @return The meal name
+     */
+    public String getName() {
+        return name;
+    }
 
     public double getPrice() {
         double price = 0;

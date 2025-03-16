@@ -45,7 +45,26 @@ public class Order {
     }
 
     public RecipeModification getModificationsForRecipe(Recipe recipe) {
-        return modifications.get(recipe);
+        // First try to get modifications directly by reference
+        RecipeModification directResult = modifications.get(recipe);
+        if (directResult != null) {
+            return directResult;
+        }
+        
+        // If no direct match, try to find by name, which helps with cloned recipes
+        for (Map.Entry<Recipe, RecipeModification> entry : modifications.entrySet()) {
+            Recipe existingRecipe = entry.getKey();
+            
+            // If we find a recipe with the same name, use its modifications
+            if (existingRecipe.getName().equals(recipe.getName())) {
+                System.out.println("[DEBUG-ORDER] Found modifications for cloned recipe " + 
+                                  recipe.getName() + " using name-based lookup");
+                return entry.getValue();
+            }
+        }
+        
+        // No modifications found for this recipe
+        return null;
     }
 
     public String getOrderId() {

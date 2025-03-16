@@ -43,4 +43,16 @@ public class BurgerRecipe extends Recipe {
         plateTask.addDependency(grillTask);
         tasks.add(plateTask);
     }
+    
+    /**
+     * Creates a fresh copy of this burger recipe.
+     * The copy will have the same inventory service but will initialize its own tasks and ingredients.
+     * @return A brand new BurgerRecipe instance without any orderId
+     */
+    @Override
+    public Recipe copy() {
+        // Simply create a new BurgerRecipe with the same inventory service
+        // The constructor will initialize the ingredients and tasks
+        return new BurgerRecipe(inventoryService);
+    }
 }

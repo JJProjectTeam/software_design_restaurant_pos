@@ -54,13 +54,66 @@ public class Kitchen extends Entity {
         }
         
         List<Recipe> newRecipes = orderManager.processOrder(); // returns a registered order (list of recipes)
+        System.out.println("[DEBUG-KITCHEN] Got " + (newRecipes != null ? newRecipes.size() : 0) + " new recipes from OrderManager");
+        
         if (newRecipes != null && !newRecipes.isEmpty()) { // if there are new recipes
+            // Print details about each new recipe
+            for (Recipe recipe : newRecipes) {
+                System.out.println("[DEBUG-KITCHEN] New recipe: " + recipe.getName() + 
+                                  ", orderId: " + recipe.getOrderId() + 
+                                  ", hashCode: " + recipe.hashCode());
+            }
+            
+            // Log the state of pendingRecipes before adding new ones
+            System.out.println("[DEBUG-KITCHEN] pendingRecipes before adding new ones (size: " + 
+                              pendingRecipes.size() + "):");
+            for (Recipe recipe : pendingRecipes) {
+                System.out.println("  - " + recipe.getName() + 
+                                  " (orderId: " + recipe.getOrderId() + 
+                                  ", hashCode: " + recipe.hashCode() + ")");
+            }
+            
             pendingRecipes.addAll(newRecipes); 
+            
+            // Log the updated pendingRecipes
+            System.out.println("[DEBUG-KITCHEN] pendingRecipes after adding new ones (size: " + 
+                              pendingRecipes.size() + "):");
+            for (Recipe recipe : pendingRecipes) {
+                System.out.println("  - " + recipe.getName() + 
+                                  " (orderId: " + recipe.getOrderId() + 
+                                  ", hashCode: " + recipe.hashCode() + ")");
+            }
             
             // Add all incomplete tasks from new recipes to pending tasks (unpack!)
             for (Recipe recipe : newRecipes) {
                 List<RecipeTask> incompleteTasks = recipe.getIncompleteTasks();
+                System.out.println("[DEBUG-KITCHEN] Recipe " + recipe.getName() + 
+                                  " (orderId: " + recipe.getOrderId() + 
+                                  ") has " + incompleteTasks.size() + " incomplete tasks");
+                
+                // Check if we already have this recipe in pendingTasks
+                if (pendingTasks.containsKey(recipe)) {
+                    System.out.println("[DEBUG-KITCHEN] WARNING: Recipe " + recipe.getName() + 
+                                      " with orderId " + recipe.getOrderId() + 
+                                      " already exists in pendingTasks map!");
+                    
+                    // Check which recipe in the map is equal to this one
+                    for (Recipe existingRecipe : pendingTasks.keySet()) {
+                        if (existingRecipe.equals(recipe)) {
+                            System.out.println("[DEBUG-KITCHEN] Found equal recipe: " + existingRecipe.getName() + 
+                                              " with orderId " + existingRecipe.getOrderId());
+                        }
+                    }
+                }
+                
                 pendingTasks.put(recipe, new ArrayList<>(incompleteTasks));
+                
+                // Log task details
+                for (RecipeTask task : incompleteTasks) {
+                    System.out.println("  - Task: " + task.getName() + 
+                                      ", station: " + task.getStationType() + 
+                                      ", hashCode: " + task.hashCode());
+                }
             }
             
             System.out.println("Kitchen received " + newRecipes.size() + " new recipes");
@@ -375,17 +428,12 @@ public class Kitchen extends Entity {
                             
                             // If this specific task is not in backlog, add it
                             if (!taskAlreadyInBacklog) {
-                                if (orderManager != null) {
-                                    for (Order order : orderManager.getPendingOrders()) {
-                                        if (order.getOrderId().equals(orderId)) {
-                                            System.out.println("[DEBUG] Adding order " + orderId + " to " + 
-                                                        stationType + " station backlog (task now ready)");
-                                            // Only add the specific task that's ready, not all tasks from the order
-                                            station.addTask(task);
-                                            break;
-                                        }
-                                    }
-                                }
+                                // FIXED: Add the task to the station backlog directly without checking
+                                // if the order is still in the pending orders queue
+                                System.out.println("[DEBUG] Adding order " + orderId + " to " + 
+                                            stationType + " station backlog (task now ready)");
+                                // Only add the specific task that's ready, not all tasks from the order
+                                station.addTask(task);
                             }
                         }
                     }
