@@ -2,6 +2,7 @@ package com.softwaredesign.project;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.softwaredesign.project.controller.*;
 import com.softwaredesign.project.customer.DineInCustomer;
@@ -630,13 +631,17 @@ public class RestaurantDriver {
                 kitchen.updateTaskAvailability();
 
                 // NEW: Force completion manually from the createdOrders list
-                for (Order order : createdOrders) {
-                    if (!order.isComplete()) { // force only if not marked complete
+                for (Iterator<Order> it = createdOrders.iterator(); it.hasNext();) {
+                    Order order = it.next();
+                    if (!order.isComplete()) { // only process if not complete
                         Meal completedMeal = createCompletedMealForOrder(order);
                         if (completedMeal != null) {
                             collectionPoint.addCompletedMeal(completedMeal);
                             System.out.println("Manually forced completion of order " + order.getOrderId());
                         }
+                        // Remove the order from the list once forced completed,
+                        // because its registration will be cleared upon collection.
+                        it.remove();
                     }
                 }
                 
