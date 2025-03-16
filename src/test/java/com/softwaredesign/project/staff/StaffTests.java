@@ -14,6 +14,7 @@ import com.softwaredesign.project.kitchen.Station;
 import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.menu.BurgerRecipe;
+import com.softwaredesign.project.inventory.InventoryStockTracker;
 import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.LongestQueueFirstStrategy;
@@ -30,18 +31,24 @@ public class StaffTests {
 
     @Before
     public void setUp() {
-        // Create inventory and menu
-        InventoryService inventoryService = new Inventory();
-        menu = new Menu(inventoryService);
+        Inventory inventory = new Inventory();
+        InventoryStockTracker inventoryStockTracker = new InventoryStockTracker();
+        inventory.attach(inventoryStockTracker);
+        inventory.addIngredient("Beef Patty", 10, 1.0, StationType.GRILL);
+        inventory.addIngredient("Bun", 10, 1.0, StationType.PREP);
+        inventory.addIngredient("Lettuce", 10, 1.0, StationType.PREP);
+        inventory.addIngredient("Tomato", 10, 1.0, StationType.PREP);
+        inventory.addIngredient("Cheese", 10, 1.0, StationType.PREP);
+        inventory.addIngredient("Mustard", 10, 0.5, StationType.PREP);
         
-        // Create kitchen components
+        menu = new Menu(inventory);
         CollectionPoint collectionPoint = new CollectionPoint();
         StationManager stationManager = new StationManager(collectionPoint);
         orderManager = new OrderManager(collectionPoint, stationManager);
         
         // Create staff with base speed
         ISpeedComponent baseSpeed = new BaseSpeed();
-        waiter = new Waiter(15.0, baseSpeed, orderManager, menu);
+        waiter = new Waiter(15.0, baseSpeed, orderManager, menu, inventoryStockTracker);
         ChefStrategy simpleStrategy = new SimpleChefStrategy();
         chef = new Chef("Test Chef", 20.0, baseSpeed, simpleStrategy, stationManager);
     }

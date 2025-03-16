@@ -88,4 +88,8 @@ public class OrderManager {
     public Queue<Order> getPendingOrders() {
         return new LinkedList<>(orders);
     }
+    
+    public List<Order> getOrders() {
+        return new ArrayList<>(orders);
+    }
 }

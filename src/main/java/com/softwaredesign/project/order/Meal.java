@@ -16,6 +16,13 @@ public class Meal {
         this.ingredients = ingredients;
         this.inventory = inventory;
         this.orderId = orderId;
+        useIngredients();
+    }
+
+    public void useIngredients() {
+        for (Ingredient ingredient : ingredients) {
+            ingredient.useIngredient();
+        }
     }
 
     public String getOrderId() {
@@ -51,5 +58,9 @@ public class Meal {
 
     public void setOrderId(String orderId) {
         this.orderId = orderId;
+    }
+
+    public List<Ingredient> getIngredients() {
+        return ingredients;
     }
 }

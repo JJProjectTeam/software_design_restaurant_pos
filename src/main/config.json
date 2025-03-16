@@ -1,12 +1,12 @@
 {   
-    "initialBudget": 1000.00,
+    "initialBankBalance": 1000.00,
     "staffRules": {
         "chefs": {
             "min": 1,
             "max": 6,
             "maxStationsPerChef": 4, 
             "maxSpeed": 5, 
-            "standardPayPerHour": 15.00, 
+            "standardPay": 15.00, 
             "payMultiplierBySpeed": 1, 
             "payMultiplierByStation": 1,
             "chanceOfCaffieneAddict": 0.3,
@@ -17,7 +17,7 @@
             "min": 1,
             "max": 10, 
             "maxSpeed": 5, 
-            "standardPayPerHour": 10.00, 
+            "standardPay": 10.00, 
             "payMultiplierBySpeed": 1,
             "chanceOfCaffieneAddict": 0.3,
             "chanceOfLethargic": 0.3,

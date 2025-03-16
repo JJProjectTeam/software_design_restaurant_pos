@@ -11,12 +11,15 @@ public class Ingredient {
     public Ingredient(String name, InventoryService inventory) {
         this.name = name;
         this.inventory = inventory;
-        // Reduce the quantity in the IngredientStore by 1 when an Ingredient is created
-        inventory.useIngredient(name, 1);
     }
-
+    
     public String getName() {
         return name;
+    }
+    
+    // Reduce the quantity in the IngredientStore by 1 when an Ingredient is created
+    public void useIngredient() {
+        inventory.useIngredient(name, 1);
     }
 
     public Set<StationType> getStationTypes() {
@@ -26,5 +29,9 @@ public class Ingredient {
     @Override
     public String toString() {
         return name;
+    }
+
+    public double getPrice() {
+        return inventory.getIngredientStore(name).getPrice();
     }
 }

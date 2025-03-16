@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.nio.file.Paths;
 import java.nio.file.Files;
+import com.softwaredesign.project.model.BankBalanceSingleton;
 
 public class ConfigurationController extends BaseController {
     private Kitchen kitchen;
@@ -43,16 +44,23 @@ public class ConfigurationController extends BaseController {
     private RestaurantViewMediator mediator;
     private SeatingPlan seatingPlan;
     private boolean configurationComplete = false;
+    private InventoryStockTracker inventoryStockTracker;
 
-    //TODO this should probably be loaded from a config or something!!! Not hard coded here
-    private List<Recipe> possibleRecipes = new ArrayList<>();
+    private double bankBalance;
+    private double chefStandardPay;
+    private double chefPayMultiplierBySpeed;
+    private double chefPayMultiplierByStation;
+    private double waiterStandardPay;
+    private double waiterPayMultiplierBySpeed;
+
+    private List<Recipe> possibleRecipes;
 
     //constructor registers with mediator
     public ConfigurationController() {
         super("Configuration");
         this.inventory = new Inventory(); // Initialize with concrete Inventory class
         this.mediator = RestaurantViewMediator.getInstance();
-        this.possibleRecipes = new ArrayList<>(); // Initialize the list
+        this.possibleRecipes = new ArrayList<>(); 
         
         // Order matters here
         setupBaseComponents();
@@ -74,6 +82,8 @@ public class ConfigurationController extends BaseController {
             JsonNode stations = config.path("inventory").path("stations");
 
             System.out.println("[ConfigurationController] Loading ingredients from config file...");
+
+            bankBalance = config.path("initialBankBalance").asDouble(1000.0);
 
             // Iterate through each station type
             for (StationType stationType : StationType.values()) {
@@ -100,6 +110,28 @@ public class ConfigurationController extends BaseController {
                     }
                 });
             }
+            // Load pay-related configuration
+            JsonNode payConfig = config.path("staffRules");
+            
+            // Load chef pay details
+            JsonNode chefPay = payConfig.path("chefs");
+            if (!chefPay.isMissingNode()) {
+                this.chefStandardPay = chefPay.path("standardPay").asDouble(15.0);
+                this.chefPayMultiplierBySpeed = chefPay.path("payMultiplierBySpeed").asDouble(1.0); 
+                this.chefPayMultiplierByStation = chefPay.path("payMultiplierByStation").asDouble(1.0);
+                System.out.println("[ConfigurationController] Loaded chef pay config - Standard Pay: $" + 
+                chefStandardPay + ", Speed Multiplier: " + chefPayMultiplierBySpeed + 
+                    ", Station Multiplier: " + chefPayMultiplierByStation);
+            }
+
+            // Load waiter pay details
+            JsonNode waiterPay = payConfig.path("waiters");
+            if (!waiterPay.isMissingNode()) {
+                this.waiterStandardPay = waiterPay.path("standardPay").asDouble(10.0);
+                this.waiterPayMultiplierBySpeed = waiterPay.path("payMultiplierBySpeed").asDouble(1.0);
+                System.out.println("[ConfigurationController] Loaded waiter pay config - Standard Pay: $" + 
+                    waiterStandardPay + ", Speed Multiplier: " + waiterPayMultiplierBySpeed);
+            }
 
             // Initialize other components
             this.collectionPoint = new CollectionPoint();
@@ -107,6 +139,11 @@ public class ConfigurationController extends BaseController {
             this.orderManager = new OrderManager(collectionPoint, stationManager);
             this.kitchen = new Kitchen(orderManager, collectionPoint, stationManager);
             this.menu = new Menu(inventory);
+
+            // create an set up inventory stock tracker and attach it to the inventory
+            this.inventoryStockTracker = new InventoryStockTracker();
+            this.inventory.attach(inventoryStockTracker);
+
 
             possibleRecipes.add(new BurgerRecipe(inventory));
             possibleRecipes.add(new KebabRecipe(inventory));
@@ -141,14 +178,15 @@ public class ConfigurationController extends BaseController {
                     chefView.setMaxChefs(maxChefs);
                     chefView.setMaxStationsPerChef(maxStationsPerChef);
                     chefView.setMaxSpeed(maxSpeed);
-                    chefView.setStandardPayPerHour(standardPayPerHour);
-                    chefView.setPayMultiplierBySpeed(payMultiplierBySpeed);
-                    chefView.setPayMultiplierByStation(payMultiplierByStation);
+                    chefView.setStandardPay(chefStandardPay);
+                    chefView.setPayMultiplierBySpeed(chefPayMultiplierBySpeed);
+                    chefView.setPayMultiplierByStation(chefPayMultiplierByStation);
+                    //todo - also for waiters
                     
                     System.out.println("[ConfigurationController] Set chef constants - Min Chefs: " + 
                         minChefs + ", Max Chefs: " + maxChefs + ", Max Stations Per Chef: " + maxStationsPerChef +
-                        ", Max Speed: " + maxSpeed + ", Standard Pay: " + standardPayPerHour +
-                        ", Speed Multiplier: " + payMultiplierBySpeed + ", Station Multiplier: " + payMultiplierByStation);
+                        ", Max Speed: " + maxSpeed + ", Standard Pay: " + chefStandardPay +
+                        ", Speed Multiplier: " + chefPayMultiplierBySpeed + ", Station Multiplier: " + chefPayMultiplierByStation);
                 }
                 
                 // Set kitchen constants
@@ -229,6 +267,8 @@ public class ConfigurationController extends BaseController {
             } else {
                 System.err.println("[ConfigurationController] Menu configuration view not found");
             }
+
+            updateBankBalance(bankBalance);
             
         } catch (Exception e) {
             System.err.println("[ConfigurationController] Error configuring views: " + e.getMessage());
@@ -260,6 +300,8 @@ public class ConfigurationController extends BaseController {
         
         // Create menu items
         createMenuItems(menuView.getSelectedRecipes());
+
+        System.out.println("[ConfigurationController] Final configuration bank balance set to: $" + String.format("%.2f", bankBalance));
         
         // Set configuration as complete
         configurationComplete = true;
@@ -292,8 +334,9 @@ public class ConfigurationController extends BaseController {
         // Create default tables
         seatingPlan = new SeatingPlan(4, 40, 5, menu);
         
+
         // Create default waiter
-        Waiter waiter = new Waiter(20.0, new BaseSpeed(), orderManager, menu);
+        Waiter waiter = new Waiter(20.0, new BaseSpeed(), orderManager, menu, inventoryStockTracker);
         
         // Assign tables to waiter
         for (Table table : seatingPlan.getAllTables()) {
@@ -344,7 +387,7 @@ public class ConfigurationController extends BaseController {
 
                 Chef chef = new Chef(
                     data.getName(),
-                    data.getCostPerHour(),
+                    data.getCost(),
                     speedComponent,
                     strategy, 
                     stationManager  // Pass stationManager to chef
@@ -399,6 +442,7 @@ public class ConfigurationController extends BaseController {
         int extraTables = allTables.size() % waiterData.size();
         int tableIndex = 0;
 
+
         System.out.println("[ConfigurationController] Distributing " + allTables.size() + " tables among " + waiterData.size() + " waiters");
         String configPath = "src/main/config.json";
         JsonNode waiterRules;
@@ -432,7 +476,7 @@ public class ConfigurationController extends BaseController {
                 speedComponent = new CocaineAddictDecorator(speedComponent);
             }
             
-            Waiter waiter = new Waiter(data.getCostPerHour(), speedComponent, orderManager, menu);
+            Waiter waiter = new Waiter(data.getCostPerHour(), speedComponent, orderManager, menu, inventoryStockTracker);
             
             // Calculate tables for this waiter
             int tablesToAssign = tablesPerWaiter + (waiters.size() < extraTables ? 1 : 0);
@@ -451,33 +495,38 @@ public class ConfigurationController extends BaseController {
         System.out.println("[ConfigurationController] Created " + waiters.size() + " waiters");
     }
 
+    //This allows us to map the selected recipes to actual instances, without duplicating listing what recipes are available
     private void createMenuItems(Set<String> selectedRecipes) {
-
         // First, create a new Menu with the inventory service
         this.menu = new Menu(inventory);
         
-        // For each selected recipe, create the appropriate Recipe object and add it to the menu
+        // Create a map of recipe names to their corresponding Recipe objects
+        Map<String, Recipe> recipeMap = possibleRecipes.stream()
+            .collect(Collectors.toMap(
+                recipe -> recipe.getName().toLowerCase(),
+                recipe -> recipe
+            ));
+        
+        // For each selected recipe, look up and create a new instance
         for (String recipeName : selectedRecipes) {
             try {
-                // Create the appropriate recipe based on the name
-                Recipe recipe = null;
-                
-                // This is a simplified approach - in a real implementation, you'd have a more
-                // flexible way to create recipes based on names
-                if (recipeName.equalsIgnoreCase("Burger")) {
-                    recipe = new BurgerRecipe(inventory);
-                } else if (recipeName.equalsIgnoreCase("Kebab")) {
-                    recipe = new KebabRecipe(inventory);
+                Recipe templateRecipe = recipeMap.get(recipeName.toLowerCase());
+                if (templateRecipe != null) {
+                    // Create a new instance of the same type of recipe
+                    Recipe newRecipe = templateRecipe.getClass()
+                        .getConstructor(InventoryService.class)
+                        .newInstance(inventory);
+                    
+                    // TODO: Uncomment when menu implementation is ready
+                    // menu.addRecipe(newRecipe);
+                    
+                    System.out.println("[ConfigurationController] Created recipe: " + recipeName);
                 } else {
-                    // For unknown recipes, create a generic one (if possible)
-                    System.err.println("Unknown recipe: " + recipeName + " - skipping");
-                    continue;
+                    System.err.println("[ConfigurationController] Unknown recipe: " + recipeName + " - skipping");
                 }
-                
-                //TODO i dont think we mande a menuuuu
-                // menu.addRecipe(recipe);
             } catch (Exception e) {
-                System.err.println("Error creating menu item: " + recipeName + " - " + e.getMessage());
+                System.err.println("[ConfigurationController] Error creating menu item: " + 
+                    recipeName + " - " + e.getMessage());
             }
         }
     }
@@ -576,5 +625,34 @@ public class ConfigurationController extends BaseController {
             System.err.println("[ConfigurationController] Error initializing menu: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    public void updateBankBalance(double newBalance) {
+        try {
+            BankBalanceSingleton.getInstance().setBankBalance(newBalance);
+            this.bankBalance = newBalance;
+            // Update all configuration views
+            ChefConfigurationView chefView = (ChefConfigurationView) mediator.getView(ViewType.CHEF_CONFIGURATION);
+            DiningConfigurationView diningView = (DiningConfigurationView) mediator.getView(ViewType.DINING_CONFIGURATION);
+            MenuConfigurationView menuView = (MenuConfigurationView) mediator.getView(ViewType.MENU_CONFIGURATION);
+
+            if (chefView != null) chefView.setBankBalance(newBalance);
+            if (diningView != null) diningView.setBankBalance(newBalance);
+            if (menuView != null) menuView.setBankBalance(newBalance);
+
+            System.out.println("[ConfigurationController] Updated bank balance to: $" + newBalance);
+        } catch (Exception e) {
+            System.err.println("[ConfigurationController] Error updating bank balance: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private double calculateChefCost(int speed, int numberOfStations) {
+        return chefStandardPay * (speed * chefPayMultiplierBySpeed) * 
+               (numberOfStations * chefPayMultiplierByStation);
+    }
+
+    private double calculateWaiterCost(int speed) {
+        return waiterStandardPay * (speed * waiterPayMultiplierBySpeed);
     }
 }

@@ -3,7 +3,10 @@ package com.softwaredesign.project.orderfulfillment;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.softwaredesign.project.inventory.Ingredient;
+import com.softwaredesign.project.model.BankBalanceSingleton;
 import com.softwaredesign.project.order.Meal;
+import com.softwaredesign.project.order.Recipe;
 
 public class CollectionPoint {
     private Map<String, List<Meal>> completedMeals;
@@ -45,6 +48,7 @@ public class CollectionPoint {
         }
         String orderId = readyOrders.poll();
         List<Meal> meals = completedMeals.remove(orderId);
+        addMealsToBankBalance(meals);
         mealsPerOrder.remove(orderId);
         return meals;
     }
@@ -92,5 +96,13 @@ public class CollectionPoint {
             return 0;
         }
         return mealsPerOrder.get(orderId);
+    }
+
+    public void addMealsToBankBalance(List<Meal> meals) {
+        for (Meal meal : meals) {
+            for (Ingredient ingredient : meal.getIngredients()) {
+                BankBalanceSingleton.getInstance().updateBankBalance(ingredient.getPrice());
+            }
+        }
     }
 }
