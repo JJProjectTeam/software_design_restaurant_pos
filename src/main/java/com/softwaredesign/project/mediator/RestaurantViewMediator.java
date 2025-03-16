@@ -95,7 +95,11 @@ public class RestaurantViewMediator {
         }
     }
     public View getView(ViewType type) {
-        return registeredViews.get(type).get(0);
+        List<View> views = registeredViews.get(type);
+        if (views != null && !views.isEmpty()) {
+            return views.get(0);
+        }
+        return null;
     }
 
     public void notifyConfigurationComplete(){

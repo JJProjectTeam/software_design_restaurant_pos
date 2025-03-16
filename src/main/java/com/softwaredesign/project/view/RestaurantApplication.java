@@ -144,9 +144,15 @@ public class RestaurantApplication extends TApplication {
     }
 
     /**
-     * Properly restarts the application by calling exit() and reinitializing through the driver.
+     * Gets the driver instance
      */
-    private void restartApplication() {
+    public RestaurantDriver getDriver() {
+        return this.driver;
+    }
+
+    /**
+     * Properly restarts the application by calling exit() and reinitializing through the driver.
+     */public void restartApplication() {
         logger.info("[RestaurantApplication] Restarting application");
         // Reset the mediator to clear any cached configuration state (including min/max number of chefs)
         RestaurantViewMediator.getInstance().reset();
