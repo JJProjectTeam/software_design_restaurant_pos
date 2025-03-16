@@ -12,7 +12,11 @@ import jexer.menu.TMenu;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
 import com.softwaredesign.project.RestaurantDriver;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class RestaurantApplication extends TApplication {
+    private static final Logger logger = LoggerFactory.getLogger(RestaurantApplication.class);
     private TWindow mainWindow;
     private Map<ViewType, View> views = new HashMap<>();
     private ViewType currentView;

@@ -10,6 +10,8 @@ import com.softwaredesign.project.view.ViewType;
 
 import java.util.Map;
 import java.util.HashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KitchenController extends BaseController {
     private Kitchen kitchen;
@@ -17,6 +19,7 @@ public class KitchenController extends BaseController {
     private Map<Station, Integer> stationIdMap;  // Changed from StationType to Station
     private int nextStationId = 1;  // Track next available ID
     private double bankBalance;
+    private static final Logger logger = LoggerFactory.getLogger(KitchenController.class);
 
     public KitchenController(Kitchen kitchen) {
         super("Kitchen");

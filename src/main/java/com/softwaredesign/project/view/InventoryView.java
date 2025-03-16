@@ -10,8 +10,11 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InventoryView extends GamePlayView {
+    private static final Logger logger = LoggerFactory.getLogger(InventoryView.class);
     private final RestaurantApplication app;
     private TTableWidget inventoryTable;
     private Queue<InventoryUpdate> pendingUpdates;

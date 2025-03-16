@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.softwaredesign.project.controller.*;
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.inventory.Inventory;
@@ -93,6 +96,8 @@ public class RestaurantDriver {
     private int tickCount = 0;
     private List<Order> createdOrders = new ArrayList<>();
     
+    private static final Logger logger = LoggerFactory.getLogger(RestaurantDriver.class);
+
     public RestaurantDriver() {
         try{
             this.app = new RestaurantApplication();

@@ -8,12 +8,15 @@ import com.softwaredesign.project.exceptions.RecipeValidationException;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.inventory.Ingredient;
 import com.softwaredesign.project.order.Recipe;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DineInCustomer extends Customer {
     private boolean isBrowsing;
     private Recipe selectedRecipe;
     private List<Ingredient> addedIngredients;
     private List<Ingredient> removedIngredients;
+    private static final Logger logger = LoggerFactory.getLogger(DineInCustomer.class);
 
     public DineInCustomer() {
         this.isBrowsing = true;

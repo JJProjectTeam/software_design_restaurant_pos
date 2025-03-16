@@ -2,9 +2,11 @@ package com.softwaredesign.project.view;
 
 import java.util.*;
 import jexer.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DiningConfigurationView extends ConfigurationView {
-
+    private static final Logger logger = LoggerFactory.getLogger(DiningConfigurationView.class);
 
     // UI Components
     private TTableWidget waiterTable;

@@ -2,8 +2,11 @@ package com.softwaredesign.project.view;
 
 import java.util.*;
 import jexer.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MenuConfigurationView extends ConfigurationView {
+    private static final Logger logger = LoggerFactory.getLogger(MenuConfigurationView.class);
     // UI Components
     private Map<String, List<String>> availableRecipes; 
     private Map<String, Boolean> selectedRecipeStates; 

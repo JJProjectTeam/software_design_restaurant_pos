@@ -3,6 +3,8 @@ package com.softwaredesign.project.orderfulfillment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
@@ -11,6 +13,7 @@ import com.softwaredesign.project.orderfulfillment.Table;
 public class SeatingPlan {
     private List<Table> tables;
     private int maxTableCapacity;
+    private static final Logger logger = LoggerFactory.getLogger(SeatingPlan.class);
     
     public SeatingPlan(int totalTables, int totalSeats, int maxTableCapacity, Menu menu) {
         this.maxTableCapacity = maxTableCapacity;

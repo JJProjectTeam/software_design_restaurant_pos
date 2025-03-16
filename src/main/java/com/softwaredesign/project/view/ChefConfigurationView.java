@@ -2,11 +2,14 @@ package com.softwaredesign.project.view;
 
 import java.util.*;
 import jexer.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ChefConfigurationView extends ConfigurationView {
     // Local storage for chef data
     private Map<String, ChefData> chefs = new HashMap<>();
     private Map<String, Integer> stationCounts = new HashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(ChefConfigurationView.class);
     
     // Station counts
     private int grillStationCount = 1;

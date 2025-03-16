@@ -5,10 +5,12 @@ import com.softwaredesign.project.controller.DiningRoomController;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
 import com.softwaredesign.project.orderfulfillment.Table;
 import jexer.*;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.*;
 
 public class DiningRoomView extends GamePlayView {
+    private static final Logger logger = LoggerFactory.getLogger(DiningRoomView.class);
     private final RestaurantApplication app;    
     private TTableWidget tableWidget;
     private Queue<TableUpdate> pendingUpdates;

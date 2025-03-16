@@ -6,6 +6,8 @@ import com.softwaredesign.project.view.ViewType;
 import com.softwaredesign.project.view.ConfigurableView;
 import com.softwaredesign.project.controller.ConfigurationController;
 import com.softwaredesign.project.model.BankBalanceSingleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -13,6 +15,7 @@ import java.util.*;
  * Mediator that maintains mappings between views and their controllers.
  */
 public class RestaurantViewMediator {
+    private static final Logger logger = LoggerFactory.getLogger(RestaurantViewMediator.class);
     private static RestaurantViewMediator instance;
     private final Map<ViewType, List<View>> registeredViews;
     private final Map<String, BaseController> controllers;

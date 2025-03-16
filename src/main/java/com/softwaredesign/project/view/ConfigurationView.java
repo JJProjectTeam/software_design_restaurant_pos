@@ -4,6 +4,8 @@ import com.softwaredesign.project.controller.BaseController;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
 
 import jexer.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class ConfigurationView implements View, ConfigurableView {
     protected final RestaurantApplication app;
@@ -12,6 +14,7 @@ public abstract class ConfigurationView implements View, ConfigurableView {
     protected TTableWidget configTable;
     protected double bankBalance = 0.0;
     protected TLabel bankBalanceLabel;
+    private static final Logger logger = LoggerFactory.getLogger(ConfigurationView.class);
 
     public ConfigurationView(RestaurantApplication app) {
         if (app == null) {

@@ -2,9 +2,11 @@ package com.softwaredesign.project.view;
 
 import jexer.*;
 import com.softwaredesign.project.model.BankBalanceSingleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class GamePlayView implements View {
-    
+    private static final Logger logger = LoggerFactory.getLogger(GamePlayView.class);
     protected static final int TAB_Y = 1;  
     protected static final int TAB_WIDTH = 15;  
     protected static final int TAB_SPACING = 2;  

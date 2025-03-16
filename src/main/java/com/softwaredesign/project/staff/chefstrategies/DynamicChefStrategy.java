@@ -2,6 +2,8 @@ package com.softwaredesign.project.staff.chefstrategies;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.softwaredesign.project.kitchen.Station;
 import com.softwaredesign.project.kitchen.StationManager;
@@ -17,6 +19,7 @@ import com.softwaredesign.project.order.RecipeTask;
 public class DynamicChefStrategy implements ChefStrategy {
     
     private StationManager stationManager;
+    private static final Logger logger = LoggerFactory.getLogger(DynamicChefStrategy.class);
     
     public DynamicChefStrategy(StationManager stationManager) {
         this.stationManager = stationManager;

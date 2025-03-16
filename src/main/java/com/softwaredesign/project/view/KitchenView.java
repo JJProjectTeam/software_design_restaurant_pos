@@ -4,12 +4,14 @@ import jexer.*;
 import java.util.Queue;
 import java.util.Map;
 import java.util.HashMap;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
 
 import java.util.LinkedList;
 
 public class KitchenView extends GamePlayView {
+    private static final Logger logger = LoggerFactory.getLogger(KitchenView.class);
     private TTableWidget kitchenStations;
     private Queue<StationUpdate> pendingUpdates;
     private Map<Integer, StationUpdate> stationDataMap;  // Add this to store station data
