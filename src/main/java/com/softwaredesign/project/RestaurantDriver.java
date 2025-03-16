@@ -639,7 +639,7 @@ public class RestaurantDriver {
                             System.out.println("  - Task: " + 
                                 (station.getCurrentTask() != null ? station.getCurrentTask().getName() : "None"));
                             System.out.println("  - Progress: " + station.getCookingProgress() + 
-                                (station.getCurrentTask() != null ? "/" + station.getCurrentTask().getCookingTime() : ""));
+                                (station.getCurrentTask() != null ? "/" + station.getCurrentTask().getCookingWorkRequired() : ""));
                         }
                     }
                 }
