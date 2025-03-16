@@ -20,8 +20,8 @@ public abstract class ConfigurationView implements View, ConfigurableView {
         if (app == null) {
             throw new IllegalArgumentException("RestaurantApplication cannot be null");
         }
-        logger.info("[ConfigurationView] Constructor called");
         this.app = app;
+        logger.info("[ConfigurationView] Constructor called");
         this.mediator = RestaurantViewMediator.getInstance();
     }
 
