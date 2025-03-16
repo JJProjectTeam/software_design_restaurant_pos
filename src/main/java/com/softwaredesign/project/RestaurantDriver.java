@@ -147,7 +147,7 @@ public class RestaurantDriver {
                                 kitchenController.updateView();
                                 inventoryController.updateView();
                                 
-                                wait(100);
+                                Thread.sleep(100);
                             }
 
                             // Demo sequence handling
@@ -167,9 +167,9 @@ public class RestaurantDriver {
                             // Update views
                             synchronized(mediator) {
                                 diningRoomController.updateView();
-                                wait(50);
+                                Thread.sleep(50);
                                 kitchenController.updateView();
-                                wait(50);
+                                Thread.sleep(50);
                                 inventoryController.updateView();
                             }
                         }
@@ -425,7 +425,8 @@ public class RestaurantDriver {
         );
 
         kitchenController = new KitchenController(
-            kitchen
+            kitchen,
+            mediator
         );
 
         //TODO populate inventory

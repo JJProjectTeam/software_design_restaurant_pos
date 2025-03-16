@@ -64,10 +64,12 @@ public class ConfigurationController extends BaseController {
     public ConfigurationController() {
         super("Configuration");
         this.inventory = new Inventory(); // Initialize with concrete Inventory class
+        this.mediator = RestaurantViewMediator.getInstance();
         this.possibleRecipes = new ArrayList<>(); 
         
         // Order matters here
         setupBaseComponents();
+        mediator.registerController("Configuration", this);
         
         // Only initialize menu after everything else is set up
         initializeMenuConfiguration();
