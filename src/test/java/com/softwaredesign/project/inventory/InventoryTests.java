@@ -1,4 +1,4 @@
-package com.softwaredesign.project;
+package com.softwaredesign.project.inventory;
 
 import static org.junit.Assert.*;
 import org.junit.Before;
