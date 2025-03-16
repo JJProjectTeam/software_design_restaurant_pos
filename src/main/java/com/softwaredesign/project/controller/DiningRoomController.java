@@ -40,7 +40,7 @@ public class DiningRoomController extends BaseController {
 
         DiningRoomView diningView = (DiningRoomView) view;
 
-        ((DiningRoomView) view).setBankBalance(bankBalance);
+        ((DiningRoomView) view).setBankBalance(BankBalanceSingleton.getInstance().getBankBalance());
 
         for (Table table : seatingPlan.getAllTables()) {
             int tableNumber = table.getTableNumber();

@@ -34,7 +34,6 @@ public class CollectionPoint {
         // Check if order is complete
         if (isOrderComplete(orderId)) {
             readyOrders.add(orderId);
-            addMealsToBankBalance(completedMeals.get(orderId));
         }
     }
 
@@ -49,6 +48,7 @@ public class CollectionPoint {
         }
         String orderId = readyOrders.poll();
         List<Meal> meals = completedMeals.remove(orderId);
+        addMealsToBankBalance(meals);
         mealsPerOrder.remove(orderId);
         return meals;
     }

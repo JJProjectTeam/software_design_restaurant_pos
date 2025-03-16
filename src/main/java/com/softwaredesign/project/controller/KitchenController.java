@@ -37,14 +37,14 @@ public class KitchenController extends BaseController {
 
     @Override
     public void updateView() {
-
         View view = mediator.getView(ViewType.KITCHEN);
         if (!(view instanceof KitchenView)) {
             return;
         }
         view = (KitchenView) view;
 
-        ((KitchenView) view).setBankBalance(bankBalance);
+        // Get updated bank balance every time updateView is called!
+        ((KitchenView) view).setBankBalance(BankBalanceSingleton.getInstance().getBankBalance());
         
         // Create a copy of the stations list to avoid ConcurrentModificationException
         java.util.List<Station> stationsCopy = new java.util.ArrayList<>(kitchen.getStationManager().getAllStations());

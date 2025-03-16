@@ -30,7 +30,7 @@ public class InventoryController extends BaseController {
             return;
         }
         view = (InventoryView) view;
-        ((InventoryView) view).setBankBalance(bankBalance);
+        ((InventoryView) view).setBankBalance(BankBalanceSingleton.getInstance().getBankBalance());
         ingredients = inventory.getAllIngredients();
         for (String ingredient : ingredients) {
             int stock = inventory.getStock(ingredient);

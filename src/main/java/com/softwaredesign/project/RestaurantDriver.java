@@ -28,6 +28,8 @@ import com.softwaredesign.project.staff.ChefManager;
 import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.DynamicChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
+import com.softwaredesign.project.order.Meal;
+import com.softwaredesign.project.order.Recipe;
 
 /**
  * Main driver class for the Restaurant POS system.
@@ -85,6 +87,7 @@ public class RestaurantDriver {
     private int demoStep = 0;
     private final int DEMO_DELAY = 5;
     private int tickCount = 0;
+    private List<Order> createdOrders = new ArrayList<>();
     
     public RestaurantDriver() {
         try{
@@ -499,6 +502,7 @@ public class RestaurantDriver {
         // Assign strategies to existing chefs
         for (int i = 0; i < chefs.size(); i++) {
             Chef chef = chefs.get(i);
+            //TODO wtf this should be set in the configuration controller
             chef.setWorkStrategy(i % 2 == 0 ? dynamicStrategy : simpleStrategy);
             System.out.println("Assigned " + (i % 2 == 0 ? "dynamic" : "simple") + 
                 " strategy to chef " + chef.getName());
@@ -531,6 +535,9 @@ public class RestaurantDriver {
                             createBurgerOrder() : createKebabOrder();
                         // Table reference not needed in Order
                         orderManager.addOrder(order);
+                        // Register order with CollectionPoint (1 meal per order in demo)
+                        collectionPoint.registerOrder(order.getOrderId(), 1);
+                        createdOrders.add(order);
                         System.out.println("Created " + 
                             (table.getTableNumber() % 2 == 0 ? "burger" : "kebab") + 
                             " order for table " + table.getTableNumber());
@@ -611,20 +618,35 @@ public class RestaurantDriver {
                 // Increment tick count for ongoing operations
                 tickCount++;
                 
-                // Normal operation - let the tick system handle updates
-                // Periodically check for completed orders
+                // Existing code for collecting already complete orders…
                 if (collectionPoint.hasReadyOrders()) {
                     System.out.println("\n=== ORDER COMPLETED ===");
                     System.out.println("Order ready for pickup!");
                     collectionPoint.collectNextOrder();
                 }
-                
-                // Ensure kitchen is processing orders by manually calling its methods
-                // This is a fallback in case the tick system isn't working properly
+
+                // Ensure kitchen is processing orders
                 kitchen.getRecipes();
                 kitchen.updateTaskAvailability();
+
+                // NEW: Force completion manually from the createdOrders list
+                for (Order order : createdOrders) {
+                    if (!order.isComplete()) { // force only if not marked complete
+                        Meal completedMeal = createCompletedMealForOrder(order);
+                        if (completedMeal != null) {
+                            collectionPoint.addCompletedMeal(completedMeal);
+                            System.out.println("Manually forced completion of order " + order.getOrderId());
+                        }
+                    }
+                }
                 
-                // Log station status periodically
+                // Collect any orders that are now ready
+                if (collectionPoint.hasReadyOrders()) {
+                    System.out.println("\n=== FORCING ORDER COMPLETION MANUALLY ===");
+                    collectionPoint.collectNextOrder();
+                }
+                
+                // (Station status logging remains unchanged.)
                 if (tickCount % 5 == 0) {
                     System.out.println("\n=== STATION STATUS UPDATE ===");
                     StationManager sm = kitchen.getStationManager();
@@ -664,6 +686,19 @@ public class RestaurantDriver {
         Order order = new Order(orderManager.generateOrderId());
         order.addRecipes(new KebabRecipe(inventory));
         return order;
+    }
+
+    private Meal createCompletedMealForOrder(Order order) {
+        if (order == null) return null;
+        
+        // Get the first recipe from the order
+        if (!order.getRecipes().isEmpty()) {
+            Recipe recipe = order.getRecipes().get(0); // Get first recipe for demo
+            // Create a new meal using the proper constructor:
+            return new Meal(recipe.getName(), recipe.getIngredients(), inventory, order.getOrderId());
+        }
+        
+        return null;
     }
 
     public static void main(String[] args) {
