@@ -385,33 +385,38 @@ public class ConfigurationController extends BaseController {
         System.out.println("[ConfigurationController] Created " + waiters.size() + " waiters");
     }
 
+    //This allows us to map the selected recipes to actual instances, without duplicating listing what recipes are available
     private void createMenuItems(Set<String> selectedRecipes) {
-
         // First, create a new Menu with the inventory service
         this.menu = new Menu(inventory);
         
-        // For each selected recipe, create the appropriate Recipe object and add it to the menu
+        // Create a map of recipe names to their corresponding Recipe objects
+        Map<String, Recipe> recipeMap = possibleRecipes.stream()
+            .collect(Collectors.toMap(
+                recipe -> recipe.getName().toLowerCase(),
+                recipe -> recipe
+            ));
+        
+        // For each selected recipe, look up and create a new instance
         for (String recipeName : selectedRecipes) {
             try {
-                //TODO change this to use available recipes list above
-                // Create the appropriate recipe based on the name
-                Recipe recipe = null;
-                // This is a simplified approach - in a real implementation, you'd have a more
-                // flexible way to create recipes based on names
-                if (recipeName.equalsIgnoreCase("Burger")) {
-                    recipe = new BurgerRecipe(inventory);
-                } else if (recipeName.equalsIgnoreCase("Kebab")) {
-                    recipe = new KebabRecipe(inventory);
+                Recipe templateRecipe = recipeMap.get(recipeName.toLowerCase());
+                if (templateRecipe != null) {
+                    // Create a new instance of the same type of recipe
+                    Recipe newRecipe = templateRecipe.getClass()
+                        .getConstructor(InventoryService.class)
+                        .newInstance(inventory);
+                    
+                    // TODO: Uncomment when menu implementation is ready
+                    // menu.addRecipe(newRecipe);
+                    
+                    System.out.println("[ConfigurationController] Created recipe: " + recipeName);
                 } else {
-                    // For unknown recipes, create a generic one (if possible)
-                    System.err.println("Unknown recipe: " + recipeName + " - skipping");
-                    continue;
+                    System.err.println("[ConfigurationController] Unknown recipe: " + recipeName + " - skipping");
                 }
-                
-                //TODO i dont think we mande a menuuuu
-                // menu.addRecipe(recipe);
             } catch (Exception e) {
-                System.err.println("Error creating menu item: " + recipeName + " - " + e.getMessage());
+                System.err.println("[ConfigurationController] Error creating menu item: " + 
+                    recipeName + " - " + e.getMessage());
             }
         }
     }
