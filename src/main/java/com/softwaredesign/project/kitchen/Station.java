@@ -371,12 +371,12 @@ public class Station extends Entity {
             }
             
             cookingProgress++;
-            int requiredTime = currentTask.getCookingTime();
+            int requiredWork =  (int) Math.round(currentTask.getCookingWorkRequired() / assignedChef.getSpeedMultiplier());
             
             StringBuilder progressMessage = new StringBuilder();
             progressMessage.append(type).append(" station cooking ").append(currentTask.getName());
             progressMessage.append(" for ").append(currentRecipe.getName());
-            progressMessage.append(" - Progress: ").append(cookingProgress).append("/").append(requiredTime);
+            progressMessage.append(" - Progress: ").append(cookingProgress).append("/").append(requiredWork);
             
             // Add chef information if available - use taskChef instead of assignedChef
             if (taskChef != null) {
@@ -390,7 +390,7 @@ public class Station extends Entity {
             
             System.out.println(progressMessage.toString());
             
-            if (cookingProgress >= requiredTime) {
+            if (cookingProgress >= requiredWork) {
                 // Task is done
                 StringBuilder completionMessage = new StringBuilder();
                 completionMessage.append(type).append(" station completed task: ").append(currentTask.getName());

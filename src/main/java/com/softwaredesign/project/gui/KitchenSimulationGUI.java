@@ -212,7 +212,7 @@ public class KitchenSimulationGUI extends JFrame {
                   .append(" (")
                   .append(station.getCookingProgress())
                   .append("/")
-                  .append(task.getCookingTime())
+                  .append(task.getCookingWorkRequired())
                   .append(")");
             } else {
                 sb.append("None");
@@ -294,7 +294,7 @@ public class KitchenSimulationGUI extends JFrame {
                         task.getName(), 
                         station.getType(),
                         station.getCookingProgress(),
-                        task.getCookingTime());
+                        task.getCookingWorkRequired());
                     
                     orderProgressMap.get(orderId).put(recipeName, progress);
                 }
@@ -403,7 +403,7 @@ public class KitchenSimulationGUI extends JFrame {
                     
                     sb.append("  Task: ").append(task.getName())
                       .append(" (").append(currentStation.getCookingProgress())
-                      .append("/").append(task.getCookingTime()).append(")\n");
+                      .append("/").append(task.getCookingWorkRequired()).append(")\n");
                     
                     if (recipe != null) {
                         sb.append("  Recipe: ").append(recipe.getName());

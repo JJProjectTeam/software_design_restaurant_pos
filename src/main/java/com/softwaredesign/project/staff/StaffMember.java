@@ -1,12 +1,14 @@
 package com.softwaredesign.project.staff;
 
+import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
+
 public abstract class StaffMember {
     private double payPerHour;
-    private double speedMultiplier;
+    private ISpeedComponent speedDecorator;
 
-    public StaffMember(double payPerHour, double speedMultiplier) {
+    public StaffMember(double payPerHour, ISpeedComponent speedDecorator) {
         this.payPerHour = payPerHour;
-        this.speedMultiplier = speedMultiplier;
+        this.speedDecorator = speedDecorator;
     }
 
     public double getPayPerHour() {
@@ -18,10 +20,6 @@ public abstract class StaffMember {
     }
 
     public double getSpeedMultiplier() {
-        return speedMultiplier;
-    }
-
-    public void setSpeedMultiplier(double speedMultiplier) {
-        this.speedMultiplier = speedMultiplier;
+        return speedDecorator.getSpeedMultiplier();
     }
 }

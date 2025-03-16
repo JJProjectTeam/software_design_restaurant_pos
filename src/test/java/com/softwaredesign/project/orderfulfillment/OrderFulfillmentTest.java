@@ -1,21 +1,25 @@
 package com.softwaredesign.project.orderfulfillment;
 
 import static org.junit.Assert.*;
-
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
+import com.softwaredesign.project.order.OrderManager;
 import com.softwaredesign.project.inventory.Inventory;
 import com.softwaredesign.project.kitchen.Kitchen;
+import com.softwaredesign.project.kitchen.StationManager;
+import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.staff.Waiter;
-import com.softwaredesign.project.orderfulfillment.Table;
+import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
+import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
+import com.softwaredesign.project.inventory.Inventory;
+import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.customer.DineInCustomer;
-import com.softwaredesign.project.order.OrderManager;
-import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.order.Meal;
+import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.order.RecipeTask;
 import com.softwaredesign.project.kitchen.StationManager;
 import com.softwaredesign.project.kitchen.StationType;
@@ -52,7 +56,10 @@ public class OrderFulfillmentTest {
         orderManager = new OrderManager(collectionPoint, stationManager);
         kitchen = new Kitchen(orderManager,  collectionPoint, stationManager);
         menu = new Menu(inventory);
-        waiter = new Waiter(15.0, 1.0, orderManager, menu, inventoryStockTracker);
+        
+        // Create staff members
+        ISpeedComponent baseSpeed = new BaseSpeed();
+        waiter = new Waiter(15.0, baseSpeed, orderManager, menu, inventoryStockTracker);
     }
 
     @Test

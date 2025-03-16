@@ -7,6 +7,7 @@ import org.junit.Before;
 import java.util.*;
 
 import com.softwaredesign.project.staff.Waiter;
+import com.softwaredesign.project.staff.staffspeeds.SpeedDecorator;
 import com.softwaredesign.project.order.OrderManager;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.order.Recipe;
@@ -15,6 +16,8 @@ import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 import com.softwaredesign.project.kitchen.StationManager;
 import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.kitchen.StationType;
+import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
+import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
 
 /**
  * Test suite to validate the inventory validation logic when placing orders.
@@ -62,7 +65,7 @@ public class InventoryValidationTest {
         table.addCustomer(customer);
 
         // Create waiter with necessary components
-        Waiter waiter = new Waiter(15.0, 1.0, orderManager, menu, inventoryTracker);
+        Waiter waiter = new Waiter(15.0, new BaseSpeed(1), orderManager, menu, inventoryTracker);
         waiter.assignTable(table);
 
         // Attempt to take order - should throw IllegalStateException
@@ -93,7 +96,7 @@ public class InventoryValidationTest {
         table.addCustomer(customer);
 
         // Create waiter with necessary components
-        Waiter waiter = new Waiter(15.0, 1.0, orderManager, menu, inventoryTracker);
+        Waiter waiter = new Waiter(15.0, new BaseSpeed(1), orderManager, menu, inventoryTracker);
         waiter.assignTable(table);
 
         // Take the order - should succeed
@@ -127,7 +130,7 @@ public class InventoryValidationTest {
         table.addCustomer(customer2);
 
         // Create waiter and take order
-        Waiter waiter = new Waiter(15.0, 1.0, orderManager, menu, inventoryTracker);
+        Waiter waiter = new Waiter(15.0, new BaseSpeed(1), orderManager, menu, inventoryTracker);
         waiter.assignTable(table);
         waiter.takeTableOrder(table);
 
@@ -153,7 +156,7 @@ public class InventoryValidationTest {
         TestCustomer customer1 = new TestCustomer(recipe1);
         table.addCustomer(customer1);
 
-        Waiter waiter = new Waiter(15.0, 1.0, orderManager, menu, inventoryTracker);
+        Waiter waiter = new Waiter(15.0, new BaseSpeed(1), orderManager, menu, inventoryTracker);
         waiter.assignTable(table);
         waiter.takeTableOrder(table);
 
@@ -201,7 +204,7 @@ public class InventoryValidationTest {
         TestCustomer customer = new TestCustomer(testRecipe);
         table.addCustomer(customer);
 
-        Waiter waiter = new Waiter(15.0, 1.0, orderManager, menu, inventoryTracker);
+        Waiter waiter = new Waiter(15.0, new BaseSpeed(1), orderManager, menu, inventoryTracker);
         waiter.assignTable(table);
         waiter.takeTableOrder(table);
 
