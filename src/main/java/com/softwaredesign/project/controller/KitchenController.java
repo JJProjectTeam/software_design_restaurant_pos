@@ -21,10 +21,10 @@ public class KitchenController extends BaseController {
     private double bankBalance;
     private static final Logger logger = LoggerFactory.getLogger(KitchenController.class);
 
-    public KitchenController(Kitchen kitchen, RestaurantViewMediator mediator) {
+    public KitchenController(Kitchen kitchen) {
         super("Kitchen");
         this.kitchen = kitchen;
-        this.mediator = mediator;
+        this.mediator = RestaurantViewMediator.getInstance();
         this.stationIdMap = new HashMap<>();
         this.bankBalance = BankBalanceSingleton.getInstance().getBankBalance();
         
