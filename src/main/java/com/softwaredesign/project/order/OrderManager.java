@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.softwaredesign.project.inventory.Ingredient;
 import com.softwaredesign.project.kitchen.StationManager;
+import com.softwaredesign.project.model.StatisticsSingleton;
 import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ public class OrderManager {
 
     /**
      * Generates a sequential order ID starting from 1000
+     * 
      * @return A string representation of the order ID (e.g., "Order-1001")
      */
     public String generateOrderId() {
@@ -36,10 +38,15 @@ public class OrderManager {
     public void addOrder(Order order) {
         collectionPoint.registerOrder(order.getOrderId(), order.getRecipes().size());
         orders.add(order);
+
+        // Track statistics
+        StatisticsSingleton.getInstance().incrementStat("ordersReceived");
+        StatisticsSingleton.getInstance().incrementStat("totalRecipesOrdered", order.getRecipes().size());
     }
 
     /**
      * Processes the next order in the queue
+     * 
      * @return A list of recipes from the order
      */
     public List<Recipe> processOrder() {
@@ -50,6 +57,9 @@ public class OrderManager {
         // Get the next order and remove it from the queue
         Order order = orders.poll();
         List<Recipe> recipes = order.getRecipes();
+
+        // Track statistics
+        StatisticsSingleton.getInstance().incrementStat("ordersProcessed");
 
         // Ensure the order is registered with the collection point
         // This is a safety check in case the order was not properly registered before
@@ -65,7 +75,7 @@ public class OrderManager {
             recipe.setOrderId(orderId);
             makeAmendments(recipe, order);
         }
-        
+
         // Clone the recipes list to avoid modifying the original order's recipes
         return new ArrayList<>(recipes);
     }
@@ -83,15 +93,16 @@ public class OrderManager {
             recipe.addIngredient(ingredient);
         }
     }
-    
+
     /**
      * Get a copy of the pending orders queue for display purposes
+     * 
      * @return a copy of the pending orders queue
      */
     public Queue<Order> getPendingOrders() {
         return new LinkedList<>(orders);
     }
-    
+
     public List<Order> getOrders() {
         return new ArrayList<>(orders);
     }
