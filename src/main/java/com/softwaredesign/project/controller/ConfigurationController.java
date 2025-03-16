@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.nio.file.Paths;
 import java.nio.file.Files;
-import com.softwaredesign.project.model.BudgetSingleton;
+import com.softwaredesign.project.model.BankBalanceSingleton;
 
 public class ConfigurationController extends BaseController {
     private Kitchen kitchen;
@@ -76,7 +76,7 @@ public class ConfigurationController extends BaseController {
 
             System.out.println("[ConfigurationController] Loading ingredients from config file...");
 
-            bankBalance = config.path("initialBudget").asDouble(1000.0);
+            bankBalance = config.path("initialBankBalance").asDouble(1000.0);
 
             // Iterate through each station type
             for (StationType stationType : StationType.values()) {
@@ -287,14 +287,11 @@ public class ConfigurationController extends BaseController {
         // Create menu items
         createMenuItems(menuView.getSelectedRecipes());
 
-        updateBankBalance(bankBalance);
+        System.out.println("[ConfigurationController] Final configuration bank balance set to: $" + String.format("%.2f", bankBalance));
         
         // Set configuration as complete
         configurationComplete = true;
         System.out.println("[ConfigurationController] Configuration complete");
-        
-        // Notify mediator that configuration is complete
-        // mediator.notifyConfigurationComplete();
     }
 
     private void createChefs(Map<String, ChefConfigurationView.ChefData> chefData) {
@@ -306,7 +303,6 @@ public class ConfigurationController extends BaseController {
                 ChefStrategy strategy = createChefStrategy(data.getStrategy());
                 
                 double chefCost = calculateChefCost(data.getSpeed(), data.getStations().size());
-                updateBankBalance(bankBalance - chefCost);
                 Chef chef = new Chef(
                     data.getName(),
                     chefCost,
@@ -370,7 +366,6 @@ public class ConfigurationController extends BaseController {
         for (var entry : waiterData.entrySet()) {
             var data = entry.getValue();
             double waiterCost = calculateWaiterCost(data.getSpeed());
-            updateBankBalance(bankBalance - waiterCost);
             Waiter waiter = new Waiter(waiterCost, data.getSpeed(), orderManager, menu);
             
             // Calculate tables for this waiter
@@ -519,8 +514,8 @@ public class ConfigurationController extends BaseController {
 
     public void updateBankBalance(double newBalance) {
         try {
-            BudgetSingleton.getInstance().setBudget(newBalance);
-            
+            BankBalanceSingleton.getInstance().setBankBalance(newBalance);
+            this.bankBalance = newBalance;
             // Update all configuration views
             ChefConfigurationView chefView = (ChefConfigurationView) mediator.getView(ViewType.CHEF_CONFIGURATION);
             DiningConfigurationView diningView = (DiningConfigurationView) mediator.getView(ViewType.DINING_CONFIGURATION);

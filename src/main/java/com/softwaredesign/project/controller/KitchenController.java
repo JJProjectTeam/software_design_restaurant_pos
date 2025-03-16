@@ -3,6 +3,7 @@ package com.softwaredesign.project.controller;
 import com.softwaredesign.project.kitchen.Kitchen;
 import com.softwaredesign.project.kitchen.Station;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
+import com.softwaredesign.project.model.BankBalanceSingleton;
 import com.softwaredesign.project.view.KitchenView;
 import com.softwaredesign.project.view.View;
 import com.softwaredesign.project.view.ViewType;
@@ -15,12 +16,14 @@ public class KitchenController extends BaseController {
     private RestaurantViewMediator mediator;
     private Map<Station, Integer> stationIdMap;  // Changed from StationType to Station
     private int nextStationId = 1;  // Track next available ID
+    private double bankBalance;
 
     public KitchenController(Kitchen kitchen) {
         super("Kitchen");
         this.kitchen = kitchen;
         this.mediator = RestaurantViewMediator.getInstance();
         this.stationIdMap = new HashMap<>();
+        this.bankBalance = BankBalanceSingleton.getInstance().getBankBalance();
         
         // Initialize station IDs for each actual station instance
         for (Station station : kitchen.getStationManager().getAllStations()) {
@@ -40,6 +43,8 @@ public class KitchenController extends BaseController {
             return;
         }
         view = (KitchenView) view;
+
+        ((KitchenView) view).setBankBalance(bankBalance);
         
         // Create a copy of the stations list to avoid ConcurrentModificationException
         java.util.List<Station> stationsCopy = new java.util.ArrayList<>(kitchen.getStationManager().getAllStations());

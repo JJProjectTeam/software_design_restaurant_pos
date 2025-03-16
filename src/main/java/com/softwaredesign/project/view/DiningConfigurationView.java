@@ -326,7 +326,7 @@ public class DiningConfigurationView extends ConfigurationView {
 
             // Check if adding this waiter would cause bank balance to go negative
             if (bankBalance - costPerHour < 0) {
-                showError("Cannot hire waiter. Cost of " + String.format("%.2f", costPerHour) + " exceeds available budget of " + String.format("%.2f", bankBalance));
+                showError("Cannot hire waiter. Cost of " + String.format("%.2f", costPerHour) + " exceeds available bankBalance of " + String.format("%.2f", bankBalance));
                 return;
             }
 
@@ -398,8 +398,8 @@ public class DiningConfigurationView extends ConfigurationView {
     @Override
     protected void onNextPressed() {
         try {
-            // Notify the mediator so the controller updates all views with the current budget
-            mediator.notifyBudgetChanged(bankBalance);
+            // Notify the mediator so the controller updates all views with the current bankBalance
+            mediator.notifyBankBalanceChanged(bankBalance);
             app.showView(ViewType.MENU_CONFIGURATION);
         } catch (Exception e) {
             System.err.println("[DiningConfigurationView] Error navigating to next view: " + e.getMessage());
@@ -410,8 +410,8 @@ public class DiningConfigurationView extends ConfigurationView {
     @Override
     protected void onBackPressed() {
         try {
-            // Notify the mediator so the controller updates all views with the current budget
-            mediator.notifyBudgetChanged(bankBalance);
+            // Notify the mediator so the controller updates all views with the current bankBalance
+            mediator.notifyBankBalanceChanged(bankBalance);
             app.showView(ViewType.CHEF_CONFIGURATION);
         } catch (Exception e) {
             System.err.println("[DiningConfigurationView] Error navigating to previous view: " + e.getMessage());

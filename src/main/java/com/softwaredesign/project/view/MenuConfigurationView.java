@@ -242,8 +242,8 @@ public class MenuConfigurationView extends ConfigurationView {
     @Override
     protected void onNextPressed() {
         try {
-            // Notify the mediator so the controller updates all views with the current budget
-            mediator.notifyBudgetChanged(bankBalance);
+            // Notify the mediator so the controller updates all views with the current bankBalance
+            mediator.notifyBankBalanceChanged(bankBalance);
             // Ensure selections are synced before proceeding
             syncSelections();
             mediator.notifyConfigurationComplete();
@@ -257,8 +257,8 @@ public class MenuConfigurationView extends ConfigurationView {
     @Override
     protected void onBackPressed() {
         try {
-            // Notify the mediator so the controller updates all views with the current budget
-            mediator.notifyBudgetChanged(bankBalance);
+            // Notify the mediator so the controller updates all views with the current bankBalance
+            mediator.notifyBankBalanceChanged(bankBalance);
             // Ensure selections are synced before going back
             syncSelections();
             app.showView(ViewType.DINING_CONFIGURATION);

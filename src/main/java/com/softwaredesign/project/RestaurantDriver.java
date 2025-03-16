@@ -129,6 +129,12 @@ public class RestaurantDriver {
                                 
                                 // Show dining room view and do initial update
                                 app.showView(ViewType.DINING_ROOM);
+                                
+                                // Ensure all gameplay views get an initial update
+                                diningRoomController.updateView();
+                                kitchenController.updateView();
+                                inventoryController.updateView();
+                                
                                 Thread.sleep(100);
                             }
 

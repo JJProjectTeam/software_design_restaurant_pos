@@ -17,6 +17,7 @@ public class DiningRoomView extends GamePlayView {
     private static final int TABLE_Y = 3;
     private static final int TABLE_HEIGHT = 10;
     private boolean isInitialized;
+    private double bankBalance;
 
     private static class TableUpdate {
         final int tableNumber;
@@ -113,5 +114,11 @@ public class DiningRoomView extends GamePlayView {
             System.err.println("[DiningRoomView] Error updating table " + tableNumber + ": " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void setBankBalance(double newBalance) {
+        super.setBankBalance(newBalance);
+        System.out.println("[DiningRoomView] Updated bank balance to: $" + String.format("%.2f", bankBalance));
     }
 }

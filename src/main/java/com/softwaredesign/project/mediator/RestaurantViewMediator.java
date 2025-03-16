@@ -5,6 +5,7 @@ import com.softwaredesign.project.view.View;
 import com.softwaredesign.project.view.ViewType;
 import com.softwaredesign.project.view.ConfigurableView;
 import com.softwaredesign.project.controller.ConfigurationController;
+import com.softwaredesign.project.model.BankBalanceSingleton;
 
 import java.util.*;
 
@@ -15,6 +16,7 @@ public class RestaurantViewMediator {
     private static RestaurantViewMediator instance;
     private final Map<ViewType, List<View>> registeredViews;
     private final Map<String, BaseController> controllers;
+    public BankBalanceSingleton bankBalanceSingleton;
     
     private RestaurantViewMediator() {
         registeredViews = new HashMap<>();
@@ -97,8 +99,9 @@ public class RestaurantViewMediator {
         getController("Configuration").onUserInput();
     }
 
-    public void notifyBudgetChanged(double newBalance) {
+    public void notifyBankBalanceChanged(double newBalance) {
         ConfigurationController configController = (ConfigurationController) getController("Configuration");
+        BankBalanceSingleton.getInstance().setBankBalance(newBalance);
         if (configController != null) {
             configController.updateBankBalance(newBalance);
         }

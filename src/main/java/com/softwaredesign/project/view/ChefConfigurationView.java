@@ -359,7 +359,7 @@ public class ChefConfigurationView extends ConfigurationView {
                 
                 // Check if adding this chef would cause bank balance to go negative
                 if (bankBalance - cost < 0) {
-                    showError("Cannot hire chef. Cost of " + String.format("%.2f", cost) + " exceeds available budget of " + String.format("%.2f", bankBalance));
+                    showError("Cannot hire chef. Cost of " + String.format("%.2f", cost) + " exceeds available bankBalance of " + String.format("%.2f", bankBalance));
                     return;
                 }
                 
@@ -620,8 +620,8 @@ public class ChefConfigurationView extends ConfigurationView {
     @Override
     protected void onNextPressed() {
         try {
-            // Notify the mediator so the controller updates all views with the current budget
-            mediator.notifyBudgetChanged(bankBalance);
+            // Notify the mediator so the controller updates all views with the current bankBalance
+            mediator.notifyBankBalanceChanged(bankBalance);
             app.showView(ViewType.DINING_CONFIGURATION);
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error navigating to next view: " + e.getMessage());
@@ -632,8 +632,8 @@ public class ChefConfigurationView extends ConfigurationView {
     @Override
     protected void onBackPressed() {
         try {
-            // Notify the mediator so the controller updates all views with the current budget
-            mediator.notifyBudgetChanged(bankBalance);
+            // Notify the mediator so the controller updates all views with the current bankBalance
+            mediator.notifyBankBalanceChanged(bankBalance);
             app.showView(ViewType.WELCOME);
         } catch (Exception e) {
             System.err.println("[ChefConfigurationView] Error navigating to previous view: " + e.getMessage());

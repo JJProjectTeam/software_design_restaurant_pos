@@ -1,5 +1,5 @@
 {   
-    "initialBudget": 1000.00,
+    "initialBankBalance": 1000.00,
     "staffRules": {
         "chefs": {
             "min": 1,

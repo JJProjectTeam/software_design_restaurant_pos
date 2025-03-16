@@ -22,6 +22,7 @@ public class InventoryView extends GamePlayView {
     private static final int TABLE_Y = 3;
     private static final int TABLE_HEIGHT = 15;
     private boolean isInitialized;
+    private double bankBalance;
 
     private static class InventoryUpdate {
         final String ingredient;
@@ -152,5 +153,11 @@ public class InventoryView extends GamePlayView {
         if (window != null) {
             window.close();
         }
+    }
+
+    @Override
+    public void setBankBalance(double newBalance) {
+        super.setBankBalance(newBalance);
+        System.out.println("[InventoryView] Updated bank balance to: $" + String.format("%.2f", bankBalance));
     }
 }
