@@ -425,8 +425,7 @@ public class RestaurantDriver {
         );
 
         kitchenController = new KitchenController(
-            kitchen,
-            mediator
+            kitchen
         );
 
         //TODO populate inventory
