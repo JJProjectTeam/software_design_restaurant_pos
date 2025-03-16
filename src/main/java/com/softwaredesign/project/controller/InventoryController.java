@@ -18,8 +18,6 @@ public class InventoryController extends BaseController {
     public InventoryController(Inventory inventory) {
         super("Inventory");
         this.inventory = inventory;
-        this.mediator = RestaurantViewMediator.getInstance();
-        mediator.registerController("Inventory", this);
         this.bankBalance = BankBalanceSingleton.getInstance().getBankBalance();
     }
     

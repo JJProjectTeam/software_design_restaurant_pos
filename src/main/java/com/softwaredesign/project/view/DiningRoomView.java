@@ -11,7 +11,6 @@ import java.util.*;
 
 public class DiningRoomView extends GamePlayView {
     private static final Logger logger = LoggerFactory.getLogger(DiningRoomView.class);
-    private final RestaurantApplication app;    
     private TTableWidget tableWidget;
     private Queue<TableUpdate> pendingUpdates;
     private static final String[] COLUMN_HEADERS = {"Table #", "Capacity", "Customers", "Status", "Waiter"};
@@ -39,7 +38,6 @@ public class DiningRoomView extends GamePlayView {
 
     public DiningRoomView(RestaurantApplication app) {
         super(app);
-        this.app = app;
         this.isInitialized = false;
         this.pendingUpdates = new LinkedList<>();
         RestaurantViewMediator.getInstance().registerView(ViewType.DINING_ROOM, this);

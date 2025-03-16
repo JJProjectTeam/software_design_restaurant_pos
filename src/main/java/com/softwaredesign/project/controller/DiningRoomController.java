@@ -26,8 +26,6 @@ public class DiningRoomController extends BaseController {
         super("DiningRoom");
         this.seatingPlan = seatingPlan;
         this.waiters = waiters;
-        this.mediator = RestaurantViewMediator.getInstance();
-        mediator.registerController("DiningRoom", this);
         this.bankBalance = BankBalanceSingleton.getInstance().getBankBalance();
     }
 

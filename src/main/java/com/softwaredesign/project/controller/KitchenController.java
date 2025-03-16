@@ -24,7 +24,6 @@ public class KitchenController extends BaseController {
     public KitchenController(Kitchen kitchen) {
         super("Kitchen");
         this.kitchen = kitchen;
-        this.mediator = RestaurantViewMediator.getInstance();
         this.stationIdMap = new HashMap<>();
         this.bankBalance = BankBalanceSingleton.getInstance().getBankBalance();
         
