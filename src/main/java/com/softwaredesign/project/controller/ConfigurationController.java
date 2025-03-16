@@ -20,7 +20,7 @@ import com.softwaredesign.project.staff.chefstrategies.OldestOrderFirstStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
 import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
 import com.softwaredesign.project.staff.staffspeeds.CaffeineAddictDecorator;
-import com.softwaredesign.project.staff.staffspeeds.CocaineAddictDecorator;
+import com.softwaredesign.project.staff.staffspeeds.StimulantAddictDecorator;
 import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
 import com.softwaredesign.project.staff.staffspeeds.LethargicDecorator;
 
@@ -75,6 +75,7 @@ public class ConfigurationController extends BaseController {
     private void setupBaseComponents() {        
         try {
             // Read and parse config file
+            // DUPLICATE CODE 1/3
             String configPath = "src/main/config.json";
             String jsonContent = Files.readString(Paths.get(configPath));
             ObjectMapper mapper = new ObjectMapper();
@@ -367,7 +368,7 @@ public class ConfigurationController extends BaseController {
         }
         double chanceOfCaffieneAddict = chefRules.path("chanceOfCaffieneAddict").asDouble(0.3);
         double chanceOfLethargic = chefRules.path("chanceOfLethargic").asDouble(0.3);
-        double chanceOfCocaineAddict = chefRules.path("chanceOfCocaineAddict").asDouble(0.25);
+        double chanceOfStimulantAddict = chefRules.path("chanceOfStimulantAddict").asDouble(0.25);
         
         for (ChefConfigurationView.ChefData data : chefData.values()) {
             try {
@@ -381,8 +382,8 @@ public class ConfigurationController extends BaseController {
                 if (Math.random() < chanceOfCaffieneAddict) {
                     speedComponent = new CaffeineAddictDecorator(speedComponent);
                 }
-                if (Math.random() < chanceOfCocaineAddict) {
-                    speedComponent = new CocaineAddictDecorator(speedComponent);
+                if (Math.random() < chanceOfStimulantAddict) {
+                    speedComponent = new StimulantAddictDecorator(speedComponent);
                 }
 
                 Chef chef = new Chef(
@@ -459,7 +460,7 @@ public class ConfigurationController extends BaseController {
         }
         double chanceOfCaffieneAddict = waiterRules.path("chanceOfCaffieneAddict").asDouble(0.3);
         double chanceOfLethargic = waiterRules.path("chanceOfLethargic").asDouble(0.3);
-        double chanceOfCocaineAddict = waiterRules.path("chanceOfCocaineAddict").asDouble(0.25);
+        double chanceOfStimulantAddict = waiterRules.path("chanceOfStimulantAddict").asDouble(0.25);
         
         for (var entry : waiterData.entrySet()) {
             var data = entry.getValue();
@@ -472,8 +473,8 @@ public class ConfigurationController extends BaseController {
             if (Math.random() < chanceOfCaffieneAddict) {
                 speedComponent = new CaffeineAddictDecorator(speedComponent);
             }
-            if (Math.random() < chanceOfCocaineAddict) {
-                speedComponent = new CocaineAddictDecorator(speedComponent);
+            if (Math.random() < chanceOfStimulantAddict) {
+                speedComponent = new StimulantAddictDecorator(speedComponent);
             }
             
             Waiter waiter = new Waiter(data.getCostPerHour(), speedComponent, orderManager, menu, inventoryStockTracker);

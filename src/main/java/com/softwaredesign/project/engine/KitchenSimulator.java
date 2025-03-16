@@ -11,7 +11,7 @@ import com.softwaredesign.project.staff.ChefManager;
 import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.DynamicChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
-import com.softwaredesign.project.staff.staffspeeds.CocaineAddictDecorator;
+import com.softwaredesign.project.staff.staffspeeds.StimulantAddictDecorator;
 import com.softwaredesign.project.staff.chefstrategies.LongestQueueFirstStrategy;
 import com.softwaredesign.project.staff.chefstrategies.OldestOrderFirstStrategy;
 import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
@@ -74,7 +74,7 @@ public class KitchenSimulator {
         // Create chefs with different strategies and meaningful names
         
         ISpeedComponent speed1 = new BaseSpeed();
-        ISpeedComponent speed2 = new CocaineAddictDecorator(speed1);
+        ISpeedComponent speed2 = new StimulantAddictDecorator(speed1);
         ISpeedComponent speed3 = new BaseSpeed();
         ISpeedComponent speed4 = new BaseSpeed();
         

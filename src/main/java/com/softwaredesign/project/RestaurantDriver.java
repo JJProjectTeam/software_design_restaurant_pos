@@ -30,7 +30,7 @@ import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.DynamicChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
 import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
-import com.softwaredesign.project.staff.staffspeeds.CocaineAddictDecorator;
+import com.softwaredesign.project.staff.staffspeeds.StimulantAddictDecorator;
 import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
 import com.softwaredesign.project.order.Meal;
 import com.softwaredesign.project.order.Recipe;
@@ -359,10 +359,10 @@ public class RestaurantDriver {
         
         // Create two speeds for both chefs
         ISpeedComponent baseSpeed = new BaseSpeed();
-        ISpeedComponent cocaineSpeed = new CocaineAddictDecorator(baseSpeed);
+        ISpeedComponent stimulantSpeed = new StimulantAddictDecorator(baseSpeed);
 
         Chef chef1 = new Chef("Default Chef 1", 15.0, baseSpeed, dynamicStrategy, stationManager);
-        Chef chef2 = new Chef("Default Chef 2", 18.0, cocaineSpeed, simpleStrategy, stationManager);
+        Chef chef2 = new Chef("Default Chef 2", 18.0, stimulantSpeed, simpleStrategy, stationManager);
         
         defaultChefs.add(chef1);
         defaultChefs.add(chef2);
