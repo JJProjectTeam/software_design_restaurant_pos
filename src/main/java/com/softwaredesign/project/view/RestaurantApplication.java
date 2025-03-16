@@ -144,48 +144,20 @@ public class RestaurantApplication extends TApplication {
     }
 
     /**
-     * Properly restarts the application by reinitializing all views and resetting the application state.
+     * Properly restarts the application by calling exit() and reinitializing through the driver.
      */
     private void restartApplication() {
         logger.info("[RestaurantApplication] Restarting application");
-        try {
-            // Use SwingUtilities.invokeLater to ensure UI updates happen on the EDT
-            javax.swing.SwingUtilities.invokeLater(() -> {
-                try {
-                    // Clear the current view
-                    currentView = null;
-                    
-                    // Clear all widgets from the main window
-                    List<TWidget> widgetsToRemove = new ArrayList<>(mainWindow.getChildren());
-                    for (TWidget widget : widgetsToRemove) {
-                        mainWindow.remove(widget);
-                    }
-                    
-                    // Reset the mediator
-                    RestaurantViewMediator mediator = RestaurantViewMediator.getInstance();
-                    mediator.reset();
-                    
-                    // Reinitialize all views
-                    views.clear();
-                    initializeViews();
-                    
-                    // If driver is available, use it for a complete restart
-                    if (driver != null) {
-                        driver.restart();
-                    } else {
-                        // Fallback to just showing welcome view
-                        showView(ViewType.WELCOME);
-                    }
-                    
-                    logger.info("[RestaurantApplication] Application restart completed");
-                } catch (Exception e) {
-                    logger.error("[RestaurantApplication] ERROR during restart: " + e.getMessage());
-                    e.printStackTrace();
-                }
-            });
-        } catch (Exception e) {
-            logger.error("[RestaurantApplication] ERROR during restart: " + e.getMessage());
-            e.printStackTrace();
+        // Reset the mediator to clear any cached configuration state (including min/max number of chefs)
+        RestaurantViewMediator.getInstance().reset();
+        // Exit the current application instance.
+        this.exit();
+        // Call the driver's restartGame() method to reinitialize everything
+        if (driver != null) {
+        driver.restartGame();
+        } else {
+        // Fallback to just showing the welcome view if no driver is available
+            showView(ViewType.WELCOME);
         }
     }
 

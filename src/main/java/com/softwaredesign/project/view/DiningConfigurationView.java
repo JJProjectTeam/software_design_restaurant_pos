@@ -18,9 +18,9 @@ public class DiningConfigurationView extends ConfigurationView {
     private TLabel maxTablesLabel;
     private TLabel maxCapacityLabel; 
     private int maxTables;
-    private int currentTableCount;
+    private int currentTableCount = 1;
     private int maxCapacity;
-    private int currentTableCapacity;
+    private int currentTableCapacity = 1;
     private int minWaiters;
     private int maxWaiters; 
     private int maxSpeed = 5; // Default value
@@ -210,7 +210,7 @@ public class DiningConfigurationView extends ConfigurationView {
         try {
             // Table count configuration
             window.addLabel("Number of Tables:", 2, 20);
-            tableCountLabel = window.addLabel("0", 25, 20);
+            tableCountLabel = window.addLabel(String.valueOf(currentTableCount), 25, 20);
             
             // Add buttons to increase/decrease table count
             window.addButton("-", 30, 20, new TAction() {
@@ -235,7 +235,7 @@ public class DiningConfigurationView extends ConfigurationView {
             
             // Table capacity configuration
             window.addLabel("Table Capacity:", 2, 22);
-            tableCapacityLabel = window.addLabel("0", 25, 22);
+            tableCapacityLabel = window.addLabel(String.valueOf(currentTableCapacity), 25, 22);
             
             // Add buttons to increase/decrease table capacity
             window.addButton("-", 30, 22, new TAction() {
@@ -257,6 +257,10 @@ public class DiningConfigurationView extends ConfigurationView {
             });
             
             maxCapacityLabel = window.addLabel("(Maximum " + maxCapacity + " seats per table)", 40, 22);
+            
+            // Update labels to show current values
+            updateTableCountLabel();
+            updateTableCapacityLabel();
         } catch (Exception e) {
             logger.error("[DiningConfigurationView] Error creating table configuration: " + e.getMessage());
             e.printStackTrace();
