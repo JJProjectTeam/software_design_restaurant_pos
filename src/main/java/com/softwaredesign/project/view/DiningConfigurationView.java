@@ -255,6 +255,10 @@ public class DiningConfigurationView extends ConfigurationView {
             });
             
             maxCapacityLabel = window.addLabel("(Maximum " + maxCapacity + " seats per table)", 40, 22);
+            
+            // Update labels to show current values
+            updateTableCountLabel();
+            updateTableCapacityLabel();
         } catch (Exception e) {
             System.err.println("[DiningConfigurationView] Error creating table configuration: " + e.getMessage());
             e.printStackTrace();
