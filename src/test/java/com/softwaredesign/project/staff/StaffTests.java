@@ -17,6 +17,7 @@ import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.order.RecipeTask;
 import com.softwaredesign.project.menu.BurgerRecipe;
+import com.softwaredesign.project.inventory.InventoryStockTracker;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,19 +29,21 @@ public class StaffTests {
 
     @Before
     public void setUp() {
-        InventoryService inventoryService = new Inventory();
-        inventoryService.addIngredient("Beef Patty", 10, 1.0, StationType.GRILL);
-        inventoryService.addIngredient("Bun", 10, 1.0, StationType.PREP);
-        inventoryService.addIngredient("Lettuce", 10, 1.0, StationType.PREP);
-        inventoryService.addIngredient("Tomato", 10, 1.0, StationType.PREP);
-        inventoryService.addIngredient("Cheese", 10, 1.0, StationType.PREP);
-        inventoryService.addIngredient("Mustard", 10, 0.5, StationType.PREP);
+        Inventory inventory = new Inventory();
+        InventoryStockTracker inventoryStockTracker = new InventoryStockTracker();
+        inventory.attach(inventoryStockTracker);
+        inventory.addIngredient("Beef Patty", 10, 1.0, StationType.GRILL);
+        inventory.addIngredient("Bun", 10, 1.0, StationType.PREP);
+        inventory.addIngredient("Lettuce", 10, 1.0, StationType.PREP);
+        inventory.addIngredient("Tomato", 10, 1.0, StationType.PREP);
+        inventory.addIngredient("Cheese", 10, 1.0, StationType.PREP);
+        inventory.addIngredient("Mustard", 10, 0.5, StationType.PREP);
         
-        menu = new Menu(inventoryService);
+        menu = new Menu(inventory);
         CollectionPoint collectionPoint = new CollectionPoint();
         StationManager stationManager = new StationManager(collectionPoint);
         orderManager = new OrderManager(collectionPoint, stationManager);
-        waiter = new Waiter(15.0, 1.0, orderManager, menu);
+        waiter = new Waiter(15.0, 1.0, orderManager, menu, inventoryStockTracker);
         chef = new Chef(20.0, 1.5, new ShortestQueueFirst(), stationManager);
     }
 

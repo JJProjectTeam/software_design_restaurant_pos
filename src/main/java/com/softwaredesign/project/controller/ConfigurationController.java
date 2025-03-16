@@ -37,6 +37,7 @@ public class ConfigurationController extends BaseController {
     private RestaurantViewMediator mediator;
     private SeatingPlan seatingPlan;
     private boolean configurationComplete = false;
+    private InventoryStockTracker inventoryStockTracker;
 
     //TODO this should probably be loaded from a config or something!!! Not hard coded here
     private List<Recipe> possibleRecipes = new ArrayList<>();
@@ -101,6 +102,11 @@ public class ConfigurationController extends BaseController {
             this.orderManager = new OrderManager(collectionPoint, stationManager);
             this.kitchen = new Kitchen(orderManager, collectionPoint, stationManager);
             this.menu = new Menu(inventory);
+
+            // create an set up inventory stock tracker and attach it to the inventory
+            this.inventoryStockTracker = new InventoryStockTracker();
+            this.inventory.attach(inventoryStockTracker);
+
 
             possibleRecipes.add(new BurgerRecipe(inventory));
             possibleRecipes.add(new KebabRecipe(inventory));
@@ -288,7 +294,7 @@ public class ConfigurationController extends BaseController {
         seatingPlan = new SeatingPlan(4, 40, 5, menu);
         
         // Create default waiter
-        Waiter waiter = new Waiter(20.0, 2, orderManager, menu);
+        Waiter waiter = new Waiter(20.0, 2, orderManager, menu, inventoryStockTracker);
         
         // Assign tables to waiter
         for (Table table : seatingPlan.getAllTables()) {
@@ -371,7 +377,7 @@ public class ConfigurationController extends BaseController {
         
         for (var entry : waiterData.entrySet()) {
             var data = entry.getValue();
-            Waiter waiter = new Waiter(data.getCostPerHour(), data.getSpeed(), orderManager, menu);
+            Waiter waiter = new Waiter(data.getCostPerHour(), data.getSpeed(), orderManager, menu, inventoryStockTracker);
             
             // Calculate tables for this waiter
             int tablesToAssign = tablesPerWaiter + (waiters.size() < extraTables ? 1 : 0);
