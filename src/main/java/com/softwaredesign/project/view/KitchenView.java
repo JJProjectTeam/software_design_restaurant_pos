@@ -17,6 +17,7 @@ public class KitchenView extends GamePlayView {
     private static final int[] COLUMN_WIDTHS = {5, 10, 8, 15, 7};
     private RestaurantViewMediator mediator;
     private boolean isInitialized;
+    private double bankBalance;
 
     private static class StationUpdate {
         final int stationID;
@@ -126,5 +127,11 @@ public class KitchenView extends GamePlayView {
     public void cleanup() {
         System.out.println("[KitchenView] Cleaning up view, unregistering from mediator");
         mediator.unregisterView("Kitchen", this);
+    }
+
+    @Override
+    public void setBankBalance(double newBalance) {
+        super.setBankBalance(newBalance);
+        System.out.println("[KitchenView] Updated bank balance to: $" + String.format("%.2f", bankBalance));
     }
 }

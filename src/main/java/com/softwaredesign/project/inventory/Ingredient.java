@@ -30,4 +30,8 @@ public class Ingredient {
     public String toString() {
         return name;
     }
+
+    public double getPrice() {
+        return inventory.getIngredientStore(name).getPrice();
+    }
 }

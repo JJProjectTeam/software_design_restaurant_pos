@@ -1,6 +1,7 @@
 package com.softwaredesign.project.view;
 
 import jexer.*;
+import com.softwaredesign.project.model.BankBalanceSingleton;
 
 public abstract class GamePlayView implements View {
     
@@ -10,6 +11,8 @@ public abstract class GamePlayView implements View {
 
     protected final RestaurantApplication app;
     protected TWindow window;
+    protected double bankBalance = 0.0;
+    protected TLabel bankBalanceLabel;
 
     public GamePlayView(RestaurantApplication app) {
         if (app == null) {
@@ -42,6 +45,9 @@ public abstract class GamePlayView implements View {
     @Override
     public void setupView() {
         System.out.println("[GamePlayView] Setting up view with navigation tabs");
+        // Create and store reference to bank balance label
+        bankBalanceLabel = window.addLabel(String.format("Bank Balance: $%.2f", bankBalance), 
+        window.getWidth() - 30, 2);
         createNavigationTabs();
         addViewContent();
     }
@@ -76,6 +82,26 @@ public abstract class GamePlayView implements View {
         tab.setWidth(TAB_WIDTH);
     }
     
+
+    protected void setBankBalance(double newBalance) {
+        this.bankBalance = newBalance;
+        updateBankBalanceLabel();
+    }
+
+    // Add method to update the label
+    private void updateBankBalanceLabel() {
+        if (bankBalanceLabel != null) {
+            try {
+                bankBalanceLabel.setLabel(String.format("Bank Balance: $%.2f", bankBalance));
+                System.out.println("[GamePlayView] Updated bank balance label to: $" + String.format("%.2f", bankBalance));
+            } catch (Exception e) {
+                System.err.println("[GamePlayView] Error updating bank balance label: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
     // Abstract method for view-specific content
     protected abstract void addViewContent();
+
+
 }
