@@ -74,12 +74,7 @@ public class ConfigurationController extends BaseController {
     //this should set up the components
     private void setupBaseComponents() {        
         try {
-            // Read and parse config file
-            // DUPLICATE CODE 1/3
-            String configPath = "src/main/config.json";
-            String jsonContent = Files.readString(Paths.get(configPath));
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode config = mapper.readTree(jsonContent);
+            JsonNode config = loadConfiguration();
             JsonNode stations = config.path("inventory").path("stations");
 
             System.out.println("[ConfigurationController] Loading ingredients from config file...");
@@ -156,6 +151,19 @@ public class ConfigurationController extends BaseController {
             System.err.println("[ConfigurationController] Error setting up base components: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Failed to setup base components", e);
+        }
+    }
+    // abstracted load configuration
+    private JsonNode loadConfiguration() {
+        try {
+            String configPath = "src/main/config.json";
+            String jsonContent = Files.readString(Paths.get(configPath));
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readTree(jsonContent);
+        } catch (Exception e) {
+            System.err.println("[ConfigurationController] Error reading config file: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to load configuration", e);
         }
     }
 
@@ -356,10 +364,7 @@ public class ConfigurationController extends BaseController {
         try {
             System.out.println("[ConfigurationController] Creating chefs from configuration");
             chefs = new ArrayList<>();
-            String configPath = "src/main/config.json";
-            String jsonContent = Files.readString(Paths.get(configPath));
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode config = mapper.readTree(jsonContent);
+            JsonNode config = loadConfiguration();
             chefRules = config.path("staffRules").path("chefs");
         } catch (Exception e) {
             System.err.println("[ConfigurationController] Error reading config file: " + e.getMessage());
@@ -443,15 +448,10 @@ public class ConfigurationController extends BaseController {
         int extraTables = allTables.size() % waiterData.size();
         int tableIndex = 0;
 
-
         System.out.println("[ConfigurationController] Distributing " + allTables.size() + " tables among " + waiterData.size() + " waiters");
-        String configPath = "src/main/config.json";
         JsonNode waiterRules;
         try{
-            String jsonContent = Files.readString(Paths.get(configPath));
-            
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode config = mapper.readTree(jsonContent);
+            JsonNode config = loadConfiguration();
             waiterRules = config.path("staffRules").path("waiters");
         } catch (Exception e) {
             System.err.println("[ConfigurationController] Error reading config file: " + e.getMessage());
