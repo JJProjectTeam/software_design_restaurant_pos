@@ -1,11 +1,15 @@
 package com.softwaredesign.project.view;
 
 import jexer.*;
+import java.util.Map;
+import java.util.HashMap;
+import com.softwaredesign.project.model.BankBalanceSingleton;
 
 public class EndOfGameView implements View {
     private final RestaurantApplication app;
     private TWindow window;
     private TTableWidget statsTable;
+    private TLabel profitLabel;
 
     public EndOfGameView(RestaurantApplication app) {
         if (app == null) {
@@ -32,36 +36,52 @@ public class EndOfGameView implements View {
 
     @Override
     public void setupView() {
-        window.addLabel("Game Over", 2, 2);
-        statsTable = window.addTable(3, 5, 100, 8, 2, 3);
-        
-        statsTable.setColumnLabel(0, "");
-        statsTable.setColumnLabel(1, "Results");
+        // Title at the top
+        window.addLabel("=== End of Game Statistics ===", 2, 2);
 
-        statsTable.setCellText(0,0, "No Customers Served");
-        statsTable.setCellText(0, 1, "No Meals Delivered");
-        statsTable.setCellText(0, 2, "Profit ($)");
+        // Create table for metrics
+        statsTable = window.addTable(3, 5, 100, 10, 2, 10);
+        statsTable.setColumnLabel(0, "Metric");
+        statsTable.setColumnLabel(1, "Value");
+        statsTable.setColumnWidth(0, 25);
+        statsTable.setColumnWidth(1, 15);
 
-        statsTable.setShowRowLabels(false);
+        // Profit label at the bottom
+        profitLabel = window.addLabel("Total Profit: $0", 3, 17);
 
-        statsTable.setColumnWidth(0, 20);
+        // Add restart button
+        TButton restartButton = window.addButton("Play Again", 3, 19, new TAction() {
+            @Override
+            public void DO() {
+                // Get the driver from the app and call restartGame directly
+                app.restartApplication();
+            }
+        });
     }
 
-    public void updateStats(int totalCustomers, int totalOrders, int totalRevenue) {
+    /**
+     * Updates the statistics table with the provided metrics
+     * @param metrics Map of metric names to their values
+     */
+    public void updateStats(Map<String, String> metrics) {
+        // Clear existing rows
         while (statsTable.getRowCount() > 0) {
             statsTable.deleteRow(0);
         }
 
-        statsTable.insertRowBelow(0);
-        statsTable.insertRowBelow(1);
-        statsTable.insertRowBelow(2);
+        // Add new rows for each metric
+        for (Map.Entry<String, String> entry : metrics.entrySet()) {
+            // Update profit label if profit metric exists
+            if (metrics.containsKey("totalRevenue")) {
+                profitLabel.setLabel(String.format("Total Profit: $%.2f", metrics.get("Profit")));
+            } else {
+                statsTable.insertRowBelow(statsTable.getRowCount());
+                int row = statsTable.getRowCount() - 1;
+                statsTable.setCellText(row, 0, entry.getKey());
+                statsTable.setCellText(row, 1, String.format("%.2f", entry.getValue()));
+                }
+        }
 
-        statsTable.setCellText(0, 0, "Total Customers");
-        statsTable.setCellText(1, 0, "Total Orders");
-        statsTable.setCellText(2, 0, "Total Revenue");
-
-        statsTable.setCellText(0, 1, String.valueOf(totalCustomers));
-        statsTable.setCellText(1, 1, String.valueOf(totalOrders));
-        statsTable.setCellText(2, 1, "$" + totalRevenue);
     }
+
 }
