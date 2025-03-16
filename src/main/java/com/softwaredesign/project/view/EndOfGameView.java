@@ -2,6 +2,8 @@ package com.softwaredesign.project.view;
 
 import jexer.*;
 import java.util.Map;
+import java.util.HashMap;
+import com.softwaredesign.project.model.BankBalanceSingleton;
 
 public class EndOfGameView implements View {
     private final RestaurantApplication app;
@@ -61,23 +63,25 @@ public class EndOfGameView implements View {
      * Updates the statistics table with the provided metrics
      * @param metrics Map of metric names to their values
      */
-    public void updateStats(Map<String, Double> metrics) {
+    public void updateStats(Map<String, String> metrics) {
         // Clear existing rows
         while (statsTable.getRowCount() > 0) {
             statsTable.deleteRow(0);
         }
 
         // Add new rows for each metric
-        for (Map.Entry<String, Double> entry : metrics.entrySet()) {
-            statsTable.insertRowBelow(statsTable.getRowCount());
-            int row = statsTable.getRowCount() - 1;
-            statsTable.setCellText(row, 0, entry.getKey());
-            statsTable.setCellText(row, 1, String.format("%.2f", entry.getValue()));
+        for (Map.Entry<String, String> entry : metrics.entrySet()) {
+            // Update profit label if profit metric exists
+            if (metrics.containsKey("totalRevenue")) {
+                profitLabel.setLabel(String.format("Total Profit: $%.2f", metrics.get("Profit")));
+            } else {
+                statsTable.insertRowBelow(statsTable.getRowCount());
+                int row = statsTable.getRowCount() - 1;
+                statsTable.setCellText(row, 0, entry.getKey());
+                statsTable.setCellText(row, 1, String.format("%.2f", entry.getValue()));
+                }
         }
 
-        // Update profit label if profit metric exists
-        if (metrics.containsKey("Profit")) {
-            profitLabel.setLabel(String.format("Total Profit: $%.2f", metrics.get("Profit")));
-        }
     }
+
 }
