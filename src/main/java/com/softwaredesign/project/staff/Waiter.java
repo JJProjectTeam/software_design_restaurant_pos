@@ -13,8 +13,11 @@ import com.softwaredesign.project.menu.Menu;
 
 import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
 import com.softwaredesign.project.inventory.InventoryStockTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Waiter extends StaffMember {
+    private static final Logger logger = LoggerFactory.getLogger(Waiter.class);
     private List<Table> assignedTables;
     private OrderManager orderManager;
     private Menu menu;

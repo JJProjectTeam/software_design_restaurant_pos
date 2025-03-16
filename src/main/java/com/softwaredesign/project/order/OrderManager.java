@@ -9,8 +9,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.softwaredesign.project.inventory.Ingredient;
 import com.softwaredesign.project.kitchen.StationManager;
 import com.softwaredesign.project.orderfulfillment.CollectionPoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OrderManager {
+    private static final Logger logger = LoggerFactory.getLogger(OrderManager.class);
     private Queue<Order> orders;
     private StationMapper stationMapper;
     private CollectionPoint collectionPoint;

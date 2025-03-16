@@ -12,8 +12,11 @@ import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.order.RecipeTask;
 import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 import com.softwaredesign.project.staff.Chef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Station extends Entity {
+    private static final Logger logger = LoggerFactory.getLogger(Station.class);
     private final StationType type;
     private List<RecipeTask> backlog;
     private Chef assignedChef;
@@ -301,8 +304,7 @@ public class Station extends Entity {
         currentTask = task;
         cookingProgress = 0;
         needsIngredients = true;
-        
-        // If we have a chef assigned, mark them as working
+
         if (assignedChef != null) {
             assignedChef.setWorking(true);
             logger.info("[DEBUG-STATION] Chef " + assignedChef.getName() + 

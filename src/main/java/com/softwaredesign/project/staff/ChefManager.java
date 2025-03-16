@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.softwaredesign.project.engine.Entity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages a collection of chefs and coordinates their work assignments.
  * This class implements Entity so it can be registered with the GameEngine.
  */
 public class ChefManager extends Entity {
+    private static final Logger logger = LoggerFactory.getLogger(ChefManager.class);
     private List<Chef> chefs;
     
     public ChefManager() {

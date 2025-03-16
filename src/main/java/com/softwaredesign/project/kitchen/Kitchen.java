@@ -14,8 +14,11 @@ import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.order.RecipeTask;
 import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 import com.softwaredesign.project.staff.Chef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Kitchen extends Entity {
+    private static final Logger logger = LoggerFactory.getLogger(Kitchen.class);
     private OrderManager orderManager;
     private CollectionPoint collectionPoint;
     private StationManager stationManager;
@@ -227,12 +230,14 @@ public class Kitchen extends Entity {
 
     @Override
     public void readState() {
+        logger.info("Reading Kitchen state");
         // Get new recipes from order manager
         getRecipes();
     }
 
     @Override
     public void writeState() {
+        logger.info("Writing Kitchen state");
         // Check for tasks that were previously waiting for dependencies that are now met
         updateTaskAvailability();
         

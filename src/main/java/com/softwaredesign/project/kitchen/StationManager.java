@@ -7,8 +7,11 @@ import java.util.List;
 
 import com.softwaredesign.project.engine.GameEngine;
 import com.softwaredesign.project.orderfulfillment.CollectionPoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class StationManager {
+public class StationManager{
+    private static final Logger logger = LoggerFactory.getLogger(StationManager.class);
     private Map<StationType, List<Station>> stations;  // Changed to Map<StationType, List<Station>>
     private CollectionPoint collectionPoint;
 

@@ -11,16 +11,19 @@ import com.softwaredesign.project.staff.ChefManager;
 import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.DynamicChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
-import com.softwaredesign.project.staff.staffspeeds.StimulantAddictDecorator;
 import com.softwaredesign.project.staff.chefstrategies.LongestQueueFirstStrategy;
 import com.softwaredesign.project.staff.chefstrategies.OldestOrderFirstStrategy;
+import com.softwaredesign.project.staff.staffspeeds.StimulantAddictDecorator;
 import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
 import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A simulator class that sets up and runs the kitchen simulation.
  */
 public class KitchenSimulator {
+    private static final Logger logger = LoggerFactory.getLogger(KitchenSimulator.class);
     private GameEngine gameEngine;
     private Kitchen kitchen;
     private OrderManager orderManager;

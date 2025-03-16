@@ -5,9 +5,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.Arrays;
 
+import com.softwaredesign.project.engine.Entity;
 import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.inventory.Ingredient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Notes about the menu class
@@ -18,6 +21,7 @@ import com.softwaredesign.project.inventory.Ingredient;
  * getRandomAdditionalIngredient and getRandomIngredientFromRecipe will eventually be replaced with calls to the inventory
  */
 public class Menu {
+    private static final Logger logger = LoggerFactory.getLogger(Menu.class);
     private final InventoryService inventoryService;
     private List<Recipe> availableRecipes;
     private boolean recipesInitialized = false;

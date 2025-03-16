@@ -10,8 +10,11 @@ import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 
 import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Chef extends StaffMember {
+    private static final Logger logger = LoggerFactory.getLogger(Chef.class);
     private List<Station> assignedStations; // Stations where the chef is assigned
     private ChefStrategy workStrategy; 
     private StationManager stationManager;

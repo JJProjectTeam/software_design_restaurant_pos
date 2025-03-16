@@ -1,17 +1,17 @@
 package com.softwaredesign.project.order;
 
+import com.softwaredesign.project.engine.Entity;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Queue;
 import java.util.stream.Collectors;
 
 import com.softwaredesign.project.inventory.Ingredient;
 import com.softwaredesign.project.inventory.InventoryService;
-import com.softwaredesign.project.kitchen.Station;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class Recipe {
+    private static final Logger logger = LoggerFactory.getLogger(Recipe.class);
     protected String name;
     protected List<Ingredient> ingredients;
     protected List<RecipeTask> tasks;
@@ -21,6 +21,10 @@ public abstract class Recipe {
     protected Recipe(String name, InventoryService inventoryService) {
         if (inventoryService == null) {
             throw new IllegalArgumentException("InventoryService cannot be null");
+        }
+        if (name == null || name.isEmpty()) {
+            logger.error("Recipe name cannot be null or empty");
+            throw new IllegalArgumentException("Recipe name cannot be null or empty");
         }
         this.name = name;
         this.inventoryService = inventoryService;
@@ -36,6 +40,7 @@ public abstract class Recipe {
                 logger.info("[FIX] Setting recipe reference for task: " + task.getName() + " in recipe: " + name);
             }
         }
+        logger.info("Created new recipe: {}", name);
     }
 
     protected abstract void initializeBaseIngredients();
@@ -126,7 +131,7 @@ public abstract class Recipe {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return java.util.Objects.hash(name);
     }
 
     public Meal buildMeal() {
