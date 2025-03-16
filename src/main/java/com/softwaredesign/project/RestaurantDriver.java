@@ -460,46 +460,16 @@ public class RestaurantDriver {
     /**
      * Completely restarts the application by resetting all components and reinitializing
      */
-    public synchronized void restart() {
-        System.out.println("[RestaurantDriver] Performing full application restart");
-        
-        // Stop the game engine before restarting
-        gameEngine.stop();
-        
-        // Stop any ongoing operations
-        try {
-            // Reset all entity references
-            this.waiters = null;
-            this.chefs = null;
-            this.kitchen = null;
-            this.menu = null;
-            this.orderManager = null;
-            this.tables = null;
-            this.inventory = null;
-            this.seatingPlan = null;
-            
-            // Reset controllers
-            this.diningRoomController = null;
-            this.kitchenController = null;
-            this.inventoryController = null;
-            
-            // Reset configuration controller but keep the mediator
-            this.configController = null;
-            
-            // Reinitialize configuration
-            initializeConfiguration();
-            
-            // Tell the application to show the welcome view
-            // Use SwingUtilities.invokeLater to ensure UI updates happen on the EDT
-            javax.swing.SwingUtilities.invokeLater(() -> {
-                app.showView(ViewType.WELCOME);
-            });
-            
-            System.out.println("[RestaurantDriver] Application restart complete");
-        } catch (Exception e) {
-            System.err.println("[RestaurantDriver] Error during restart: " + e.getMessage());
-            e.printStackTrace();
+    public synchronized void restartGame() {
+        System.out.println("[RestaurantDriver] Restarting game...");
+        if (gameEngine != null) {
+            gameEngine.stop();
         }
+        // Delete the current RestaurantApplication instance
+        this.app = null;
+        // Create a new RestaurantDriver to reinitialize all components
+        RestaurantDriver newDriver = new RestaurantDriver();
+        newDriver.start();
     }
 
     private void setupDemoScenario() {
