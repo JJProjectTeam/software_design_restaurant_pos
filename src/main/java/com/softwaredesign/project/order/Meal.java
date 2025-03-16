@@ -52,4 +52,8 @@ public class Meal {
     public void setOrderId(String orderId) {
         this.orderId = orderId;
     }
+
+    public List<Ingredient> getIngredients() {
+        return ingredients;
+    }
 }
