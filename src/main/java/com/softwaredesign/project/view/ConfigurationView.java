@@ -1,7 +1,6 @@
 package com.softwaredesign.project.view;
 
 import com.softwaredesign.project.controller.BaseController;
-import com.softwaredesign.project.controller.ConfigurationController;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
 
 import jexer.*;
@@ -11,6 +10,8 @@ public abstract class ConfigurationView implements View, ConfigurableView {
     protected TWindow window;
     protected RestaurantViewMediator mediator;
     protected TTableWidget configTable;
+    protected double bankBalance = 0.0;
+    protected TLabel bankBalanceLabel;
 
     public ConfigurationView(RestaurantApplication app) {
         if (app == null) {
@@ -46,9 +47,12 @@ public abstract class ConfigurationView implements View, ConfigurableView {
 
     protected void setupCommonElements() {
         try {
-            // Add the configuration title and money label
+            // Add the configuration title
             window.addLabel("Configuration Settings", 2, 2);
-            window.addLabel("$", window.getWidth() - 15, 2);
+            
+            // Create and store reference to bank balance label
+            bankBalanceLabel = window.addLabel(String.format("Bank Balance: $%.2f", bankBalance), 
+                window.getWidth() - 30, 2);
             
         } catch (Exception e) {
             System.err.println("[ConfigurationView] Error in setupCommonElements: " + e.getMessage());
@@ -117,6 +121,28 @@ public abstract class ConfigurationView implements View, ConfigurableView {
     @Override
     public void onUpdate(BaseController controller) {
 
+    }
+
+    // Add getter and setter for bank balance
+    protected double getBankBalance() {
+        return bankBalance;
+    }
+
+    protected void setBankBalance(double newBalance) {
+        this.bankBalance = newBalance;
+        updateBankBalanceLabel();
+    }
+
+    // Add method to update the label
+    private void updateBankBalanceLabel() {
+        if (bankBalanceLabel != null) {
+            try {
+                bankBalanceLabel.setLabel(String.format("Bank Balance: $%.2f", bankBalance));
+            } catch (Exception e) {
+                System.err.println("[ConfigurationView] Error updating bank balance label: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
 
 }
