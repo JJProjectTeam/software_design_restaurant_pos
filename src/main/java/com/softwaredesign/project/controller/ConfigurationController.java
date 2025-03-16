@@ -20,7 +20,7 @@ import com.softwaredesign.project.staff.chefstrategies.OldestOrderFirstStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
 import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
 import com.softwaredesign.project.staff.staffspeeds.CaffeineAddictDecorator;
-import com.softwaredesign.project.staff.staffspeeds.CocaineAddictDecorator;
+import com.softwaredesign.project.staff.staffspeeds.StimulantAddictDecorator;
 import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
 import com.softwaredesign.project.staff.staffspeeds.LethargicDecorator;
 
@@ -30,8 +30,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.nio.file.Paths;
 import java.nio.file.Files;
 import com.softwaredesign.project.model.BankBalanceSingleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConfigurationController extends BaseController {
+    private static final Logger logger = LoggerFactory.getLogger(ConfigurationController.class);
+    private static final String CONFIG_ERROR_MSG = "[ConfigurationController] Error reading config file: ";
+
     private Kitchen kitchen;
     private OrderManager orderManager;
     private Inventory inventory;
@@ -74,14 +79,10 @@ public class ConfigurationController extends BaseController {
     //this should set up the components
     private void setupBaseComponents() {        
         try {
-            // Read and parse config file
-            String configPath = "src/main/config.json";
-            String jsonContent = Files.readString(Paths.get(configPath));
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode config = mapper.readTree(jsonContent);
+            JsonNode config = loadConfiguration();
             JsonNode stations = config.path("inventory").path("stations");
 
-            System.out.println("[ConfigurationController] Loading ingredients from config file...");
+            logger.info("[ConfigurationController] Loading ingredients from config file...");
 
             bankBalance = config.path("initialBankBalance").asDouble(1000.0);
 
@@ -89,7 +90,7 @@ public class ConfigurationController extends BaseController {
             for (StationType stationType : StationType.values()) {
                 JsonNode stationNode = stations.path(stationType.toString());
                 if (stationNode.isMissingNode()) {
-                    System.out.println("[ConfigurationController] No ingredients found for station: " + stationType);
+                    logger.info("[ConfigurationController] No ingredients found for station: {}", stationType);
                     continue;
                 }
 
@@ -102,11 +103,11 @@ public class ConfigurationController extends BaseController {
 
                     try {
                         inventory.addIngredient(ingredientName, stock, price, stationType);
-                        System.out.println("[ConfigurationController] Added ingredient: " + ingredientName + 
-                            " (Stock: " + stock + ", Price: $" + price + ", Station: " + stationType + ")");
+                        logger.info("[ConfigurationController] Added ingredient: {} (Stock: {}, Price: ${}, Station: {})",
+                            ingredientName, stock, price, stationType);
                     } catch (Exception e) {
-                        System.err.println("[ConfigurationController] Error adding ingredient " + 
-                            ingredientName + ": " + e.getMessage());
+                        logger.error("[ConfigurationController] Error adding ingredient {}: {}", 
+                            ingredientName, e.getMessage());
                     }
                 });
             }
@@ -119,9 +120,8 @@ public class ConfigurationController extends BaseController {
                 this.chefStandardPay = chefPay.path("standardPay").asDouble(15.0);
                 this.chefPayMultiplierBySpeed = chefPay.path("payMultiplierBySpeed").asDouble(1.0); 
                 this.chefPayMultiplierByStation = chefPay.path("payMultiplierByStation").asDouble(1.0);
-                System.out.println("[ConfigurationController] Loaded chef pay config - Standard Pay: $" + 
-                chefStandardPay + ", Speed Multiplier: " + chefPayMultiplierBySpeed + 
-                    ", Station Multiplier: " + chefPayMultiplierByStation);
+                logger.info("[ConfigurationController] Loaded chef pay config - Standard Pay: ${}, Speed Multiplier: {}, Station Multiplier: {}", 
+                    chefStandardPay, chefPayMultiplierBySpeed, chefPayMultiplierByStation);
             }
 
             // Load waiter pay details
@@ -129,8 +129,8 @@ public class ConfigurationController extends BaseController {
             if (!waiterPay.isMissingNode()) {
                 this.waiterStandardPay = waiterPay.path("standardPay").asDouble(10.0);
                 this.waiterPayMultiplierBySpeed = waiterPay.path("payMultiplierBySpeed").asDouble(1.0);
-                System.out.println("[ConfigurationController] Loaded waiter pay config - Standard Pay: $" + 
-                    waiterStandardPay + ", Speed Multiplier: " + waiterPayMultiplierBySpeed);
+                logger.info("[ConfigurationController] Loaded waiter pay config - Standard Pay: ${}, Speed Multiplier: {}", 
+                    waiterStandardPay, waiterPayMultiplierBySpeed);
             }
 
             // Initialize other components
@@ -152,9 +152,22 @@ public class ConfigurationController extends BaseController {
             configureViews(config);
 
         } catch (Exception e) {
-            System.err.println("[ConfigurationController] Error setting up base components: " + e.getMessage());
+            logger.error("[ConfigurationController] Error setting up base components: {}", e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Failed to setup base components", e);
+        }
+    }
+    // abstracted load configuration
+    private JsonNode loadConfiguration() {
+        try {
+            String configPath = "src/main/config.json";
+            String jsonContent = Files.readString(Paths.get(configPath));
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readTree(jsonContent);
+        } catch (Exception e) {
+            logger.error(CONFIG_ERROR_MSG + "{}", e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to load configuration", e);
         }
     }
 
@@ -183,10 +196,8 @@ public class ConfigurationController extends BaseController {
                     chefView.setPayMultiplierByStation(chefPayMultiplierByStation);
                     //todo - also for waiters
                     
-                    System.out.println("[ConfigurationController] Set chef constants - Min Chefs: " + 
-                        minChefs + ", Max Chefs: " + maxChefs + ", Max Stations Per Chef: " + maxStationsPerChef +
-                        ", Max Speed: " + maxSpeed + ", Standard Pay: " + chefStandardPay +
-                        ", Speed Multiplier: " + chefPayMultiplierBySpeed + ", Station Multiplier: " + chefPayMultiplierByStation);
+                    logger.info("[ConfigurationController] Set chef constants - Min Chefs: {}, Max Chefs: {}, Max Stations Per Chef: {}, Max Speed: {}, Standard Pay: {}, Speed Multiplier: {}, Station Multiplier: {}", 
+                        minChefs, maxChefs, maxStationsPerChef, maxSpeed, chefStandardPay, chefPayMultiplierBySpeed, chefPayMultiplierByStation);
                 }
                 
                 // Set kitchen constants
@@ -202,19 +213,17 @@ public class ConfigurationController extends BaseController {
                     chefView.setMaxInstancesOfStation(maxInstancesOfStation);
                     chefView.setMinInstancesOfStation(minInstancesOfStation);
                     
-                    System.out.println("[ConfigurationController] Set kitchen constants - Min Stations: " + 
-                        minStations + ", Max Stations: " + maxStations + 
-                        ", Min Instances: " + minInstancesOfStation + 
-                        ", Max Instances: " + maxInstancesOfStation);
+                    logger.info("[ConfigurationController] Set kitchen constants - Min Stations: {}, Max Stations: {}, Min Instances: {}, Max Instances: {}", 
+                        minStations, maxStations, minInstancesOfStation, maxInstancesOfStation);
                 }
             } else {
-                System.err.println("[ConfigurationController] Chef configuration view not found");
+                logger.error("[ConfigurationController] Chef configuration view not found");
             }
             
             // Get dining configuration view
             DiningConfigurationView diningView = (DiningConfigurationView) mediator.getView(ViewType.DINING_CONFIGURATION);
             if (diningView == null) {
-                System.err.println("[ConfigurationController] Dining configuration view not found");
+                logger.error("[ConfigurationController] Dining configuration view not found");
                 return;
             }
 
@@ -227,8 +236,8 @@ public class ConfigurationController extends BaseController {
                 diningView.setMaxTables(maxTables);
                 diningView.setMaxCapacity(maxCapacity);
                 
-                System.out.println("[ConfigurationController] Set dining room constants - Max Tables: " + 
-                    maxTables + ", Max Capacity: " + maxCapacity);
+                logger.info("[ConfigurationController] Set dining room constants - Max Tables: {}, Max Capacity: {}", 
+                    maxTables, maxCapacity);
             }
 
             // Set waiter constants
@@ -245,9 +254,8 @@ public class ConfigurationController extends BaseController {
                 diningView.setStandardPayPerHour(standardPayPerHour);
                 diningView.setPayMultiplierBySpeed(payMultiplierBySpeed);
                 
-                System.out.println("[ConfigurationController] Set waiter constants - Min Waiters: " + 
-                    minWaiters + ", Max Waiters: " + maxWaiters + ", Max Speed: " + maxSpeed +
-                    ", Standard Pay: " + standardPayPerHour + ", Speed Multiplier: " + payMultiplierBySpeed);
+                logger.info("[ConfigurationController] Set waiter constants - Min Waiters: {}, Max Waiters: {}, Max Speed: {}, Standard Pay: {}, Speed Multiplier: {}", 
+                    minWaiters, maxWaiters, maxSpeed, standardPayPerHour, payMultiplierBySpeed);
             }
             
             // Set menu configuration constants
@@ -261,17 +269,17 @@ public class ConfigurationController extends BaseController {
                     menuView.setMinRecipes(minRecipes);
                     menuView.setMaxRecipes(maxRecipes);
                     
-                    System.out.println("[ConfigurationController] Set menu constants - Min Recipes: " + 
-                        minRecipes + ", Max Recipes: " + maxRecipes);
+                    logger.info("[ConfigurationController] Set menu constants - Min Recipes: {}, Max Recipes: {}", 
+                        minRecipes, maxRecipes);
                 }
             } else {
-                System.err.println("[ConfigurationController] Menu configuration view not found");
+                logger.error("[ConfigurationController] Menu configuration view not found");
             }
 
             updateBankBalance(bankBalance);
             
         } catch (Exception e) {
-            System.err.println("[ConfigurationController] Error configuring views: " + e.getMessage());
+            logger.error("[ConfigurationController] Error configuring views: {}", e.getMessage());
             e.printStackTrace();
         }
     }
@@ -301,11 +309,11 @@ public class ConfigurationController extends BaseController {
         // Create menu items
         createMenuItems(menuView.getSelectedRecipes());
 
-        System.out.println("[ConfigurationController] Final configuration bank balance set to: $" + String.format("%.2f", bankBalance));
+        logger.info("[ConfigurationController] Final configuration bank balance set to: ${}", String.format("%.2f", bankBalance));
         
         // Set configuration as complete
         configurationComplete = true;
-        System.out.println("[ConfigurationController] Configuration complete");
+        logger.info("[ConfigurationController] Configuration complete");
         
         // Notify mediator that configuration is complete
         // mediator.notifyConfigurationComplete();
@@ -353,21 +361,18 @@ public class ConfigurationController extends BaseController {
     private void createChefs(Map<String, ChefConfigurationView.ChefData> chefData) {
         JsonNode chefRules;
         try {
-            System.out.println("[ConfigurationController] Creating chefs from configuration");
+            logger.info("[ConfigurationController] Creating chefs from configuration");
             chefs = new ArrayList<>();
-            String configPath = "src/main/config.json";
-            String jsonContent = Files.readString(Paths.get(configPath));
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode config = mapper.readTree(jsonContent);
+            JsonNode config = loadConfiguration();
             chefRules = config.path("staffRules").path("chefs");
         } catch (Exception e) {
-            System.err.println("[ConfigurationController] Error reading config file: " + e.getMessage());
+            logger.error("[ConfigurationController] Error reading config file: {}", e.getMessage());
             e.printStackTrace();
             return;
         }
         double chanceOfCaffieneAddict = chefRules.path("chanceOfCaffieneAddict").asDouble(0.3);
         double chanceOfLethargic = chefRules.path("chanceOfLethargic").asDouble(0.3);
-        double chanceOfCocaineAddict = chefRules.path("chanceOfCocaineAddict").asDouble(0.25);
+        double chanceOfStimulantAddict = chefRules.path("chanceOfStimulantAddict").asDouble(0.25);
         
         for (ChefConfigurationView.ChefData data : chefData.values()) {
             try {
@@ -381,8 +386,8 @@ public class ConfigurationController extends BaseController {
                 if (Math.random() < chanceOfCaffieneAddict) {
                     speedComponent = new CaffeineAddictDecorator(speedComponent);
                 }
-                if (Math.random() < chanceOfCocaineAddict) {
-                    speedComponent = new CocaineAddictDecorator(speedComponent);
+                if (Math.random() < chanceOfStimulantAddict) {
+                    speedComponent = new StimulantAddictDecorator(speedComponent);
                 }
 
                 Chef chef = new Chef(
@@ -400,17 +405,17 @@ public class ConfigurationController extends BaseController {
                     for (Station station : stationManager.getAllStations()) {
                         if (station.getType() == type && !station.hasChef()) {
                             chef.assignToStation(type);
-                            System.out.println("[ConfigurationController] Assigned chef to " + type + " station");
+                            logger.info("[ConfigurationController] Assigned chef to {}", type);
                             break;
                         }
                     }
                 }
                 
                 chefs.add(chef);
-                System.out.println("[ConfigurationController] Created chef: " + chef.getName());
+                logger.info("[ConfigurationController] Created chef: {}", chef.getName());
                 
             } catch (Exception e) {
-                System.err.println("[ConfigurationController] Error creating chef: " + e.getMessage());
+                logger.error("[ConfigurationController] Error creating chef: {}", e.getMessage());
                 throw new RuntimeException("Failed to create chef: " + data.getName(), e);
             }
         }
@@ -430,9 +435,9 @@ public class ConfigurationController extends BaseController {
         this.waiters = new ArrayList<>();
 
         // Create tables
-        System.out.println("[ConfigurationController] Creating tables - Count: " + tableCount + ", Capacity: " + tableCapacity);
+        logger.info("[ConfigurationController] Creating tables - Count: {}, Capacity: {}", tableCount, tableCapacity);
         seatingPlan = new SeatingPlan(tableCount, 40, tableCapacity, menu);
-        System.out.println("[ConfigurationController] Created seating plan with " + seatingPlan.getAllTables().size() + " tables");
+        logger.info("[ConfigurationController] Created seating plan with {} tables", seatingPlan.getAllTables().size());
 
         // Get all tables from seating plan
         List<Table> allTables = seatingPlan.getAllTables();
@@ -442,24 +447,19 @@ public class ConfigurationController extends BaseController {
         int extraTables = allTables.size() % waiterData.size();
         int tableIndex = 0;
 
-
-        System.out.println("[ConfigurationController] Distributing " + allTables.size() + " tables among " + waiterData.size() + " waiters");
-        String configPath = "src/main/config.json";
+        logger.info("[ConfigurationController] Distributing {} tables among {} waiters", allTables.size(), waiterData.size());
         JsonNode waiterRules;
         try{
-            String jsonContent = Files.readString(Paths.get(configPath));
-            
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode config = mapper.readTree(jsonContent);
+            JsonNode config = loadConfiguration();
             waiterRules = config.path("staffRules").path("waiters");
         } catch (Exception e) {
-            System.err.println("[ConfigurationController] Error reading config file: " + e.getMessage());
+            logger.error("[ConfigurationController] Error reading config file: {}", e.getMessage());
             e.printStackTrace();
             return;
         }
         double chanceOfCaffieneAddict = waiterRules.path("chanceOfCaffieneAddict").asDouble(0.3);
         double chanceOfLethargic = waiterRules.path("chanceOfLethargic").asDouble(0.3);
-        double chanceOfCocaineAddict = waiterRules.path("chanceOfCocaineAddict").asDouble(0.25);
+        double chanceOfStimulantAddict = waiterRules.path("chanceOfStimulantAddict").asDouble(0.25);
         
         for (var entry : waiterData.entrySet()) {
             var data = entry.getValue();
@@ -472,15 +472,15 @@ public class ConfigurationController extends BaseController {
             if (Math.random() < chanceOfCaffieneAddict) {
                 speedComponent = new CaffeineAddictDecorator(speedComponent);
             }
-            if (Math.random() < chanceOfCocaineAddict) {
-                speedComponent = new CocaineAddictDecorator(speedComponent);
+            if (Math.random() < chanceOfStimulantAddict) {
+                speedComponent = new StimulantAddictDecorator(speedComponent);
             }
             
             Waiter waiter = new Waiter(data.getCostPerHour(), speedComponent, orderManager, menu, inventoryStockTracker);
             
             // Calculate tables for this waiter
             int tablesToAssign = tablesPerWaiter + (waiters.size() < extraTables ? 1 : 0);
-            System.out.println("[ConfigurationController] Assigning " + tablesToAssign + " tables to waiter");
+            logger.info("[ConfigurationController] Assigning {} tables to waiter", tablesToAssign);
             
             // Assign tables
             for (int i = 0; i < tablesToAssign && tableIndex < allTables.size(); i++) {
@@ -489,10 +489,10 @@ public class ConfigurationController extends BaseController {
             }
             
             waiters.add(waiter);
-            System.out.println("[ConfigurationController] Added waiter with " + tablesToAssign + " tables");
+            logger.info("[ConfigurationController] Added waiter with {} tables", tablesToAssign);
         }
         
-        System.out.println("[ConfigurationController] Created " + waiters.size() + " waiters");
+        logger.info("[ConfigurationController] Created {} waiters", waiters.size());
     }
 
     //This allows us to map the selected recipes to actual instances, without duplicating listing what recipes are available
@@ -520,13 +520,13 @@ public class ConfigurationController extends BaseController {
                     // TODO: Uncomment when menu implementation is ready
                     // menu.addRecipe(newRecipe);
                     
-                    System.out.println("[ConfigurationController] Created recipe: " + recipeName);
+                    logger.info("[ConfigurationController] Created recipe: {}", recipeName);
                 } else {
-                    System.err.println("[ConfigurationController] Unknown recipe: " + recipeName + " - skipping");
+                    logger.error("[ConfigurationController] Unknown recipe: {} - skipping", recipeName);
                 }
             } catch (Exception e) {
-                System.err.println("[ConfigurationController] Error creating menu item: " + 
-                    recipeName + " - " + e.getMessage());
+                logger.error("[ConfigurationController] Error creating menu item: {} - {}", 
+                    recipeName, e.getMessage());
             }
         }
     }
@@ -535,8 +535,8 @@ public class ConfigurationController extends BaseController {
      * Create stations based on the configuration
      */
     private void createStations(int grillCount, int prepCount, int plateCount) {
-        System.out.println("[ConfigurationController] Creating stations - Grill: " + grillCount + 
-            ", Prep: " + prepCount + ", Plate: " + plateCount);
+        logger.info("[ConfigurationController] Creating stations - Grill: {}, Prep: {}, Plate: {}", 
+            grillCount, prepCount, plateCount);
         
         // Clear existing stations
         stationManager.clearStations();
@@ -552,17 +552,17 @@ public class ConfigurationController extends BaseController {
         Map<StationType, Long> counts = stationManager.getAllStations().stream()
             .collect(Collectors.groupingBy(Station::getType, Collectors.counting()));
         
-        System.out.println("[ConfigurationController] Station counts after creation:");
-        counts.forEach((type, count) -> System.out.println("  " + type + ": " + count));
+        logger.info("[ConfigurationController] Station counts after creation:");
+        counts.forEach((type, count) -> logger.info("  {}: {}", type, count));
     }
 
     private int createStationsOfType(StationType type, int count, int startId) {
-        System.out.println("[ConfigurationController] Creating " + count + " " + type + " stations starting at ID " + startId);
+        logger.info("[ConfigurationController] Creating {} {} stations starting at ID {}", count, type, startId);
         for (int i = 0; i < count; i++) {
             Station station = new Station(type, collectionPoint);
             station.setKitchen(kitchen);
             stationManager.addStation(station);
-            System.out.println("[ConfigurationController] Created " + type + " station " + startId);
+            logger.info("[ConfigurationController] Created {} station {}", type, startId);
             startId++;
         }
         return startId;
@@ -622,7 +622,7 @@ public class ConfigurationController extends BaseController {
             menuView.setPossibleRecipes(recipeData);
             
         } catch (Exception e) {
-            System.err.println("[ConfigurationController] Error initializing menu: " + e.getMessage());
+            logger.error("[ConfigurationController] Error initializing menu: {}", e.getMessage());
             e.printStackTrace();
         }
     }
@@ -640,9 +640,9 @@ public class ConfigurationController extends BaseController {
             if (diningView != null) diningView.setBankBalance(newBalance);
             if (menuView != null) menuView.setBankBalance(newBalance);
 
-            System.out.println("[ConfigurationController] Updated bank balance to: $" + newBalance);
+            logger.info("[ConfigurationController] Updated bank balance to: ${}", newBalance);
         } catch (Exception e) {
-            System.err.println("[ConfigurationController] Error updating bank balance: " + e.getMessage());
+            logger.error("[ConfigurationController] Error updating bank balance: {}", e.getMessage());
             e.printStackTrace();
         }
     }

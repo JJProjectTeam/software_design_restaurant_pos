@@ -12,7 +12,11 @@ import jexer.menu.TMenu;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
 import com.softwaredesign.project.RestaurantDriver;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class RestaurantApplication extends TApplication {
+    private static final Logger logger = LoggerFactory.getLogger(RestaurantApplication.class);
     private TWindow mainWindow;
     private Map<ViewType, View> views = new HashMap<>();
     private ViewType currentView;
@@ -20,7 +24,7 @@ public class RestaurantApplication extends TApplication {
 
     public RestaurantApplication() throws Exception {
         super(BackendType.SWING);
-        System.out.println("[RestaurantApplication] Starting application initialization");
+        logger.info("[RestaurantApplication] Starting application initialization");
 
         // Create the main window first
         mainWindow = new TWindow(this, "OOPsies Bistro", 0, 0, getScreen().getWidth(), getScreen().getHeight());
@@ -33,32 +37,32 @@ public class RestaurantApplication extends TApplication {
         TMenu helpMenu = addMenu("&Help");
         helpMenu.addItem(1025, "&Restart Game");
 
-        System.out.println("[RestaurantApplication] Application initialization complete");
+        logger.info("[RestaurantApplication] Application initialization complete");
     }
 
     private void initializeViews() {
-        System.out.println("[RestaurantApplication] Initializing views");
+        logger.info("[RestaurantApplication] Initializing views");
         for (ViewType viewType : ViewType.values()) {
             try {
-                System.out.println("[RestaurantApplication] Creating view instance for: " + viewType);
+                logger.info("[RestaurantApplication] Creating view instance for: " + viewType);
                 View view = viewType.getViewClass()
                     .getDeclaredConstructor(RestaurantApplication.class)
                     .newInstance(this);
                 views.put(viewType, view);
-                System.out.println("[RestaurantApplication] Initialized view: " + viewType);
+                logger.info("[RestaurantApplication] Initialized view: " + viewType);
             } catch (Exception e) {
-                System.err.println("[RestaurantApplication] ERROR: Failed to initialize view: " + viewType);
-                System.err.println("[RestaurantApplication] Exception: " + e.getMessage());
+                logger.error("[RestaurantApplication] ERROR: Failed to initialize view: " + viewType);
+                logger.error("[RestaurantApplication] Exception: " + e.getMessage());
                 e.printStackTrace();
                 throw new RuntimeException("Failed to initialize view: " + viewType, e);
             }
         }
-        System.out.println("[RestaurantApplication] All views initialized successfully");
+        logger.info("[RestaurantApplication] All views initialized successfully");
     }
 
     public void showView(ViewType viewType) {
         if (currentView == viewType) {
-            System.out.println("[RestaurantApplication] Already showing view: " + viewType);
+            logger.info("[RestaurantApplication] Already showing view: " + viewType);
             return;
         }
 
@@ -95,11 +99,11 @@ public class RestaurantApplication extends TApplication {
                 
                 currentView = viewType;
             } else {
-                System.err.println("[RestaurantApplication] ERROR: Unknown view: " + viewType);
+                logger.error("[RestaurantApplication] ERROR: Unknown view: " + viewType);
                 throw new IllegalArgumentException("Unknown view: " + viewType);
             }
         } catch (Exception e) {
-            System.err.println("[RestaurantApplication] ERROR in showView: " + e.getMessage());
+            logger.error("[RestaurantApplication] ERROR in showView: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -143,7 +147,7 @@ public class RestaurantApplication extends TApplication {
      * Properly restarts the application by calling exit() and reinitializing through the driver.
      */
     private void restartApplication() {
-        System.out.println("[RestaurantApplication] Restarting application");
+        logger.info("[RestaurantApplication] Restarting application");
         // Reset the mediator to clear any cached configuration state (including min/max number of chefs)
         RestaurantViewMediator.getInstance().reset();
         // Exit the current application instance.

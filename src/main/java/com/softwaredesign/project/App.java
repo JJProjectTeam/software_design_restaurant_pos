@@ -35,7 +35,7 @@
 //         inventoryService.addIngredient("Pickle", 10, 0.5, StationType.PREP);
 //         inventoryService.addIngredient("Mayo", 10, 0.5, StationType.PREP);
 
-//         System.out.println("Inventory: " + inventoryService.getStock("Beef Patty"));
+//         logger.info("Inventory: " + inventoryService.getStock("Beef Patty"));
 
 //         Menu menu = new Menu(inventoryService);
 //         CollectionPoint collectionPoint = new CollectionPoint();
@@ -43,11 +43,11 @@
 //         OrderManager orderManager = new OrderManager(collectionPoint, stationManager);
         
 //         // Create seating plan with enough capacity
-//         System.out.println("Creating seating plan...");
+//         logger.info("Creating seating plan...");
 //         SeatingPlan seatingPlan = new SeatingPlan(5, 10, menu); 
         
 //         // Create and assign waiters
-//         System.out.println("\nCreating waiters...");
+//         logger.info("\nCreating waiters...");
 //         List<Waiter> waiters = new ArrayList<>();
 //         waiters.add(new Waiter(15.0, 1.0, orderManager, menu));
 //         waiters.add(new Waiter(15.0, 1.0, orderManager, menu));
@@ -56,21 +56,21 @@
 //         int waiterIndex = 0;
 //         for (Table table : seatingPlan.getAllTables()) {
 //             waiters.get(waiterIndex).assignTable(table);
-//             System.out.println("Table " + table.getTableNumber() + " assigned to waiter " + waiterIndex);
+//             logger.info("Table " + table.getTableNumber() + " assigned to waiter " + waiterIndex);
 //             waiterIndex = (waiterIndex + 1) % waiters.size();
 //         }
         
 //         // Create and seat customers
-//         System.out.println("\nSeating customers...");
+//         logger.info("\nSeating customers...");
 //         // Group of 2
 //         List<DineInCustomer> group1 = new ArrayList<>();
 //         group1.add(new DineInCustomer());
 //         group1.add(new DineInCustomer());
 //         Table table1 = seatingPlan.findTableForGroup(group1);
 //         if (table1 != null) {
-//             System.out.println("Group of 2 seated at table " + table1.getTableNumber());
+//             logger.info("Group of 2 seated at table " + table1.getTableNumber());
 //         } else {
-//             System.out.println("No table available for group of 2");
+//             logger.info("No table available for group of 2");
 //             return;
 //         }
         
@@ -81,34 +81,34 @@
 //         }
 //         Table table2 = seatingPlan.findTableForGroup(group2);
 //         if (table2 != null) {
-//             System.out.println("Group of 4 seated at table " + table2.getTableNumber());
+//             logger.info("Group of 4 seated at table " + table2.getTableNumber());
 //         } else {
-//             System.out.println("No table available for group of 4");
+//             logger.info("No table available for group of 4");
 //             return;
 //         }
         
 //         // Have customers finish browsing
-//         System.out.println("\nCustomers browsing menus...");
+//         logger.info("\nCustomers browsing menus...");
 //         for (Table table : seatingPlan.getAllTables()) {
 //             for (DineInCustomer customer : table.getCustomers()) {
 //                 customer.finishBrowsing();
-//                 System.out.println("Customer at table " + table.getTableNumber() + " finished browsing");
+//                 logger.info("Customer at table " + table.getTableNumber() + " finished browsing");
 //             }
 //         }
 
 //         // Take orders
-//         System.out.println("\nTaking orders...");
+//         logger.info("\nTaking orders...");
 //         for (Waiter waiter : waiters) {
 //             for (Table table : waiter.getAssignedTables()) {
 //                 if (!table.getCustomers().isEmpty()) {
-//                     System.out.println("Waiter taking order from table " + table.getTableNumber());
+//                     logger.info("Waiter taking order from table " + table.getTableNumber());
 //                     waiter.takeTableOrder(table);
 //                 }
 //             }
 //         }
         
 //         // Demonstrate kitchen operations (separate from front-of-house)
-//         System.out.println("\nDemonstrating kitchen operations...");
+//         logger.info("\nDemonstrating kitchen operations...");
         
 //         // Create chefs with different strategies
 //         List<Chef> chefs = new ArrayList<>();
@@ -120,11 +120,11 @@
 //         for (Chef chef : chefs) {
 //             chef.assignToStation(StationType.GRILL);
 //             chef.assignToStation(StationType.PREP);
-//             System.out.println("Chef assigned to grill and prep stations");
+//             logger.info("Chef assigned to grill and prep stations");
             
 //             // Demonstrate different working strategies
 //             Station nextStation = chef.chooseNextStation();
-//             System.out.println("Chef chose " + nextStation + " based on their strategy");
+//             logger.info("Chef chose " + nextStation + " based on their strategy");
 //         }
 //     }
 // }

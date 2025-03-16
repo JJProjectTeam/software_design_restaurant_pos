@@ -2,9 +2,11 @@ package com.softwaredesign.project.view;
 
 import jexer.*;
 import com.softwaredesign.project.model.BankBalanceSingleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class GamePlayView implements View {
-    
+    private static final Logger logger = LoggerFactory.getLogger(GamePlayView.class);
     protected static final int TAB_Y = 1;  
     protected static final int TAB_WIDTH = 15;  
     protected static final int TAB_SPACING = 2;  
@@ -44,7 +46,7 @@ public abstract class GamePlayView implements View {
     
     @Override
     public void setupView() {
-        System.out.println("[GamePlayView] Setting up view with navigation tabs");
+        logger.info("[GamePlayView] Setting up view with navigation tabs");
         // Create and store reference to bank balance label
         bankBalanceLabel = window.addLabel(String.format("Bank Balance: $%.2f", bankBalance), 
         window.getWidth() - 30, 2);
@@ -53,7 +55,7 @@ public abstract class GamePlayView implements View {
     }
     
     protected void createNavigationTabs() {
-        System.out.println("[GamePlayView] Creating navigation tabs for " + this.getClass().getSimpleName());
+        logger.info("[GamePlayView] Creating navigation tabs for " + this.getClass().getSimpleName());
         // Add navigation tabs at the top
         if (this instanceof KitchenView) {
             addTab("Dining Room", ViewType.DINING_ROOM, 1);
@@ -69,10 +71,10 @@ public abstract class GamePlayView implements View {
     
     protected void addTab(String label, ViewType destination, int position) {
         if (window == null) {
-            System.err.println("[GamePlayView] Cannot add tab - window is null");
+            logger.error("[GamePlayView] Cannot add tab - window is null");
             return;
         }
-        System.out.println("[GamePlayView] Adding tab: " + label + " at position " + position);
+        logger.info("[GamePlayView] Adding tab: " + label + " at position " + position);
         int x = position * (TAB_WIDTH + TAB_SPACING);
         TButton tab = window.addButton(label, x, TAB_Y, new TAction() {
             public void DO() {
@@ -93,9 +95,9 @@ public abstract class GamePlayView implements View {
         if (bankBalanceLabel != null) {
             try {
                 bankBalanceLabel.setLabel(String.format("Bank Balance: $%.2f", bankBalance));
-                System.out.println("[GamePlayView] Updated bank balance label to: $" + String.format("%.2f", bankBalance));
+                logger.info("[GamePlayView] Updated bank balance label to: $" + String.format("%.2f", bankBalance));
             } catch (Exception e) {
-                System.err.println("[GamePlayView] Error updating bank balance label: " + e.getMessage());
+                logger.error("[GamePlayView] Error updating bank balance label: " + e.getMessage());
                 e.printStackTrace();
             }
         }

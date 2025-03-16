@@ -13,8 +13,11 @@ import com.softwaredesign.project.menu.Menu;
 
 import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
 import com.softwaredesign.project.inventory.InventoryStockTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Waiter extends StaffMember {
+    private static final Logger logger = LoggerFactory.getLogger(Waiter.class);
     private List<Table> assignedTables;
     private OrderManager orderManager;
     private Menu menu;
@@ -62,7 +65,7 @@ public class Waiter extends StaffMember {
                     throw new IllegalStateException("Not enough ingredients to fulfill the order");
                 }
             } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
+                logger.info(e.getMessage());
                 // TODO: Handle what to do if the order cannot be fulfilled
                 return false;
             }

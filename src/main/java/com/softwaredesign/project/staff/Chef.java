@@ -10,8 +10,11 @@ import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 
 import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Chef extends StaffMember {
+    private static final Logger logger = LoggerFactory.getLogger(Chef.class);
     private List<Station> assignedStations; // Stations where the chef is assigned
     private ChefStrategy workStrategy; 
     private StationManager stationManager;
@@ -27,7 +30,7 @@ public class Chef extends StaffMember {
         this.stationManager = stationManager;
         this.name = "Chef " + (++chefCounter);
         this.isWorking = false;
-        System.out.println("[DEBUG] Created new chef: " + name + speedDecorator.getSpeedMultiplier());
+        logger.info("[DEBUG] Created new chef: " + name + speedDecorator.getSpeedMultiplier());
     }
     
     public Chef(String name, double payPerHour, ISpeedComponent speedDecorator, ChefStrategy strategy, StationManager stationManager) {
@@ -37,7 +40,7 @@ public class Chef extends StaffMember {
         this.stationManager = stationManager;
         this.name = name;
         this.isWorking = false;
-        System.out.println("[DEBUG] Created new chef: " + name + speedDecorator.getSpeedMultiplier());
+        logger.info("[DEBUG] Created new chef: " + name + speedDecorator.getSpeedMultiplier());
     }
     
     public String getName() {
@@ -46,11 +49,11 @@ public class Chef extends StaffMember {
     
     // Chef periodically checks for work
     public void checkForWork() {
-        System.out.println("[DEBUG] " + name + " checking for work");
+        logger.info("[DEBUG] " + name + " checking for work");
         if (currentStation != null) {
-            System.out.println("[DEBUG] Current station: " + currentStation.getType());
+            logger.info("[DEBUG] Current station: " + currentStation.getType());
         } else {
-            System.out.println("[DEBUG] No current station");
+            logger.info("[DEBUG] No current station");
         }
         
         // Instead of always choosing a new station if not busy, check if any assigned station actually has tasks
@@ -60,32 +63,32 @@ public class Chef extends StaffMember {
         }
         
         if (totalBacklog == 0) {
-            System.out.println("[DEBUG] " + name + " finds no pending tasks in assigned stations, staying at " + (currentStation != null ? currentStation.getType() : "no station"));
+            logger.info("[DEBUG] " + name + " finds no pending tasks in assigned stations, staying at " + (currentStation != null ? currentStation.getType() : "no station"));
             return;
         }
         
         // There are pending tasks, proceed to choose a new station
-        System.out.println("[DEBUG] " + name + " found pending tasks, choosing next station");
+        logger.info("[DEBUG] " + name + " found pending tasks, choosing next station");
         Station newStation = chooseNextStation();
         if (newStation != null) {
-            System.out.println("[DEBUG] " + name + " chose station: " + newStation.getType());
+            logger.info("[DEBUG] " + name + " chose station: " + newStation.getType());
             if (newStation.getCurrentTask() != null) {
                 isWorking = true;
-                System.out.println("[DEBUG] " + name + " is now working on task: " + newStation.getCurrentTask().getName());
+                logger.info("[DEBUG] " + name + " is now working on task: " + newStation.getCurrentTask().getName());
             }
         } else {
-            System.out.println("[DEBUG] " + name + " couldn't find a suitable station despite pending tasks");
+            logger.info("[DEBUG] " + name + " couldn't find a suitable station despite pending tasks");
         }
     }
 
     public void assignToStation(StationType stationType) {
-        System.out.println("[DEBUG-CHEF-ASSIGN] " + name + " being assigned to " + stationType);
+        logger.info("[DEBUG-CHEF-ASSIGN] " + name + " being assigned to " + stationType);
         
         // Check if we already have this station type in our assigned stations
         boolean alreadyAssigned = false;
         for (Station existingStation : assignedStations) {
             if (existingStation.getType() == stationType) {
-                System.out.println("[DEBUG-CHEF-ASSIGN] " + name + " already has a " + stationType + " station assigned");
+                logger.info("[DEBUG-CHEF-ASSIGN] " + name + " already has a " + stationType + " station assigned");
                 alreadyAssigned = true;
                 break;
             }
@@ -100,19 +103,19 @@ public class Chef extends StaffMember {
                 for (Station station : stationsOfType) {
                     if (!assignedStations.contains(station)) {
                         assignedStations.add(station);
-                        System.out.println("[DEBUG-CHEF-ASSIGN] Added " + stationType + " station to " + 
+                        logger.info("[DEBUG-CHEF-ASSIGN] Added " + stationType + " station to " + 
                             name + "'s assigned stations list. Total stations: " + assignedStations.size());
                     }
                 }
             } else {
-                System.out.println("[DEBUG-CHEF-ASSIGN] Could not find any stations of type " + stationType);
+                logger.info("[DEBUG-CHEF-ASSIGN] Could not find any stations of type " + stationType);
             }
         }
         
         // Print out all assigned stations for debugging
-        System.out.println("[DEBUG-CHEF-ASSIGN] " + name + " now has " + assignedStations.size() + " assigned stations:");
+        logger.info("[DEBUG-CHEF-ASSIGN] " + name + " now has " + assignedStations.size() + " assigned stations:");
         for (Station station : assignedStations) {
-            System.out.println("  - " + station.getType());
+            logger.info("  - " + station.getType());
         }
     }
 
@@ -126,43 +129,43 @@ public class Chef extends StaffMember {
     
     public void removeStationAssignment(Station station) {
         if (station == null) {
-            System.out.println("[DEBUG-CHEF-REMOVE] Attempted to remove null station from " + name);
+            logger.info("[DEBUG-CHEF-REMOVE] Attempted to remove null station from " + name);
             return;
         }
         
-        System.out.println("[DEBUG-CHEF-REMOVE] Removing " + station.getType() + " station from " + name);
+        logger.info("[DEBUG-CHEF-REMOVE] Removing " + station.getType() + " station from " + name);
         
         boolean removed = assignedStations.remove(station);
         
         if (removed) {
-            System.out.println("[DEBUG-CHEF-REMOVE] Successfully removed " + station.getType() + 
+            logger.info("[DEBUG-CHEF-REMOVE] Successfully removed " + station.getType() + 
                 " station from " + name + "'s assigned stations");
         } else {
-            System.out.println("[DEBUG-CHEF-REMOVE] Station " + station.getType() + 
+            logger.info("[DEBUG-CHEF-REMOVE] Station " + station.getType() + 
                 " was not in " + name + "'s assigned stations list");
         }
         
         // If this was the chef's current station, clear that reference
         if (currentStation == station) {
-            System.out.println("[DEBUG-CHEF-REMOVE] Clearing current station reference for " + name);
+            logger.info("[DEBUG-CHEF-REMOVE] Clearing current station reference for " + name);
             currentStation = null;
         }
         
         // Print remaining assigned stations
-        System.out.println("[DEBUG-CHEF-REMOVE] " + name + " now has " + assignedStations.size() + " assigned stations:");
+        logger.info("[DEBUG-CHEF-REMOVE] " + name + " now has " + assignedStations.size() + " assigned stations:");
         for (Station s : assignedStations) {
-            System.out.println("  - " + s.getType());
+            logger.info("  - " + s.getType());
         }
     }
 
     public Station chooseNextStation() {
-        System.out.println("[DEBUG-CHEF-CHOOSE] " + name + " choosing next station");
-        System.out.println("[DEBUG-CHEF-CHOOSE] Current station: " + (currentStation != null ? currentStation.getType() : "NONE"));
-        System.out.println("[DEBUG-CHEF-CHOOSE] Assigned stations: " + assignedStations.size());
+        logger.info("[DEBUG-CHEF-CHOOSE] " + name + " choosing next station");
+        logger.info("[DEBUG-CHEF-CHOOSE] Current station: " + (currentStation != null ? currentStation.getType() : "NONE"));
+        logger.info("[DEBUG-CHEF-CHOOSE] Assigned stations: " + assignedStations.size());
         
         // If the chef is currently working on a task, they shouldn't be reassigned
         if (isWorking) {
-            System.out.println("[DEBUG-CHEF-CHOOSE] " + name + " is already working, staying at current station");
+            logger.info("[DEBUG-CHEF-CHOOSE] " + name + " is already working, staying at current station");
             return currentStation;
         }
         
@@ -170,10 +173,10 @@ public class Chef extends StaffMember {
         List<Station> stationsToCheck = new ArrayList<>();
         
         if (!assignedStations.isEmpty()) {
-             System.out.println("[DEBUG-CHEF-CHOOSE] " + name + " looking for work in assigned stations only");
+             logger.info("[DEBUG-CHEF-CHOOSE] " + name + " looking for work in assigned stations only");
              stationsToCheck.addAll(assignedStations);
         } else {
-             System.out.println("[DEBUG-CHEF-CHOOSE] " + name + " has no assigned stations, cannot check work outside assignments");
+             logger.info("[DEBUG-CHEF-CHOOSE] " + name + " has no assigned stations, cannot check work outside assignments");
              return null;
         }
         
@@ -181,7 +184,7 @@ public class Chef extends StaffMember {
         // This ensures we prioritize the start of the recipe pipeline
         for (Station station : stationsToCheck) {
             if (station.getType() == StationType.PREP && station.hasBacklogItems() && !station.hasChef()) {
-                System.out.println("[IMPORTANT] Chef " + name + " prioritizing free PREP station with backlog items");
+                logger.info("[IMPORTANT] Chef " + name + " prioritizing free PREP station with backlog items");
                 station.registerChef(this);
                 StringBuilder logMessage = new StringBuilder();
                 logMessage.append(name).append(" moved to PREP station (priority assignment)");
@@ -190,7 +193,7 @@ public class Chef extends StaffMember {
                 } else {
                     logMessage.append(" (waiting for task assignment)");
                 }
-                System.out.println(logMessage.toString());
+                logger.info(logMessage.toString());
                 return station;
             }
         }
@@ -198,7 +201,7 @@ public class Chef extends StaffMember {
         // PRIORITY 2: Check if there's a station with a task already assigned but no chef
         for (Station station : stationsToCheck) {
             if (station.getCurrentTask() != null && !station.hasChef()) {
-                System.out.println("[DEBUG] Chef " + name + " found station with task but no chef");
+                logger.info("[DEBUG] Chef " + name + " found station with task but no chef");
                 station.registerChef(this);
                 
                 StringBuilder logMessage = new StringBuilder();
@@ -210,7 +213,7 @@ public class Chef extends StaffMember {
                     logMessage.append(" (Order ID: ").append(station.getCurrentRecipe().getOrderId()).append(")");
                 }
                 
-                System.out.println(logMessage.toString());
+                logger.info(logMessage.toString());
                 return station;
             }
         }
@@ -218,12 +221,12 @@ public class Chef extends StaffMember {
         // PRIORITY 3: Check for any station with backlog items
         for (Station station : stationsToCheck) {
             if (station.hasBacklogItems() && !station.hasChef()) {
-                System.out.println("[DEBUG] Chef " + name + " found free station with backlog items");
+                logger.info("[DEBUG] Chef " + name + " found free station with backlog items");
                 station.registerChef(this);
                 StringBuilder logMessage = new StringBuilder();
                 logMessage.append(name).append(" moved to ").append(station.getType()).append(" station");
                 logMessage.append(" (station has backlog items)");
-                System.out.println(logMessage.toString());
+                logger.info(logMessage.toString());
                 return station;
             }
         }
@@ -252,7 +255,7 @@ public class Chef extends StaffMember {
                 logMessage.append(" (no active task)");
             }
                 
-            System.out.println(logMessage.toString());
+            logger.info(logMessage.toString());
             return nextStation;
         } else {
             // No station available, clear the current station

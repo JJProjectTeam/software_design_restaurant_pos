@@ -10,6 +10,8 @@ import com.softwaredesign.project.view.ViewType;
 
 import java.util.Map;
 import java.util.HashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KitchenController extends BaseController {
     private Kitchen kitchen;
@@ -17,6 +19,7 @@ public class KitchenController extends BaseController {
     private Map<Station, Integer> stationIdMap;  // Changed from StationType to Station
     private int nextStationId = 1;  // Track next available ID
     private double bankBalance;
+    private static final Logger logger = LoggerFactory.getLogger(KitchenController.class);
 
     public KitchenController(Kitchen kitchen) {
         super("Kitchen");
@@ -28,7 +31,7 @@ public class KitchenController extends BaseController {
         // Initialize station IDs for each actual station instance
         for (Station station : kitchen.getStationManager().getAllStations()) {
             stationIdMap.put(station, nextStationId++);
-            System.out.println("[KitchenController] Assigned ID " + (nextStationId-1) + 
+            logger.info("[KitchenController] Assigned ID " + (nextStationId-1) + 
                 " to " + station.getType() + " station");
         }
         
@@ -49,18 +52,18 @@ public class KitchenController extends BaseController {
         // Create a copy of the stations list to avoid ConcurrentModificationException
         java.util.List<Station> stationsCopy = new java.util.ArrayList<>(kitchen.getStationManager().getAllStations());
         
-        System.out.println("[KitchenController] Updating view for " + stationsCopy.size() + " stations");
+        logger.info("[KitchenController] Updating view for " + stationsCopy.size() + " stations");
             
         for (Station station : stationsCopy) {
             int stationID = stationIdMap.getOrDefault(station, nextStationId++);
             if (!stationIdMap.containsKey(station)) {
                 stationIdMap.put(station, stationID);
-                System.out.println("[KitchenController] Assigned new ID " + stationID + " to " + station.getType() + " station");
+                logger.info("[KitchenController] Assigned new ID " + stationID + " to " + station.getType() + " station");
             }
             
             String stationName = station.getType().toString();
             int backlog = station.getBacklogSize();
-            System.out.println("[KitchenController] Station " + stationName + " has backlog size " + backlog);
+            logger.info("[KitchenController] Station " + stationName + " has backlog size " + backlog);
             String chefName = station.hasChef() ? station.getAssignedChef().getName() : "";
             char inUse = station.hasChef() ? 'X' : ' ';
             

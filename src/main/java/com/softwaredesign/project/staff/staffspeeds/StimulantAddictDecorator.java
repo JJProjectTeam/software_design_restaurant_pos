@@ -1,7 +1,7 @@
 package com.softwaredesign.project.staff.staffspeeds;
 
-public class CocaineAddictDecorator extends SpeedDecorator {
-    public CocaineAddictDecorator(ISpeedComponent speed) {
+public class StimulantAddictDecorator extends SpeedDecorator {
+    public StimulantAddictDecorator(ISpeedComponent speed) {
         super(speed);
     }
 

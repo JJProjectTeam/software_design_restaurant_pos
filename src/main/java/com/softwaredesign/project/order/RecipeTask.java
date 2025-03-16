@@ -6,13 +6,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import com.softwaredesign.project.engine.Entity;
 import com.softwaredesign.project.inventory.Ingredient;
 import com.softwaredesign.project.kitchen.StationType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Represents a specific task within a recipe that needs to be performed at a particular station.
  */
 public class RecipeTask {
+    private static final Logger logger = LoggerFactory.getLogger(RecipeTask.class);
     private String name;
     private StationType stationType;
     private List<Ingredient> ingredients;
@@ -109,7 +113,7 @@ public class RecipeTask {
         }
         
         if (allMet) {
-            System.out.println("[DEBUG] All dependencies are now met for task: " + name);
+            logger.info("[DEBUG] All dependencies are now met for task: " + name);
         }
     }
     

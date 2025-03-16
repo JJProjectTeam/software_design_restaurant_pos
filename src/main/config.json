@@ -11,7 +11,7 @@
             "payMultiplierByStation": 1,
             "chanceOfCaffieneAddict": 0.3,
             "chanceOfLethargic": 0.3,
-            "chanceOfCocaineAddict": 0.25
+            "chanceOfStimulantAddict": 0.25
         },
         "waiters": {
             "min": 1,
@@ -21,7 +21,7 @@
             "payMultiplierBySpeed": 1,
             "chanceOfCaffieneAddict": 0.3,
             "chanceOfLethargic": 0.3,
-            "chanceOfCocaineAddict": 0.05
+            "chanceOfStimulantAddict": 0.05
         }
     },
     "diningRoomRules": {

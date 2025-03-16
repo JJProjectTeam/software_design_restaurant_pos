@@ -1,7 +1,11 @@
 package com.softwaredesign.project.inventory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class InventoryAlert implements IObserver {
     private final int lowStockThreshold;
+    private static final Logger logger = LoggerFactory.getLogger(InventoryAlert.class);
 
 
     public InventoryAlert(int lowStockThreshold) {
@@ -17,8 +21,8 @@ public class InventoryAlert implements IObserver {
     @Override
     public void update(String ingredient, int quantity) {
         if (isLowStock(quantity)) {
-            System.out.println("WARNING: Low stock alert for " + ingredient + " - only " + quantity + " remaining!");
+            logger.info("WARNING: Low stock alert for " + ingredient + " - only " + quantity + " remaining!");
         }
-        System.out.println("Stock update: " + ingredient + " - " + quantity + " units in stock");
+        logger.info("Stock update: " + ingredient + " - " + quantity + " units in stock");
     }
 }

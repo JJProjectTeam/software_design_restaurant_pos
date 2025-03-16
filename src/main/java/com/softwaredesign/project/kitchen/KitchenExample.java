@@ -20,16 +20,16 @@
 //         kitchen.submitOrder(); // Order 2
 //         kitchen.submitOrder(); // Order 3
         
-//         System.out.println("Starting kitchen simulation...");
-//         System.out.println("Each order needs 5 ticks for grilling and 3 ticks for plating");
+//         logger.info("Starting kitchen simulation...");
+//         logger.info("Each order needs 5 ticks for grilling and 3 ticks for plating");
         
 //         // Run simulation for 20 ticks
 //         for (int tick = 1; tick <= 20; tick++) {
-//             System.out.println("\nTick " + tick);
+//             logger.info("\nTick " + tick);
 //             simulator.step();
 //             kitchen.processOrders(); // Move orders between stations
 //         }
         
-//         System.out.println("\nKitchen simulation complete!");
+//         logger.info("\nKitchen simulation complete!");
 //     }
 // }

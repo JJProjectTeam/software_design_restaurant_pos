@@ -11,16 +11,19 @@ import com.softwaredesign.project.staff.ChefManager;
 import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.DynamicChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
-import com.softwaredesign.project.staff.staffspeeds.CocaineAddictDecorator;
 import com.softwaredesign.project.staff.chefstrategies.LongestQueueFirstStrategy;
 import com.softwaredesign.project.staff.chefstrategies.OldestOrderFirstStrategy;
+import com.softwaredesign.project.staff.staffspeeds.StimulantAddictDecorator;
 import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
 import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A simulator class that sets up and runs the kitchen simulation.
  */
 public class KitchenSimulator {
+    private static final Logger logger = LoggerFactory.getLogger(KitchenSimulator.class);
     private GameEngine gameEngine;
     private Kitchen kitchen;
     private OrderManager orderManager;
@@ -74,7 +77,7 @@ public class KitchenSimulator {
         // Create chefs with different strategies and meaningful names
         
         ISpeedComponent speed1 = new BaseSpeed();
-        ISpeedComponent speed2 = new CocaineAddictDecorator(speed1);
+        ISpeedComponent speed2 = new StimulantAddictDecorator(speed1);
         ISpeedComponent speed3 = new BaseSpeed();
         ISpeedComponent speed4 = new BaseSpeed();
         
@@ -103,11 +106,11 @@ public class KitchenSimulator {
         chef3.chooseNextStation();
         chef4.chooseNextStation();
         
-        System.out.println("Chefs assigned to kitchen with different strategies:");
-        System.out.println("- Mario: Dynamic Strategy - prioritizes stations based on task urgency and dependencies");
-        System.out.println("- Luigi: Simple Strategy - prioritizes stations with assigned recipes");
-        System.out.println("- Peach: Longest Queue Strategy - prioritizes stations with the most pending orders");
-        System.out.println("- Toad: Oldest Order Strategy - prioritizes stations with the oldest pending orders");
+        logger.info("Chefs assigned to kitchen with different strategies:");
+        logger.info("- Mario: Dynamic Strategy - prioritizes stations based on task urgency and dependencies");
+        logger.info("- Luigi: Simple Strategy - prioritizes stations with assigned recipes");
+        logger.info("- Peach: Longest Queue Strategy - prioritizes stations with the most pending orders");
+        logger.info("- Toad: Oldest Order Strategy - prioritizes stations with the oldest pending orders");
     }
     
     public void start() {
@@ -173,7 +176,7 @@ public class KitchenSimulator {
     
     private void checkCompletedOrders() {
         while (collectionPoint.hasReadyOrders()) {
-            System.out.println("Order completed and ready for pickup!");
+            logger.info("Order completed and ready for pickup!");
             collectionPoint.collectNextOrder();
         }
     }

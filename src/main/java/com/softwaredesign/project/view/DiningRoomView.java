@@ -5,10 +5,12 @@ import com.softwaredesign.project.controller.DiningRoomController;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
 import com.softwaredesign.project.orderfulfillment.Table;
 import jexer.*;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.*;
 
 public class DiningRoomView extends GamePlayView {
+    private static final Logger logger = LoggerFactory.getLogger(DiningRoomView.class);
     private final RestaurantApplication app;    
     private TTableWidget tableWidget;
     private Queue<TableUpdate> pendingUpdates;
@@ -45,7 +47,7 @@ public class DiningRoomView extends GamePlayView {
 
     @Override
     public void initialize(TWindow window) {
-        System.out.println("[DiningRoomView] Initializing view");
+        logger.info("[DiningRoomView] Initializing view");
         super.initialize(window);  // This will set up the window and call setupView()
     }
 
@@ -80,7 +82,7 @@ public class DiningRoomView extends GamePlayView {
     public void onTableUpdate(int tableNumber, int capacity, int customers, String status, char waiterId) {
         TableUpdate update = new TableUpdate(tableNumber, capacity, customers, status, waiterId);
         if (!isInitialized) {
-            System.out.println("[DiningRoomView] View not yet initialized, queueing update for table: " + tableNumber);
+            logger.info("[DiningRoomView] View not yet initialized, queueing update for table: " + tableNumber);
             pendingUpdates.offer(update);
         } else {
             updateTableInWidget(tableNumber, capacity, customers, status, waiterId);
@@ -89,7 +91,7 @@ public class DiningRoomView extends GamePlayView {
 
     private void updateTableInWidget(int tableNumber, int capacity, int customers, String status, char waiterId) {
         if (tableWidget == null) {
-            System.err.println("[DiningRoomView] Table widget not initialized");
+            logger.error("[DiningRoomView] Table widget not initialized");
             return;
         }
 
@@ -109,9 +111,9 @@ public class DiningRoomView extends GamePlayView {
             tableWidget.setCellText(3, tableNumber - 1, status);
             tableWidget.setCellText(4, tableNumber - 1, String.valueOf(waiterId));
 
-            System.out.println("[DiningRoomView] Updated table " + tableNumber);
+            logger.info("[DiningRoomView] Updated table " + tableNumber);
         } catch (Exception e) {
-            System.err.println("[DiningRoomView] Error updating table " + tableNumber + ": " + e.getMessage());
+            logger.error("[DiningRoomView] Error updating table " + tableNumber + ": " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -119,6 +121,6 @@ public class DiningRoomView extends GamePlayView {
     @Override
     public void setBankBalance(double newBalance) {
         super.setBankBalance(newBalance);
-        System.out.println("[DiningRoomView] Updated bank balance to: $" + String.format("%.2f", bankBalance));
+        logger.info("[DiningRoomView] Updated bank balance to: $" + String.format("%.2f", bankBalance));
     }
 }

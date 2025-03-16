@@ -3,6 +3,8 @@ package com.softwaredesign.project.orderfulfillment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
@@ -11,6 +13,7 @@ import com.softwaredesign.project.orderfulfillment.Table;
 public class SeatingPlan {
     private List<Table> tables;
     private int maxTableCapacity;
+    private static final Logger logger = LoggerFactory.getLogger(SeatingPlan.class);
     
     public SeatingPlan(int totalTables, int totalSeats, int maxTableCapacity, Menu menu) {
         this.maxTableCapacity = maxTableCapacity;
@@ -53,7 +56,7 @@ public class SeatingPlan {
             
             // Break if no seats were distributed in this iteration
             if (!seatsDistributed) {
-                System.out.println("[SeatingPlan] Warning: Could not distribute " + remainingSeats + 
+                logger.info("[SeatingPlan] Warning: Could not distribute " + remainingSeats + 
                                   " remaining seats. All tables at maximum capacity.");
                 break;
             }
@@ -69,7 +72,7 @@ public class SeatingPlan {
         
         // Check if group is too large for any table
         if (groupSize > maxTableCapacity) {
-            System.out.println("Sorry, we cannot accommodate groups larger than " + maxTableCapacity);
+            logger.info("Sorry, we cannot accommodate groups larger than " + maxTableCapacity);
             return null;
         }
         
@@ -77,12 +80,12 @@ public class SeatingPlan {
         for (Table table : tables) {
             if (table.getTableCapacity() >= groupSize && table.getCustomers().isEmpty()) {
                 customerGroup.forEach(table::addCustomer);
-                System.out.println("Group of " + groupSize + " seated at table " + table.getTableNumber());
+                logger.info("Group of " + groupSize + " seated at table " + table.getTableNumber());
                 return table;
             }
         }
         
-        System.out.println("Sorry, no available tables for a group of " + groupSize);
+        logger.info("Sorry, no available tables for a group of " + groupSize);
         return null;
     }
     
