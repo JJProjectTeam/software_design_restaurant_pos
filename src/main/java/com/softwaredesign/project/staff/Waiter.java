@@ -10,6 +10,8 @@ import com.softwaredesign.project.order.OrderManager;
 import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
+
+import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
 import com.softwaredesign.project.inventory.InventoryStockTracker;
 
 public class Waiter extends StaffMember {
@@ -18,8 +20,8 @@ public class Waiter extends StaffMember {
     private Menu menu;
     private InventoryStockTracker inventoryStockTracker;
 
-    public Waiter(double payPerHour, double speedMultiplier, OrderManager orderManager, Menu menu, InventoryStockTracker inventoryStockTracker) {
-        super(payPerHour, speedMultiplier);
+    public Waiter(double payPerHour, ISpeedComponent speedDecorator, OrderManager orderManager, Menu menu, InventoryStockTracker inventoryStockTracker) {
+        super(payPerHour, speedDecorator);
         this.assignedTables = new ArrayList<>();
         this.orderManager = orderManager;
         this.menu = menu;

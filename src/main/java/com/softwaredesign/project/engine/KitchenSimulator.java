@@ -11,8 +11,11 @@ import com.softwaredesign.project.staff.ChefManager;
 import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.DynamicChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
+import com.softwaredesign.project.staff.staffspeeds.CocaineAddictDecorator;
 import com.softwaredesign.project.staff.chefstrategies.LongestQueueFirstStrategy;
 import com.softwaredesign.project.staff.chefstrategies.OldestOrderFirstStrategy;
+import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
+import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
 
 /**
  * A simulator class that sets up and runs the kitchen simulation.
@@ -69,10 +72,16 @@ public class KitchenSimulator {
         ChefStrategy oldestOrderStrategy = new OldestOrderFirstStrategy();
         
         // Create chefs with different strategies and meaningful names
-        Chef chef1 = new Chef("Mario", 15.0, 1.0, dynamicStrategy, stationManager); // Dynamic strategy
-        Chef chef2 = new Chef("Luigi", 18.0, 0.8, simpleStrategy, stationManager); // Simple strategy
-        Chef chef3 = new Chef("Peach", 17.0, 0.9, longestQueueStrategy, stationManager); // Longest queue strategy
-        Chef chef4 = new Chef("Toad", 16.0, 1.1, oldestOrderStrategy, stationManager); // Oldest order strategy
+        
+        ISpeedComponent speed1 = new BaseSpeed();
+        ISpeedComponent speed2 = new CocaineAddictDecorator(speed1);
+        ISpeedComponent speed3 = new BaseSpeed();
+        ISpeedComponent speed4 = new BaseSpeed();
+        
+        Chef chef1 = new Chef("Mario", 15.0, speed1, dynamicStrategy, stationManager); // Dynamic strategy
+        Chef chef2 = new Chef("Luigi", 18.0, speed2, simpleStrategy, stationManager); // Simple strategy
+        Chef chef3 = new Chef("Peach", 17.0, speed3, longestQueueStrategy, stationManager); // Longest queue strategy
+        Chef chef4 = new Chef("Toad", 16.0, speed4, oldestOrderStrategy, stationManager); // Oldest order strategy
         
         // Add the chefs to the chef manager
         chefManager.addChef(chef1);

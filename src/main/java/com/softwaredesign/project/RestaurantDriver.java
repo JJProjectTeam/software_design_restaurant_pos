@@ -29,6 +29,9 @@ import com.softwaredesign.project.staff.ChefManager;
 import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.DynamicChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
+import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
+import com.softwaredesign.project.staff.staffspeeds.CocaineAddictDecorator;
+import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
 import com.softwaredesign.project.order.Meal;
 import com.softwaredesign.project.order.Recipe;
 
@@ -354,8 +357,12 @@ public class RestaurantDriver {
         ChefStrategy dynamicStrategy = new DynamicChefStrategy(stationManager);
         ChefStrategy simpleStrategy = new SimpleChefStrategy();
         
-        Chef chef1 = new Chef("Default Chef 1", 15.0, 1.0, dynamicStrategy, stationManager);
-        Chef chef2 = new Chef("Default Chef 2", 18.0, 0.8, simpleStrategy, stationManager);
+        // Create two speeds for both chefs
+        ISpeedComponent baseSpeed = new BaseSpeed();
+        ISpeedComponent cocaineSpeed = new CocaineAddictDecorator(baseSpeed);
+
+        Chef chef1 = new Chef("Default Chef 1", 15.0, baseSpeed, dynamicStrategy, stationManager);
+        Chef chef2 = new Chef("Default Chef 2", 18.0, cocaineSpeed, simpleStrategy, stationManager);
         
         defaultChefs.add(chef1);
         defaultChefs.add(chef2);
@@ -663,7 +670,7 @@ public class RestaurantDriver {
                             System.out.println("  - Task: " + 
                                 (station.getCurrentTask() != null ? station.getCurrentTask().getName() : "None"));
                             System.out.println("  - Progress: " + station.getCookingProgress() + 
-                                (station.getCurrentTask() != null ? "/" + station.getCurrentTask().getCookingTime() : ""));
+                                (station.getCurrentTask() != null ? "/" + station.getCurrentTask().getCookingWorkRequired() : ""));
                         }
                     }
                 }

@@ -8,14 +8,20 @@
             "maxSpeed": 5, 
             "standardPay": 15.00, 
             "payMultiplierBySpeed": 1, 
-            "payMultiplierByStation": 1
+            "payMultiplierByStation": 1,
+            "chanceOfCaffieneAddict": 0.3,
+            "chanceOfLethargic": 0.3,
+            "chanceOfCocaineAddict": 0.25
         },
         "waiters": {
             "min": 1,
             "max": 10, 
             "maxSpeed": 5, 
             "standardPay": 10.00, 
-            "payMultiplierBySpeed": 1
+            "payMultiplierBySpeed": 1,
+            "chanceOfCaffieneAddict": 0.3,
+            "chanceOfLethargic": 0.3,
+            "chanceOfCocaineAddict": 0.05
         }
     },
     "diningRoomRules": {

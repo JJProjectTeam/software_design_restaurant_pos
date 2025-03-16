@@ -17,8 +17,8 @@ public class RecipeTask {
     private StationType stationType;
     private List<Ingredient> ingredients;
     private boolean completed;
-    private static final int DEFAULT_COOKING_TIME = 5;
-    private int cookingTime;
+    private static final int DEFAULT_COOKING_WORK_REQUIRED = 5;
+    private int cookingWorkRequired;
     private Set<RecipeTask> dependencies; // Tasks that must be completed before this task can start
     private boolean assigned; // Tracks if this task has been assigned to a station
     private Recipe recipe; // Reference to the parent recipe this task belongs to
@@ -29,13 +29,13 @@ public class RecipeTask {
         this.ingredients = new ArrayList<>();
         this.completed = false;
         this.assigned = false;
-        this.cookingTime = DEFAULT_COOKING_TIME;
+        this.cookingWorkRequired = DEFAULT_COOKING_WORK_REQUIRED;
         this.dependencies = new HashSet<>();
     }
     
     public RecipeTask(String name, StationType stationType, int cookingTime) {
         this(name, stationType);
-        this.cookingTime = cookingTime;
+        this.cookingWorkRequired = cookingTime;
     }
     
     /**
@@ -153,8 +153,8 @@ public class RecipeTask {
         this.assigned = assigned;
     }
     
-    public int getCookingTime() {
-        return cookingTime;
+    public int getCookingWorkRequired() {
+        return cookingWorkRequired;
     }
     
     /**
