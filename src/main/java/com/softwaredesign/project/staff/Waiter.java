@@ -18,7 +18,8 @@ public class Waiter extends StaffMember {
     private Menu menu;
     private InventoryStockTracker inventoryStockTracker;
 
-    public Waiter(double payPerHour, double speedMultiplier, OrderManager orderManager, Menu menu, InventoryStockTracker inventoryStockTracker) {
+    public Waiter(double payPerHour, double speedMultiplier, OrderManager orderManager, Menu menu,
+            InventoryStockTracker inventoryStockTracker) {
         super(payPerHour, speedMultiplier);
         this.assignedTables = new ArrayList<>();
         this.orderManager = orderManager;
@@ -30,7 +31,7 @@ public class Waiter extends StaffMember {
         assignedTables.add(table);
     }
 
-    public void takeTableOrder(Table table) {
+    public boolean takeTableOrder(Table table) {
         if (!assignedTables.contains(table)) {
             throw new IllegalArgumentException("This table is not assigned to this waiter");
         }
@@ -42,6 +43,7 @@ public class Waiter extends StaffMember {
         String orderId = orderManager.generateOrderId();
         Order tableOrder = new Order(orderId);
 
+        // First collect all orders without checking inventory
         for (DineInCustomer customer : table.getCustomers()) {
             try {
                 Recipe customerRecipe = customer.selectRecipeFromMenu(menu);
@@ -60,10 +62,13 @@ public class Waiter extends StaffMember {
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
                 // TODO: Handle what to do if the order cannot be fulfilled
+                return false;
             }
         }
 
+        // Only add the order if we have all ingredients
         orderManager.addOrder(tableOrder);
+        return true;
     }
 
     public List<Table> getAssignedTables() {
