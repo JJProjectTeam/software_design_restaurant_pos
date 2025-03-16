@@ -2,6 +2,9 @@ package com.softwaredesign.project.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.ArrayList;
+import java.util.List;
 
 public class StatisticsSingleton {
     private static StatisticsSingleton instance;
@@ -112,6 +115,16 @@ public class StatisticsSingleton {
         return intStats.containsKey(key) || doubleStats.containsKey(key) || stringStats.containsKey(key);
     }
 
+    // Get total revenue from BankBalanceSingleton
+    public double getTotalRevenue() {
+        return BankBalanceSingleton.getInstance().getBankBalance();
+    }
+
+    // Get formatted total revenue
+    public String getFormattedTotalRevenue() {
+        return String.format("$%.2f", getTotalRevenue());
+    }
+
     // Get all statistics as formatted strings
     public Map<String, String> getAllStatsFormatted() {
         Map<String, String> allStats = new HashMap<>();
@@ -128,7 +141,45 @@ public class StatisticsSingleton {
             allStats.put(entry.getKey(), entry.getValue());
         }
 
+        // Add total revenue from BankBalanceSingleton
+        allStats.put("totalRevenue", getFormattedTotalRevenue());
+
         return allStats;
+    }
+
+    /**
+     * Gets a formatted summary of statistics for display.
+     * This sorts the stats alphabetically and formats them for easy reading.
+     * 
+     * @return A list of formatted strings, each representing a statistic
+     */
+    public List<String> getStatsSummary() {
+        List<String> summary = new ArrayList<>();
+        Map<String, String> allStats = new TreeMap<>(getAllStatsFormatted()); // TreeMap sorts keys alphabetically
+
+        for (Map.Entry<String, String> entry : allStats.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            // Format the key for better readability (camelCase to Title Case with Spaces)
+            String formattedKey = key.replaceAll("([a-z])([A-Z])", "$1 $2");
+            formattedKey = formattedKey.substring(0, 1).toUpperCase() + formattedKey.substring(1);
+
+            // Format value based on known types (for values not already formatted)
+            if ((key.contains("revenue") || key.contains("balance") || key.contains("cost"))
+                    && !value.startsWith("$") && doubleStats.containsKey(key)) {
+                value = String.format("$%.2f", doubleStats.get(key));
+            }
+
+            // For totalRevenue specifically, use the bank balance directly
+            if (key.equals("totalRevenue")) {
+                value = getFormattedTotalRevenue();
+            }
+
+            summary.add(formattedKey + ": " + value);
+        }
+
+        return summary;
     }
 
     // Reset all statistics
