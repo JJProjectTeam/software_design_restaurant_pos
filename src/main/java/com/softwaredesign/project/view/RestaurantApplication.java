@@ -20,7 +20,7 @@ public class RestaurantApplication extends TApplication {
 
     public RestaurantApplication() throws Exception {
         super(BackendType.SWING);
-        System.out.println("[RestaurantApplication] Starting application initialization");
+        logger.info("[RestaurantApplication] Starting application initialization");
 
         // Create the main window first
         mainWindow = new TWindow(this, "OOPsies Bistro", 0, 0, getScreen().getWidth(), getScreen().getHeight());
@@ -33,32 +33,32 @@ public class RestaurantApplication extends TApplication {
         TMenu helpMenu = addMenu("&Help");
         helpMenu.addItem(1025, "&Restart Game");
 
-        System.out.println("[RestaurantApplication] Application initialization complete");
+        logger.info("[RestaurantApplication] Application initialization complete");
     }
 
     private void initializeViews() {
-        System.out.println("[RestaurantApplication] Initializing views");
+        logger.info("[RestaurantApplication] Initializing views");
         for (ViewType viewType : ViewType.values()) {
             try {
-                System.out.println("[RestaurantApplication] Creating view instance for: " + viewType);
+                logger.info("[RestaurantApplication] Creating view instance for: " + viewType);
                 View view = viewType.getViewClass()
                     .getDeclaredConstructor(RestaurantApplication.class)
                     .newInstance(this);
                 views.put(viewType, view);
-                System.out.println("[RestaurantApplication] Initialized view: " + viewType);
+                logger.info("[RestaurantApplication] Initialized view: " + viewType);
             } catch (Exception e) {
-                System.err.println("[RestaurantApplication] ERROR: Failed to initialize view: " + viewType);
-                System.err.println("[RestaurantApplication] Exception: " + e.getMessage());
+                logger.error("[RestaurantApplication] ERROR: Failed to initialize view: " + viewType);
+                logger.error("[RestaurantApplication] Exception: " + e.getMessage());
                 e.printStackTrace();
                 throw new RuntimeException("Failed to initialize view: " + viewType, e);
             }
         }
-        System.out.println("[RestaurantApplication] All views initialized successfully");
+        logger.info("[RestaurantApplication] All views initialized successfully");
     }
 
     public void showView(ViewType viewType) {
         if (currentView == viewType) {
-            System.out.println("[RestaurantApplication] Already showing view: " + viewType);
+            logger.info("[RestaurantApplication] Already showing view: " + viewType);
             return;
         }
 
@@ -95,11 +95,11 @@ public class RestaurantApplication extends TApplication {
                 
                 currentView = viewType;
             } else {
-                System.err.println("[RestaurantApplication] ERROR: Unknown view: " + viewType);
+                logger.error("[RestaurantApplication] ERROR: Unknown view: " + viewType);
                 throw new IllegalArgumentException("Unknown view: " + viewType);
             }
         } catch (Exception e) {
-            System.err.println("[RestaurantApplication] ERROR in showView: " + e.getMessage());
+            logger.error("[RestaurantApplication] ERROR in showView: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -143,7 +143,7 @@ public class RestaurantApplication extends TApplication {
      * Properly restarts the application by reinitializing all views and resetting the application state.
      */
     private void restartApplication() {
-        System.out.println("[RestaurantApplication] Restarting application");
+        logger.info("[RestaurantApplication] Restarting application");
         try {
             // Use SwingUtilities.invokeLater to ensure UI updates happen on the EDT
             javax.swing.SwingUtilities.invokeLater(() -> {
@@ -173,14 +173,14 @@ public class RestaurantApplication extends TApplication {
                         showView(ViewType.WELCOME);
                     }
                     
-                    System.out.println("[RestaurantApplication] Application restart completed");
+                    logger.info("[RestaurantApplication] Application restart completed");
                 } catch (Exception e) {
-                    System.err.println("[RestaurantApplication] ERROR during restart: " + e.getMessage());
+                    logger.error("[RestaurantApplication] ERROR during restart: " + e.getMessage());
                     e.printStackTrace();
                 }
             });
         } catch (Exception e) {
-            System.err.println("[RestaurantApplication] ERROR during restart: " + e.getMessage());
+            logger.error("[RestaurantApplication] ERROR during restart: " + e.getMessage());
             e.printStackTrace();
         }
     }

@@ -34,7 +34,7 @@ public class RestaurantViewMediator {
      * Register a view with its corresponding controller type
      */
     public void registerView(ViewType type, View view) {
-        System.out.println("[RestaurantViewMediator] Registering view for type: " + type);
+        logger.info("[RestaurantViewMediator] Registering view for type: " + type);
         registeredViews.computeIfAbsent(type, k -> new ArrayList<>()).add(view);
     }
     
@@ -42,7 +42,7 @@ public class RestaurantViewMediator {
      * Unregister a view
      */
     public void unregisterView(String type, View view) {
-        System.out.println("[RestaurantViewMediator] Unregistering view for type: " + type);
+        logger.info("[RestaurantViewMediator] Unregistering view for type: " + type);
         List<View> views = registeredViews.get(type);
         if (views != null) {
             views.remove(view);
@@ -56,7 +56,7 @@ public class RestaurantViewMediator {
      * Register a controller
      */
     public void registerController(String type, BaseController controller) {
-        System.out.println("[RestaurantViewMediator] Registering controller of type: " + type);
+        logger.info("[RestaurantViewMediator] Registering controller of type: " + type);
         controllers.put(type, controller);
     }
     
@@ -78,7 +78,7 @@ public class RestaurantViewMediator {
      * Notify all views of a specific type to update
      */
     public void notifyViewUpdate(String type) {
-        System.out.println("[RestaurantViewMediator] Notifying views of type " + type + " to update");
+        logger.info("[RestaurantViewMediator] Notifying views of type " + type + " to update");
         BaseController controller = controllers.get(type);
         if (controller != null) {
             List<View> views = registeredViews.get(type);
@@ -111,7 +111,7 @@ public class RestaurantViewMediator {
      * Reset the mediator by clearing all registered controllers and views
      */
     public void reset() {
-        System.out.println("[RestaurantViewMediator] Resetting mediator - clearing all controllers and views");
+        logger.info("[RestaurantViewMediator] Resetting mediator - clearing all controllers and views");
         controllers.clear();
         registeredViews.clear();
     }

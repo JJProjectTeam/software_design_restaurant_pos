@@ -77,7 +77,7 @@ public class ChefConfigurationView extends ConfigurationView {
     }
 
     public Map<String, Integer> getStationCounts() {
-        System.out.println("[ChefConfigurationView] Getting station counts - Grill: " + grillStationCount 
+        logger.info("[ChefConfigurationView] Getting station counts - Grill: " + grillStationCount 
             + ", Prep: " + prepStationCount + ", Plate: " + plateStationCount);
         
         Map<String, Integer> counts = new HashMap<>();
@@ -105,7 +105,7 @@ public class ChefConfigurationView extends ConfigurationView {
             createInputForm();
             
         } catch (Exception e) {
-            System.err.println("[ChefConfigurationView] Error setting up elements: " + e.getMessage());
+            logger.error("[ChefConfigurationView] Error setting up elements: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -114,7 +114,7 @@ public class ChefConfigurationView extends ConfigurationView {
         try {
             
             window.addLabel("Current Chefs:", 2, 4);
-            System.out.println("[ChefConfigurationView] Adding table widget");
+            logger.info("[ChefConfigurationView] Adding table widget");
             chefTable = window.addTable(2, 6, 130, 8, 5, 1);
             
             // Set column labels
@@ -139,13 +139,13 @@ public class ChefConfigurationView extends ConfigurationView {
             removeNameField = window.addField(30, 14, 20, false);
             window.addButton("Remove", 55, 14, new TAction() {
                 public void DO() {
-                    System.out.println("[ChefConfigurationView] Remove Chef button pressed");
+                    logger.info("[ChefConfigurationView] Remove Chef button pressed");
                     removeChef();
                 }
             });
             
         } catch (Exception e) {
-            System.err.println("[ChefConfigurationView] Error creating chef table: " + e.getMessage());
+            logger.error("[ChefConfigurationView] Error creating chef table: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -237,7 +237,7 @@ public class ChefConfigurationView extends ConfigurationView {
             });
             
         } catch (Exception e) {
-            System.err.println("[ChefConfigurationView] Error creating station count configuration: " + e.getMessage());
+            logger.error("[ChefConfigurationView] Error creating station count configuration: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -248,7 +248,7 @@ public class ChefConfigurationView extends ConfigurationView {
             prepCountLabel.setLabel(String.valueOf(prepStationCount));
             plateCountLabel.setLabel(String.valueOf(plateStationCount));
         } catch (Exception e) {
-            System.err.println("[ChefConfigurationView] Error updating station count labels: " + e.getMessage());
+            logger.error("[ChefConfigurationView] Error updating station count labels: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -262,14 +262,14 @@ public class ChefConfigurationView extends ConfigurationView {
     
             // Repopulate from local storage without deducting bank balance again
             for (var entry : chefs.entrySet()) {
-                System.out.println("[ChefConfigurationView] Adding chef to table: " + entry.getKey());
+                logger.info("[ChefConfigurationView] Adding chef to table: " + entry.getKey());
                 var chef = entry.getValue();
                 String stations = String.join(", ", chef.stations);
                 addChefToTable(chef.name, stations, chef.speed, chef.cost, chef.strategy, false);
             }
             
         } catch (Exception e) {
-            System.err.println("[ChefConfigurationView] Error refreshing chef table: " + e.getMessage());
+            logger.error("[ChefConfigurationView] Error refreshing chef table: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -319,7 +319,7 @@ public class ChefConfigurationView extends ConfigurationView {
             });
             
         } catch (Exception e) {
-            System.err.println("[ChefConfigurationView] Error creating input form: " + e.getMessage());
+            logger.error("[ChefConfigurationView] Error creating input form: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -373,7 +373,7 @@ public class ChefConfigurationView extends ConfigurationView {
                 clearInputs();
             }
         } catch (Exception e) {
-            System.err.println("[ChefConfigurationView] Error handling add chef: " + e.getMessage());
+            logger.error("[ChefConfigurationView] Error handling add chef: " + e.getMessage());
             e.printStackTrace();
             showError("Error adding chef: " + e.getMessage());
         }
@@ -438,7 +438,7 @@ public class ChefConfigurationView extends ConfigurationView {
             removeNameField.setText("");
             
         } catch (Exception e) {
-            System.err.println("[ChefConfigurationView] Error removing chef: " + e.getMessage());
+            logger.error("[ChefConfigurationView] Error removing chef: " + e.getMessage());
             e.printStackTrace();
             showError("Error removing chef: " + e.getMessage());
         }
@@ -459,7 +459,7 @@ public class ChefConfigurationView extends ConfigurationView {
                 setBankBalance(bankBalance - cost);
             }
         } catch (Exception e) {
-            System.err.println("[ChefConfigurationView] Error adding chef to table: " + e.getMessage());
+            logger.error("[ChefConfigurationView] Error adding chef to table: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -505,7 +505,7 @@ public class ChefConfigurationView extends ConfigurationView {
 
             return true;
         } catch (Exception e) {
-            System.err.println("[ChefConfigurationView] Error validating inputs: " + e.getMessage());
+            logger.error("[ChefConfigurationView] Error validating inputs: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -520,7 +520,7 @@ public class ChefConfigurationView extends ConfigurationView {
             prepCheckbox.setChecked(false);
             plateCheckbox.setChecked(false);
         } catch (Exception e) {
-            System.err.println("[ChefConfigurationView] Error clearing inputs: " + e.getMessage());
+            logger.error("[ChefConfigurationView] Error clearing inputs: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -539,7 +539,7 @@ public class ChefConfigurationView extends ConfigurationView {
 
             return hasGrill && hasPrep && hasPlate;
         } catch (Exception e) {
-            System.err.println("[ChefConfigurationView] Error validating station coverage: " + e.getMessage());
+            logger.error("[ChefConfigurationView] Error validating station coverage: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -611,7 +611,7 @@ public class ChefConfigurationView extends ConfigurationView {
             
             return true;
         } catch (Exception e) {
-            System.err.println("[ChefConfigurationView] Error validating configuration: " + e.getMessage());
+            logger.error("[ChefConfigurationView] Error validating configuration: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -624,7 +624,7 @@ public class ChefConfigurationView extends ConfigurationView {
             mediator.notifyBankBalanceChanged(bankBalance);
             app.showView(ViewType.DINING_CONFIGURATION);
         } catch (Exception e) {
-            System.err.println("[ChefConfigurationView] Error navigating to next view: " + e.getMessage());
+            logger.error("[ChefConfigurationView] Error navigating to next view: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -636,7 +636,7 @@ public class ChefConfigurationView extends ConfigurationView {
             mediator.notifyBankBalanceChanged(bankBalance);
             app.showView(ViewType.WELCOME);
         } catch (Exception e) {
-            System.err.println("[ChefConfigurationView] Error navigating to previous view: " + e.getMessage());
+            logger.error("[ChefConfigurationView] Error navigating to previous view: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -681,7 +681,7 @@ public class ChefConfigurationView extends ConfigurationView {
                 }
                 speedCombo.setList(speeds);
             } catch (Exception e) {
-                System.err.println("[ChefConfigurationView] Error updating speed combo box: " + e.getMessage());
+                logger.error("[ChefConfigurationView] Error updating speed combo box: " + e.getMessage());
             }
         }
     }

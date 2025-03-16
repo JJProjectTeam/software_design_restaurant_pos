@@ -54,7 +54,7 @@ public class OrderManager {
         // Only re-register if it's not already registered
         if (collectionPoint.getTotalMealsExpected(orderId) == 0) {
             collectionPoint.registerOrder(orderId, recipes.size());
-            System.out.println("[DEBUG] Re-registered order " + orderId + " with collection point");
+            logger.info("[DEBUG] Re-registered order " + orderId + " with collection point");
         }
 
         for (Recipe recipe : recipes) {

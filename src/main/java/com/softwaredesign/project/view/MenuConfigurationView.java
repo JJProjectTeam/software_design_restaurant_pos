@@ -14,9 +14,9 @@ public class MenuConfigurationView extends ConfigurationView {
 
     public MenuConfigurationView(RestaurantApplication app) {
         super(app);
-        System.out.println("[MenuConfigurationView] Registering with mediator");
+        logger.info("[MenuConfigurationView] Registering with mediator");
         mediator.registerView(ViewType.MENU_CONFIGURATION, this);
-        System.out.println("[MenuConfigurationView] Registration complete");
+        logger.info("[MenuConfigurationView] Registration complete");
         // Initialize with default recipes
         this.availableRecipes = new HashMap<>();
         this.selectedRecipeStates = new HashMap<>();
@@ -35,7 +35,7 @@ public class MenuConfigurationView extends ConfigurationView {
     }
 
     public void setPossibleRecipes(Map<String, List<String>> recipes) {
-        System.out.println("[MenuConfigurationView] Setting possible recipes: " + recipes.keySet());
+        logger.info("[MenuConfigurationView] Setting possible recipes: " + recipes.keySet());
         this.availableRecipes = new HashMap<>(recipes);
         this.selectedRecipeStates = new HashMap<>();
         
@@ -46,10 +46,10 @@ public class MenuConfigurationView extends ConfigurationView {
         
         // Update the display if already initialized
         if (window != null) {
-            System.out.println("[MenuConfigurationView] Window exists, updating display");
+            logger.info("[MenuConfigurationView] Window exists, updating display");
             updateListDisplay();
         } else {
-            System.out.println("[MenuConfigurationView] Window not yet initialized");
+            logger.info("[MenuConfigurationView] Window not yet initialized");
         }
     }
 
@@ -63,11 +63,11 @@ public class MenuConfigurationView extends ConfigurationView {
             window.addLabel("Available Recipes:", 2, 4);
             window.addLabel("(Select the items you want to include in your menu)", 2, 5);
             
-            System.out.println("[MenuConfigurationView] Setting up with " + availableRecipes.size() + " recipes");
+            logger.info("[MenuConfigurationView] Setting up with " + availableRecipes.size() + " recipes");
             createRecipeSelectionArea();
             
         } catch (Exception e) {
-            System.err.println("[MenuConfigurationView] Error setting up elements: " + e.getMessage());
+            logger.error("[MenuConfigurationView] Error setting up elements: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -99,7 +99,7 @@ public class MenuConfigurationView extends ConfigurationView {
             recipeList = window.addList(displayItems, 2, 7, window.getWidth() - 4, window.getHeight() - 15, listAction);
             
         } catch (Exception e) {
-            System.err.println("[MenuConfigurationView] Error creating recipe selection area: " + e.getMessage());
+            logger.error("[MenuConfigurationView] Error creating recipe selection area: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -119,7 +119,7 @@ public class MenuConfigurationView extends ConfigurationView {
             // Sync with selectedRecipes set
             syncSelections();
         } catch (Exception e) {
-            System.err.println("[MenuConfigurationView] Error toggling recipe selection: " + e.getMessage());
+            logger.error("[MenuConfigurationView] Error toggling recipe selection: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -164,7 +164,7 @@ public class MenuConfigurationView extends ConfigurationView {
                 recipeList.setSelectedIndex(currentSelection);
             }
         } catch (Exception e) {
-            System.err.println("[MenuConfigurationView] Error updating list display: " + e.getMessage());
+            logger.error("[MenuConfigurationView] Error updating list display: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -178,7 +178,7 @@ public class MenuConfigurationView extends ConfigurationView {
                 }
             }
         } catch (Exception e) {
-            System.err.println("[MenuConfigurationView] Error syncing selections: " + e.getMessage());
+            logger.error("[MenuConfigurationView] Error syncing selections: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -207,7 +207,7 @@ public class MenuConfigurationView extends ConfigurationView {
             // Update the display
             updateListDisplay();
         } catch (Exception e) {
-            System.err.println("[MenuConfigurationView] Error setting selected recipes: " + e.getMessage());
+            logger.error("[MenuConfigurationView] Error setting selected recipes: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -233,7 +233,7 @@ public class MenuConfigurationView extends ConfigurationView {
             }
             return true;
         } catch (Exception e) {
-            System.err.println("[MenuConfigurationView] Error validating configuration: " + e.getMessage());
+            logger.error("[MenuConfigurationView] Error validating configuration: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -249,7 +249,7 @@ public class MenuConfigurationView extends ConfigurationView {
             mediator.notifyConfigurationComplete();
             app.showView(ViewType.DINING_ROOM);
         } catch (Exception e) {
-            System.err.println("[MenuConfigurationView] Error navigating to next view: " + e.getMessage());
+            logger.error("[MenuConfigurationView] Error navigating to next view: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -263,18 +263,18 @@ public class MenuConfigurationView extends ConfigurationView {
             syncSelections();
             app.showView(ViewType.DINING_CONFIGURATION);
         } catch (Exception e) {
-            System.err.println("[MenuConfigurationView] Error navigating to previous view: " + e.getMessage());
+            logger.error("[MenuConfigurationView] Error navigating to previous view: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     @Override
     protected void setupNavigationButtons() {
-        System.out.println("[MenuConfigurationView] setupNavigationButtons started");
+        logger.info("[MenuConfigurationView] setupNavigationButtons started");
         try {
             window.addButton("Start Game", window.getWidth() - 15, window.getHeight() - 4, new TAction() {
                 public void DO() {
-                    System.out.println("[MenuConfigurationView] Start Game button pressed");
+                    logger.info("[MenuConfigurationView] Start Game button pressed");
                     if (validateConfiguration()) {
                         onNextPressed();
                     }
@@ -283,13 +283,13 @@ public class MenuConfigurationView extends ConfigurationView {
 
             window.addButton("Back", 2, window.getHeight() - 4, new TAction() {
                 public void DO() {
-                    System.out.println("[MenuConfigurationView] Back button pressed");
+                    logger.info("[MenuConfigurationView] Back button pressed");
                     onBackPressed();
                 }
             });
-            System.out.println("[MenuConfigurationView] setupNavigationButtons completed");
+            logger.info("[MenuConfigurationView] setupNavigationButtons completed");
         } catch (Exception e) {
-            System.err.println("[MenuConfigurationView] Error in setupNavigationButtons: " + e.getMessage());
+            logger.error("[MenuConfigurationView] Error in setupNavigationButtons: " + e.getMessage());
             e.printStackTrace();
         }
     }

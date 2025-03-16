@@ -17,7 +17,7 @@ public abstract class ConfigurationView implements View, ConfigurableView {
         if (app == null) {
             throw new IllegalArgumentException("RestaurantApplication cannot be null");
         }
-        System.out.println("[ConfigurationView] Constructor called");
+        logger.info("[ConfigurationView] Constructor called");
         this.app = app;
         this.mediator = RestaurantViewMediator.getInstance();
     }
@@ -55,7 +55,7 @@ public abstract class ConfigurationView implements View, ConfigurableView {
                 window.getWidth() - 30, 2);
             
         } catch (Exception e) {
-            System.err.println("[ConfigurationView] Error in setupCommonElements: " + e.getMessage());
+            logger.error("[ConfigurationView] Error in setupCommonElements: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -85,7 +85,7 @@ public abstract class ConfigurationView implements View, ConfigurableView {
                 }
             });
         } catch (Exception e) {
-            System.err.println("[ConfigurationView] Error in setupNavigationButtons: " + e.getMessage());
+            logger.error("[ConfigurationView] Error in setupNavigationButtons: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -95,18 +95,18 @@ public abstract class ConfigurationView implements View, ConfigurableView {
             // Use a message box instead of a label
             new TMessageBox(window.getApplication(), "Error", message, TMessageBox.Type.OK);
         } catch (Exception e) {
-            System.err.println("[ConfigurationView] Error showing error message box: " + e.getMessage());
+            logger.error("[ConfigurationView] Error showing error message box: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     protected void showWarning(String message) {
-        System.out.println("[ConfigurationView] showWarning called with message: " + message);
+        logger.info("[ConfigurationView] showWarning called with message: " + message);
         try {
             // Use a message box instead of a label
             new TMessageBox(window.getApplication(), "Warning", message, TMessageBox.Type.OK);
         } catch (Exception e) {
-            System.err.println("[ConfigurationView] Error showing warning message box: " + e.getMessage());
+            logger.error("[ConfigurationView] Error showing warning message box: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -139,7 +139,7 @@ public abstract class ConfigurationView implements View, ConfigurableView {
             try {
                 bankBalanceLabel.setLabel(String.format("Bank Balance: $%.2f", bankBalance));
             } catch (Exception e) {
-                System.err.println("[ConfigurationView] Error updating bank balance label: " + e.getMessage());
+                logger.error("[ConfigurationView] Error updating bank balance label: " + e.getMessage());
                 e.printStackTrace();
             }
         }

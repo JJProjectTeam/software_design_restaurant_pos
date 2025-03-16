@@ -36,7 +36,7 @@ public class DynamicChefStrategy implements ChefStrategy {
                 if (recipe != null) {
                     RecipeTask task = findTaskForStation(recipe, station.getType());
                     if (task != null && task.areDependenciesMet() && !task.isCompleted()) {
-                        System.out.println("Strategy found available task at empty station: " + task.getName() + 
+                        logger.info("Strategy found available task at empty station: " + task.getName() + 
                                          " for recipe: " + recipe.getName() + 
                                          " at station: " + station.getType());
                         return station;
@@ -56,7 +56,7 @@ public class DynamicChefStrategy implements ChefStrategy {
                     if (recipe != null) {
                         RecipeTask task = findTaskForStation(recipe, station.getType());
                         if (task != null && task.areDependenciesMet() && !task.isCompleted()) {
-                            System.out.println("Strategy found task by station type priority: " + task.getName() + 
+                            logger.info("Strategy found task by station type priority: " + task.getName() + 
                                          " for recipe: " + recipe.getName() + 
                                          " at station: " + station.getType());
                             return station;
@@ -77,7 +77,7 @@ public class DynamicChefStrategy implements ChefStrategy {
                         !task.isCompleted()) {
                         Recipe recipe = task.getRecipe();
                         if (recipe != null) {
-                            System.out.println("Strategy found backlog task: " + task.getName() + 
+                            logger.info("Strategy found backlog task: " + task.getName() + 
                                              " for recipe: " + recipe.getName() + 
                                              " at station: " + station.getType());
                             return station;
@@ -122,7 +122,7 @@ public class DynamicChefStrategy implements ChefStrategy {
             if (task.getStationType() == station.getType() && task.areDependenciesMet() && !task.isCompleted()) {
                 Recipe recipe = task.getRecipe();
                 if (recipe != null) {
-                    System.out.println("Dynamic strategy found task " + task.getName() + 
+                    logger.info("Dynamic strategy found task " + task.getName() + 
                                    " for recipe " + recipe.getName() + " ready at " + 
                                    station.getType() + " station");
                     return task;

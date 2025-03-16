@@ -33,7 +33,7 @@ public abstract class Recipe {
         for (RecipeTask task : tasks) {
             if (task.getRecipe() == null) {
                 task.setRecipe(this);
-                System.out.println("[FIX] Setting recipe reference for task: " + task.getName() + " in recipe: " + name);
+                logger.info("[FIX] Setting recipe reference for task: " + task.getName() + " in recipe: " + name);
             }
         }
     }

@@ -33,7 +33,7 @@ public class DiningConfigurationView extends ConfigurationView {
             try {
                 maxTablesLabel.setLabel("(Maximum " + maxTables + " tables)");
             } catch (Exception e) {
-                System.err.println("[DiningConfigurationView] Error updating max tables label: " + e.getMessage());
+                logger.error("[DiningConfigurationView] Error updating max tables label: " + e.getMessage());
             }
         }
     }
@@ -45,7 +45,7 @@ public class DiningConfigurationView extends ConfigurationView {
             try {
                 maxCapacityLabel.setLabel("(Maximum " + maxCapacity + " seats per table)");
             } catch (Exception e) {
-                System.err.println("[DiningConfigurationView] Error updating max capacity label: " + e.getMessage());
+                logger.error("[DiningConfigurationView] Error updating max capacity label: " + e.getMessage());
             }
         }
     }
@@ -69,7 +69,7 @@ public class DiningConfigurationView extends ConfigurationView {
                 }
                 speedCombo.setList(speeds);
             } catch (Exception e) {
-                System.err.println("[DiningConfigurationView] Error updating speed combo box: " + e.getMessage());
+                logger.error("[DiningConfigurationView] Error updating speed combo box: " + e.getMessage());
             }
         }
     }
@@ -147,7 +147,7 @@ public class DiningConfigurationView extends ConfigurationView {
             // Create waiter input form
             createWaiterInputForm();
         } catch (Exception e) {
-            System.err.println("[DiningConfigurationView] Error setting up elements: " + e.getMessage());
+            logger.error("[DiningConfigurationView] Error setting up elements: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -181,7 +181,7 @@ public class DiningConfigurationView extends ConfigurationView {
                 }
             });
         } catch (Exception e) {
-            System.err.println("[DiningConfigurationView] Error creating waiter table: " + e.getMessage());
+            logger.error("[DiningConfigurationView] Error creating waiter table: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -199,7 +199,7 @@ public class DiningConfigurationView extends ConfigurationView {
                 addWaiterToTable(waiter.name, waiter.speed, waiter.costPerHour, false);
             }
         } catch (Exception e) {
-            System.err.println("[DiningConfigurationView] Error refreshing waiter table: " + e.getMessage());
+            logger.error("[DiningConfigurationView] Error refreshing waiter table: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -256,7 +256,7 @@ public class DiningConfigurationView extends ConfigurationView {
             
             maxCapacityLabel = window.addLabel("(Maximum " + maxCapacity + " seats per table)", 40, 22);
         } catch (Exception e) {
-            System.err.println("[DiningConfigurationView] Error creating table configuration: " + e.getMessage());
+            logger.error("[DiningConfigurationView] Error creating table configuration: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -265,7 +265,7 @@ public class DiningConfigurationView extends ConfigurationView {
         try {
             tableCountLabel.setLabel(String.valueOf(currentTableCount));
         } catch (Exception e) {
-            System.err.println("[DiningConfigurationView] Error updating table count label: " + e.getMessage());
+            logger.error("[DiningConfigurationView] Error updating table count label: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -274,7 +274,7 @@ public class DiningConfigurationView extends ConfigurationView {
         try {
             tableCapacityLabel.setLabel(String.valueOf(currentTableCapacity));
         } catch (Exception e) {
-            System.err.println("[DiningConfigurationView] Error updating table capacity label: " + e.getMessage());
+            logger.error("[DiningConfigurationView] Error updating table capacity label: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -302,7 +302,7 @@ public class DiningConfigurationView extends ConfigurationView {
                 }
             });
         } catch (Exception e) {
-            System.err.println("[DiningConfigurationView] Error creating waiter input form: " + e.getMessage());
+            logger.error("[DiningConfigurationView] Error creating waiter input form: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -340,7 +340,7 @@ public class DiningConfigurationView extends ConfigurationView {
             nameField.setText("");
             speedCombo.setIndex(0);
         } catch (Exception e) {
-            System.err.println("[DiningConfigurationView] Error adding waiter: " + e.getMessage());
+            logger.error("[DiningConfigurationView] Error adding waiter: " + e.getMessage());
             e.printStackTrace();
             showError("Error adding waiter: " + e.getMessage());
         }
@@ -359,7 +359,7 @@ public class DiningConfigurationView extends ConfigurationView {
                 setBankBalance(bankBalance - costPerHour);
             }
         } catch (Exception e) {
-            System.err.println("[DiningConfigurationView] Error adding waiter to table: " + e.getMessage());
+            logger.error("[DiningConfigurationView] Error adding waiter to table: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -389,7 +389,7 @@ public class DiningConfigurationView extends ConfigurationView {
             }
             return true;
         } catch (Exception e) {
-            System.err.println("[DiningConfigurationView] Error validating configuration: " + e.getMessage());
+            logger.error("[DiningConfigurationView] Error validating configuration: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -402,7 +402,7 @@ public class DiningConfigurationView extends ConfigurationView {
             mediator.notifyBankBalanceChanged(bankBalance);
             app.showView(ViewType.MENU_CONFIGURATION);
         } catch (Exception e) {
-            System.err.println("[DiningConfigurationView] Error navigating to next view: " + e.getMessage());
+            logger.error("[DiningConfigurationView] Error navigating to next view: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -414,7 +414,7 @@ public class DiningConfigurationView extends ConfigurationView {
             mediator.notifyBankBalanceChanged(bankBalance);
             app.showView(ViewType.CHEF_CONFIGURATION);
         } catch (Exception e) {
-            System.err.println("[DiningConfigurationView] Error navigating to previous view: " + e.getMessage());
+            logger.error("[DiningConfigurationView] Error navigating to previous view: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -457,9 +457,9 @@ public class DiningConfigurationView extends ConfigurationView {
             // Clear the remove field
             removeNameField.setText("");
             
-            System.out.println("[DiningConfigurationView] Waiter removed: " + waiterName);
+            logger.info("[DiningConfigurationView] Waiter removed: " + waiterName);
         } catch (Exception e) {
-            System.err.println("[DiningConfigurationView] Error removing waiter: " + e.getMessage());
+            logger.error("[DiningConfigurationView] Error removing waiter: " + e.getMessage());
             e.printStackTrace();
             showError("Error removing waiter: " + e.getMessage());
         }

@@ -76,9 +76,9 @@ public class Station extends Entity {
     public void addTask(RecipeTask task) {
         // Ensure the task has a recipe reference
         if (task.getRecipe() == null) {
-            System.out.println("[WARNING] Task added to backlog without recipe reference: " + task.getName());
+            logger.info("[WARNING] Task added to backlog without recipe reference: " + task.getName());
             // Don't add tasks without a recipe reference
-            System.out.println("[FIX] Rejecting task without recipe reference: " + task.getName());
+            logger.info("[FIX] Rejecting task without recipe reference: " + task.getName());
             return;
         }
         
@@ -89,7 +89,7 @@ public class Station extends Entity {
             // Use the enhanced equals method which now considers the recipe's orderId
             if (existingTask.equals(task)) {
                 taskAlreadyExists = true;
-                System.out.println("[DEBUG] Prevented duplicate task: " + task.getName() + 
+                logger.info("[DEBUG] Prevented duplicate task: " + task.getName() + 
                                " for recipe: " + (task.getRecipe() != null ? task.getRecipe().getName() : "unknown") +
                                " with orderId: " + (task.getRecipe() != null ? task.getRecipe().getOrderId() : "unknown"));
                 break;
@@ -99,7 +99,7 @@ public class Station extends Entity {
         // Only add the task if it's not already in the backlog
         if (!taskAlreadyExists) {
             backlog.add(task);
-            System.out.println("[DEBUG] Added task to " + type + " station backlog: " + task.getName() + 
+            logger.info("[DEBUG] Added task to " + type + " station backlog: " + task.getName() + 
                            " for recipe: " + (task.getRecipe() != null ? task.getRecipe().getName() : "unknown") +
                            " with orderId: " + (task.getRecipe() != null ? task.getRecipe().getOrderId() : "unknown"));
         }
@@ -139,18 +139,18 @@ public class Station extends Entity {
     }
 
     public void registerChef(Chef chef) {
-        System.out.println("\n[DEBUG-STATION] Registering chef " + chef.getName() + " at " + type + " station");
-        System.out.println("[DEBUG-STATION] Current assignedChef: " + 
+        logger.info("\n[DEBUG-STATION] Registering chef " + chef.getName() + " at " + type + " station");
+        logger.info("[DEBUG-STATION] Current assignedChef: " + 
             (assignedChef != null ? assignedChef.getName() : "NONE"));
-        System.out.println("[DEBUG-STATION] Chef's current station: " + 
+        logger.info("[DEBUG-STATION] Chef's current station: " + 
             (chef.getCurrentStation() != null ? chef.getCurrentStation().getType() : "NONE"));
         
         // If we already have a chef assigned, unregister them first
         if (assignedChef != null && assignedChef != chef) {
-            System.out.println("[DEBUG-STATION] Station already has chef " + assignedChef.getName() + ", unregistering them");
+            logger.info("[DEBUG-STATION] Station already has chef " + assignedChef.getName() + ", unregistering them");
             // Log if a task is being reassigned
             if (currentTask != null) {
-                System.out.println("Chef " + assignedChef.getName() + " has left " + type + " station, task reassigned");
+                logger.info("Chef " + assignedChef.getName() + " has left " + type + " station, task reassigned");
             }
             // Unregister the current chef
             assignedChef.removeStationAssignment(this);
@@ -160,35 +160,35 @@ public class Station extends Entity {
         // Check if the chef is already assigned to another station and unregister them from there
         Station currentChefStation = chef.getCurrentStation();
         if (currentChefStation != null && currentChefStation != this) {
-            System.out.println("[DEBUG-STATION] Chef " + chef.getName() + " is currently at " + 
+            logger.info("[DEBUG-STATION] Chef " + chef.getName() + " is currently at " + 
                 currentChefStation.getType() + " station, unregistering from there");
-            System.out.println("Chef " + chef.getName() + " was at " + currentChefStation.getType() + 
+            logger.info("Chef " + chef.getName() + " was at " + currentChefStation.getType() + 
                               " station but is now moving to " + type + " station");
             // Unregister from the other station
             if (currentChefStation.getAssignedChef() == chef) {
-                System.out.println("[DEBUG-STATION] Unregistering chef from " + currentChefStation.getType());
+                logger.info("[DEBUG-STATION] Unregistering chef from " + currentChefStation.getType());
                 currentChefStation.unregisterChef();
             } else {
-                System.out.println("[DEBUG-STATION] WARNING: Chef thinks they're at " + 
+                logger.info("[DEBUG-STATION] WARNING: Chef thinks they're at " + 
                     currentChefStation.getType() + " but that station doesn't have them assigned!");
             }
         }
         
         // Set this station as the chef's current station
-        System.out.println("[DEBUG-STATION] Setting " + type + " as current station for " + chef.getName());
+        logger.info("[DEBUG-STATION] Setting " + type + " as current station for " + chef.getName());
         chef.setCurrentStation(this);
         assignedChef = chef;
         
-        System.out.println("Chef " + chef.getName() + " is now registered at " + type + " station");
+        logger.info("Chef " + chef.getName() + " is now registered at " + type + " station");
         
         // If there's a task but no chef was assigned to it yet, assign this chef
         if (currentTask != null && taskChef == null) {
-            System.out.println("[DEBUG-STATION] Assigning chef to task: " + currentTask.getName());
+            logger.info("[DEBUG-STATION] Assigning chef to task: " + currentTask.getName());
             taskChef = chef;
         }
         
         // Verify the registration worked
-        System.out.println("[DEBUG-STATION] After registration: " + 
+        logger.info("[DEBUG-STATION] After registration: " + 
             chef.getName() + " current station is " + 
             (chef.getCurrentStation() != null ? chef.getCurrentStation().getType() : "NONE") + 
             ", station's assigned chef is " + 
@@ -196,44 +196,44 @@ public class Station extends Entity {
     }
 
     public void unregisterChef() {
-        System.out.println("\n[DEBUG-STATION] Unregistering chef from " + type + " station");
-        System.out.println("[DEBUG-STATION] Current assignedChef: " + 
+        logger.info("\n[DEBUG-STATION] Unregistering chef from " + type + " station");
+        logger.info("[DEBUG-STATION] Current assignedChef: " + 
             (assignedChef != null ? assignedChef.getName() : "NONE"));
         
         // Note: We don't unregister the taskChef here because they remain
         // associated with the current task even if they leave the station
         
         if (assignedChef != null) {
-            System.out.println("[DEBUG-STATION] Found assigned chef: " + assignedChef.getName());
+            logger.info("[DEBUG-STATION] Found assigned chef: " + assignedChef.getName());
             
             // If this chef considers this their current station, update their state
             if (assignedChef.getCurrentStation() == this) {
-                System.out.println("[DEBUG-STATION] Chef " + assignedChef.getName() + 
+                logger.info("[DEBUG-STATION] Chef " + assignedChef.getName() + 
                     " considers this their current station, clearing reference");
-                System.out.println("Chef " + assignedChef.getName() + " is no longer registered at " + type + " station");
+                logger.info("Chef " + assignedChef.getName() + " is no longer registered at " + type + " station");
                 // Clear the chef's station reference
                 assignedChef.setCurrentStation(null);
             } else {
-                System.out.println("[DEBUG-STATION] WARNING: Chef " + assignedChef.getName() + 
+                logger.info("[DEBUG-STATION] WARNING: Chef " + assignedChef.getName() + 
                     " is assigned here but thinks they're at " + 
                     (assignedChef.getCurrentStation() != null ? 
                         assignedChef.getCurrentStation().getType() : "NONE"));
             }
             
             Chef departingChef = assignedChef;
-            System.out.println("[DEBUG-STATION] Setting assignedChef to null");
+            logger.info("[DEBUG-STATION] Setting assignedChef to null");
             assignedChef = null;
             
             // Make sure the chef's assigned stations list no longer contains this station
-            System.out.println("[DEBUG-STATION] Removing station from chef's assigned stations list");
+            logger.info("[DEBUG-STATION] Removing station from chef's assigned stations list");
             departingChef.removeStationAssignment(this);
             
-            System.out.println("[DEBUG-STATION] After unregistration: Chef " + departingChef.getName() + 
+            logger.info("[DEBUG-STATION] After unregistration: Chef " + departingChef.getName() + 
                 " current station is " + 
                 (departingChef.getCurrentStation() != null ? 
                     departingChef.getCurrentStation().getType() : "NONE"));
         } else {
-            System.out.println("[DEBUG-STATION] No chef assigned to unregister");
+            logger.info("[DEBUG-STATION] No chef assigned to unregister");
             assignedChef = null;
         }
     }
@@ -265,16 +265,16 @@ public class Station extends Entity {
                     
                     // Preserve the assigned task in the backlog so that the station always shows tasks (even if in progress)
                     
-                    System.out.println(type + " station assigned task: " + task.getName() + 
+                    logger.info(type + " station assigned task: " + task.getName() + 
                                       " for recipe: " + recipe.getName());
                     return;
                 }
             }
             
             // No tasks for this station type in this recipe
-            System.out.println(type + " station has no tasks in recipe: " + recipe.getName());
+            logger.info(type + " station has no tasks in recipe: " + recipe.getName());
         } else {
-            System.out.println(type + " station is busy with another task");
+            logger.info(type + " station is busy with another task");
         }
     }
     
@@ -285,18 +285,18 @@ public class Station extends Entity {
      */
     public void assignTask(Recipe recipe, RecipeTask task) {
         if (currentTask != null) {
-            System.out.println("[DEBUG-STATION] " + type + " station already has task " + 
+            logger.info("[DEBUG-STATION] " + type + " station already has task " + 
                 currentTask.getName() + ", not assigning " + task.getName());
             
             // Add to backlog instead
             if (!backlog.contains(task)) {
                 backlog.add(task);
-                System.out.println("[DEBUG-STATION] Added " + task.getName() + " to " + type + " station backlog");
+                logger.info("[DEBUG-STATION] Added " + task.getName() + " to " + type + " station backlog");
             }
             return;
         }
         
-        System.out.println("[DEBUG-STATION] Assigning task " + task.getName() + " to " + type + " station");
+        logger.info("[DEBUG-STATION] Assigning task " + task.getName() + " to " + type + " station");
         currentRecipe = recipe;
         currentTask = task;
         cookingProgress = 0;
@@ -305,17 +305,17 @@ public class Station extends Entity {
         // If we have a chef assigned, mark them as working
         if (assignedChef != null) {
             assignedChef.setWorking(true);
-            System.out.println("[DEBUG-STATION] Chef " + assignedChef.getName() + 
+            logger.info("[DEBUG-STATION] Chef " + assignedChef.getName() + 
                 " is now working on task " + task.getName());
         } else {
-            System.out.println("[DEBUG-STATION] No chef assigned to " + type + 
+            logger.info("[DEBUG-STATION] No chef assigned to " + type + 
                 " station, task " + task.getName() + " waiting for chef");
         }
         
         // Ingredients will be provided by the kitchen during its writeState method
         // via provideIngredientsToStations()
         if (kitchen == null) {
-            System.out.println("[DEBUG-STATION] Kitchen reference is null, cannot request ingredients");
+            logger.info("[DEBUG-STATION] Kitchen reference is null, cannot request ingredients");
             // Auto-provide ingredients for testing
             needsIngredients = false;
         }
@@ -348,7 +348,7 @@ public class Station extends Entity {
     public void provideIngredients() {
         if (currentTask != null && needsIngredients) {
             needsIngredients = false;
-            System.out.println(type + " station received ingredients for task: " + 
+            logger.info(type + " station received ingredients for task: " + 
                                currentTask.getName() + " of " + currentRecipe.getName());
         }
     }
@@ -388,7 +388,7 @@ public class Station extends Entity {
                 progressMessage.append(" (Order ID: ").append(currentRecipe.getOrderId()).append(")");
             }
             
-            System.out.println(progressMessage.toString());
+            logger.info(progressMessage.toString());
             
             if (cookingProgress >= requiredWork) {
                 // Task is done
@@ -406,7 +406,7 @@ public class Station extends Entity {
                     completionMessage.append(" (Order ID: ").append(currentRecipe.getOrderId()).append(")");
                 }
                 
-                System.out.println(completionMessage.toString());
+                logger.info(completionMessage.toString());
                 
                 // Mark the task as completed and no longer assigned
                 currentTask.setCompleted(true);
@@ -416,7 +416,7 @@ public class Station extends Entity {
                 // Check if the entire recipe is completed
                 if (completedRecipe.allTasksCompleted()) {
                     // All tasks are complete, build the meal
-                    System.out.println("All tasks for " + completedRecipe.getName() + " are complete, building meal");
+                    logger.info("All tasks for " + completedRecipe.getName() + " are complete, building meal");
                     
                     // Get order ID from recipe
                     String orderId = completedRecipe.getOrderId();
@@ -434,7 +434,7 @@ public class Station extends Entity {
                         collectionPoint.addCompletedMeal(completedMeal);
                         
                     } catch (Exception e) {
-                        System.out.println("[ERROR] Failed to add meal to collection point: " + e.getMessage());
+                        logger.info("[ERROR] Failed to add meal to collection point: " + e.getMessage());
                         
                         // Try to re-register the order if needed
                         if (orderId != null && kitchen != null && kitchen.getOrderManager() != null) {
@@ -443,7 +443,7 @@ public class Station extends Entity {
                                 if (order.getOrderId().equals(orderId)) {
                                     // Re-register the order with the collection point
                                     collectionPoint.registerOrder(orderId, order.getRecipes().size());
-                                    System.out.println("[DEBUG] Re-registered order " + orderId + " with collection point");
+                                    logger.info("[DEBUG] Re-registered order " + orderId + " with collection point");
                                     
                                     // Try again with proper error handling
                                     try {
@@ -457,9 +457,9 @@ public class Station extends Entity {
                                         
                                         // Now add the meal to the collection point
                                         collectionPoint.addCompletedMeal(retryMeal);
-                                        System.out.println("[DEBUG] Successfully added meal after re-registration");
+                                        logger.info("[DEBUG] Successfully added meal after re-registration");
                                     } catch (Exception ex) {
-                                        System.out.println("[ERROR] Failed to add meal even after re-registration: " + ex.getMessage());
+                                        logger.info("[ERROR] Failed to add meal even after re-registration: " + ex.getMessage());
                                     }
                                     break;
                                 }
@@ -467,7 +467,7 @@ public class Station extends Entity {
                         }
                     }
                 } else {
-                    System.out.println("Recipe " + completedRecipe.getName() + " still has tasks remaining");
+                    logger.info("Recipe " + completedRecipe.getName() + " still has tasks remaining");
                     
                         // Find the next station that has tasks for this recipe
                     boolean foundNextTask = false;
@@ -505,7 +505,7 @@ public class Station extends Entity {
                                         for (Order order : orderManager.getPendingOrders()) {
                                             if (order.getOrderId().equals(orderId)) {
                                                 // Add this order to the next station's backlog
-                                                System.out.println("[DEBUG] Moving order " + orderId + " from " + type + 
+                                                logger.info("[DEBUG] Moving order " + orderId + " from " + type + 
                                                             " to " + nextStationType + " station backlog");
                                                 nextStation.addTasksFromOrder(order);
                                                 break;
@@ -516,7 +516,7 @@ public class Station extends Entity {
                             }
                         }
                     } else {
-                        System.out.println("[DEBUG] No next station found for recipe " + completedRecipe.getName());
+                        logger.info("[DEBUG] No next station found for recipe " + completedRecipe.getName());
                     }
                 }
                 
@@ -540,7 +540,7 @@ public class Station extends Entity {
                 // If we still don't have a task and the chef is still assigned here,
                 // have them look for work elsewhere
                 if (currentChef != null && !currentChef.isWorking()) {
-                    System.out.println("[DEBUG] Having chef " + currentChef.getName() + " look for new work");
+                    logger.info("[DEBUG] Having chef " + currentChef.getName() + " look for new work");
                     currentChef.chooseNextStation();
                 }
             }
@@ -555,11 +555,11 @@ public class Station extends Entity {
      * Tries to pull the next task from the backlog queue if available.
      */
     private void tryAssignNewTask() {
-        System.out.println("[DEBUG] " + type + " station checking backlog for new tasks");
+        logger.info("[DEBUG] " + type + " station checking backlog for new tasks");
         if (!backlog.isEmpty()) {
             RecipeTask nextTask = backlog.remove(0);
             Recipe recipe = nextTask.getRecipe();
-            System.out.println("[DEBUG] " + type + " station pulling queued task: " + nextTask.getName());
+            logger.info("[DEBUG] " + type + " station pulling queued task: " + nextTask.getName());
             currentRecipe = recipe;
             currentTask = nextTask;
             cookingProgress = 0;
@@ -567,14 +567,14 @@ public class Station extends Entity {
 
             if (assignedChef != null) {
                 assignedChef.setWorking(true);
-                System.out.println("[DEBUG-STATION] Chef " + assignedChef.getName() + " is now working on task " + nextTask.getName());
+                logger.info("[DEBUG-STATION] Chef " + assignedChef.getName() + " is now working on task " + nextTask.getName());
             } else {
-                System.out.println("[DEBUG-STATION] No chef assigned to " + type + " station, queued task " + nextTask.getName() + " remains waiting for chef assignment");
+                logger.info("[DEBUG-STATION] No chef assigned to " + type + " station, queued task " + nextTask.getName() + " remains waiting for chef assignment");
             }
             return;
         }
         // Instead of asking kitchen for new recipes, simply log that we're waiting for new tasks
-        System.out.println("[DEBUG] " + type + " station backlog is empty, waiting for new tasks");
+        logger.info("[DEBUG] " + type + " station backlog is empty, waiting for new tasks");
         return;
     }
 

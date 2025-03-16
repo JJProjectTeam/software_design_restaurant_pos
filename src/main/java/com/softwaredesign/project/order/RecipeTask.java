@@ -109,7 +109,7 @@ public class RecipeTask {
         }
         
         if (allMet) {
-            System.out.println("[DEBUG] All dependencies are now met for task: " + name);
+            logger.info("[DEBUG] All dependencies are now met for task: " + name);
         }
     }
     

@@ -64,7 +64,7 @@ public class KitchenView extends GamePlayView {
     }
 
     protected void createKitchenStationsTable() {
-        System.out.println("[KitchenView] Creating kitchen table...");
+        logger.info("[KitchenView] Creating kitchen table...");
         kitchenStations = window.addTable(2, 3, window.getWidth() - 4, 15, 5, 10);
 
         // Set column labels and widths
@@ -83,7 +83,7 @@ public class KitchenView extends GamePlayView {
         }
         
         if (!isInitialized) {
-            System.out.println("[KitchenView] View not yet initialized, queueing update for station: " + station);
+            logger.info("[KitchenView] View not yet initialized, queueing update for station: " + station);
             synchronized (pendingUpdates) {
                 pendingUpdates.offer(update);
             }
@@ -94,7 +94,7 @@ public class KitchenView extends GamePlayView {
 
     private void updateStationInTable(int stationID, String stationName, int backlog, String chef, char inUse) {
         if (kitchenStations == null) {
-            System.out.println("[KitchenView] ERROR: kitchenStations is null!");
+            logger.info("[KitchenView] ERROR: kitchenStations is null!");
             return;
         }
         
@@ -116,22 +116,22 @@ public class KitchenView extends GamePlayView {
                 kitchenStations.setCellText(4, targetRow, String.valueOf(inUse));
             }
 
-            System.out.println("[KitchenView] Successfully updated station " + stationID + " in the view");
+            logger.info("[KitchenView] Successfully updated station " + stationID + " in the view");
         } catch (Exception e) {
-            System.out.println("[KitchenView] ERROR updating station " + stationID + ": " + e.getMessage());
+            logger.info("[KitchenView] ERROR updating station " + stationID + ": " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     @Override
     public void cleanup() {
-        System.out.println("[KitchenView] Cleaning up view, unregistering from mediator");
+        logger.info("[KitchenView] Cleaning up view, unregistering from mediator");
         mediator.unregisterView("Kitchen", this);
     }
 
     @Override
     public void setBankBalance(double newBalance) {
         super.setBankBalance(newBalance);
-        System.out.println("[KitchenView] Updated bank balance to: $" + String.format("%.2f", bankBalance));
+        logger.info("[KitchenView] Updated bank balance to: $" + String.format("%.2f", bankBalance));
     }
 }

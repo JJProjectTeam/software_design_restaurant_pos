@@ -103,11 +103,11 @@ public class KitchenSimulator {
         chef3.chooseNextStation();
         chef4.chooseNextStation();
         
-        System.out.println("Chefs assigned to kitchen with different strategies:");
-        System.out.println("- Mario: Dynamic Strategy - prioritizes stations based on task urgency and dependencies");
-        System.out.println("- Luigi: Simple Strategy - prioritizes stations with assigned recipes");
-        System.out.println("- Peach: Longest Queue Strategy - prioritizes stations with the most pending orders");
-        System.out.println("- Toad: Oldest Order Strategy - prioritizes stations with the oldest pending orders");
+        logger.info("Chefs assigned to kitchen with different strategies:");
+        logger.info("- Mario: Dynamic Strategy - prioritizes stations based on task urgency and dependencies");
+        logger.info("- Luigi: Simple Strategy - prioritizes stations with assigned recipes");
+        logger.info("- Peach: Longest Queue Strategy - prioritizes stations with the most pending orders");
+        logger.info("- Toad: Oldest Order Strategy - prioritizes stations with the oldest pending orders");
     }
     
     public void start() {
@@ -173,7 +173,7 @@ public class KitchenSimulator {
     
     private void checkCompletedOrders() {
         while (collectionPoint.hasReadyOrders()) {
-            System.out.println("Order completed and ready for pickup!");
+            logger.info("Order completed and ready for pickup!");
             collectionPoint.collectNextOrder();
         }
     }

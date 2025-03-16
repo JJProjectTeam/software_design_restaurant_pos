@@ -23,8 +23,8 @@
 //         inventory.attach(alert);
 
 //         // Add initial ingredients to inventory
-//         System.out.println("Initializing Inventory:");
-//         System.out.println("----------------------");
+//         logger.info("Initializing Inventory:");
+//         logger.info("----------------------");
 //         inventory.addIngredient("Tomato", 10, 2.50);
 //         inventory.addIngredient("Garlic", 8, 1.00);
 //         inventory.addIngredient("Onion", 15, 1.50);
@@ -38,7 +38,7 @@
 //         inventory.addIngredient("Kebab Meat", 50, 5.00);
 //         inventory.addIngredient("Pita Bread", 40, 5.00);
 
-//         System.out.println();
+//         logger.info();
 //         return inventory;
 //     }
 
@@ -54,7 +54,7 @@
 //         Kitchen kitchen = new Kitchen(orderManager, inventory, collectionPoint);
 
 //         // Test empty kitchen first
-//         System.out.println("Testing empty kitchen:");
+//         logger.info("Testing empty kitchen:");
 //         kitchen.prepareRecipes(); // No return value needed anymore
 
 //         // Create ingredients for modifications
@@ -62,8 +62,8 @@
 //         Ingredient sauce = new Ingredient("Garlic Sauce", inventory);
 
 //         // Create and populate orders
-//         System.out.println("Creating and processing orders:");
-//         System.out.println("------------------------------");
+//         logger.info("Creating and processing orders:");
+//         logger.info("------------------------------");
 
 //         // Order 1: Burger with extra cheese
 //         // TODO: Need to replace this with a factory maybe to make it sequential
@@ -86,16 +86,16 @@
 //         kitchen.prepareRecipes();
 
 //         // Display prepared meals from collection point
-//         System.out.println("\nPrepared Meals:");
-//         System.out.println("---------------");
+//         logger.info("\nPrepared Meals:");
+//         logger.info("---------------");
 //         while (collectionPoint.hasReadyOrders()) {
 //             List<Meal> completedOrder = collectionPoint.collectNextOrder();
 //             for (Meal meal : completedOrder) {
-//                 System.out.println(meal);
+//                 logger.info(meal);
 //             }
 //         }
 
-//         System.out.println("\nOrder Processing Completed");
+//         logger.info("\nOrder Processing Completed");
 //     }
 
 //     public static void main(String[] args) {
@@ -106,14 +106,14 @@
 //         processOrders(inventory);
 
 //         // Step 3: Display final inventory status
-//         System.out.println("\nFinal Inventory Status:");
-//         System.out.println("----------------------");
-//         System.out.println("Tomato: " + inventory.getStock("Tomato") + " units");
-//         System.out.println("Garlic: " + inventory.getStock("Garlic") + " units");
-//         System.out.println("Onion: " + inventory.getStock("Onion") + " units");
-//         System.out.println("Beef: " + inventory.getStock("Beef Patty") + " units");
-//         System.out.println("Chicken: " + inventory.getStock("Chicken") + " units");
-//         System.out.println("Cheese: " + inventory.getStock("Cheese") + " units");
-//         System.out.println("Garlic Sauce: " + inventory.getStock("Garlic Sauce") + " units");
+//         logger.info("\nFinal Inventory Status:");
+//         logger.info("----------------------");
+//         logger.info("Tomato: " + inventory.getStock("Tomato") + " units");
+//         logger.info("Garlic: " + inventory.getStock("Garlic") + " units");
+//         logger.info("Onion: " + inventory.getStock("Onion") + " units");
+//         logger.info("Beef: " + inventory.getStock("Beef Patty") + " units");
+//         logger.info("Chicken: " + inventory.getStock("Chicken") + " units");
+//         logger.info("Cheese: " + inventory.getStock("Cheese") + " units");
+//         logger.info("Garlic Sauce: " + inventory.getStock("Garlic Sauce") + " units");
 //     }
 // }

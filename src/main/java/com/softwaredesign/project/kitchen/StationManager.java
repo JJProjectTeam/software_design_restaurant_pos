@@ -24,7 +24,7 @@ public class StationManager {
     public void addStation(Station station) {
         stations.get(station.getType()).add(station);
         GameEngine.getInstance().registerEntity(station);
-        System.out.println("[StationManager] Added station: " + station.getType() + 
+        logger.info("[StationManager] Added station: " + station.getType() + 
             " (Total: " + stations.get(station.getType()).size() + ")");
     }
     
@@ -49,6 +49,6 @@ public class StationManager {
         for (List<Station> stationList : stations.values()) {
             stationList.clear();
         }
-        System.out.println("[StationManager] Cleared all stations");
+        logger.info("[StationManager] Cleared all stations");
     }
 }

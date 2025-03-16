@@ -17,8 +17,8 @@ public class InventoryAlert implements IObserver {
     @Override
     public void update(String ingredient, int quantity) {
         if (isLowStock(quantity)) {
-            System.out.println("WARNING: Low stock alert for " + ingredient + " - only " + quantity + " remaining!");
+            logger.info("WARNING: Low stock alert for " + ingredient + " - only " + quantity + " remaining!");
         }
-        System.out.println("Stock update: " + ingredient + " - " + quantity + " units in stock");
+        logger.info("Stock update: " + ingredient + " - " + quantity + " units in stock");
     }
 }

@@ -53,7 +53,7 @@ public class SeatingPlan {
             
             // Break if no seats were distributed in this iteration
             if (!seatsDistributed) {
-                System.out.println("[SeatingPlan] Warning: Could not distribute " + remainingSeats + 
+                logger.info("[SeatingPlan] Warning: Could not distribute " + remainingSeats + 
                                   " remaining seats. All tables at maximum capacity.");
                 break;
             }
@@ -69,7 +69,7 @@ public class SeatingPlan {
         
         // Check if group is too large for any table
         if (groupSize > maxTableCapacity) {
-            System.out.println("Sorry, we cannot accommodate groups larger than " + maxTableCapacity);
+            logger.info("Sorry, we cannot accommodate groups larger than " + maxTableCapacity);
             return null;
         }
         
@@ -77,12 +77,12 @@ public class SeatingPlan {
         for (Table table : tables) {
             if (table.getTableCapacity() >= groupSize && table.getCustomers().isEmpty()) {
                 customerGroup.forEach(table::addCustomer);
-                System.out.println("Group of " + groupSize + " seated at table " + table.getTableNumber());
+                logger.info("Group of " + groupSize + " seated at table " + table.getTableNumber());
                 return table;
             }
         }
         
-        System.out.println("Sorry, no available tables for a group of " + groupSize);
+        logger.info("Sorry, no available tables for a group of " + groupSize);
         return null;
     }
     

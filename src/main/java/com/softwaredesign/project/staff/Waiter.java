@@ -60,7 +60,7 @@ public class Waiter extends StaffMember {
                     throw new IllegalStateException("Not enough ingredients to fulfill the order");
                 }
             } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
+                logger.info(e.getMessage());
                 // TODO: Handle what to do if the order cannot be fulfilled
             }
         }

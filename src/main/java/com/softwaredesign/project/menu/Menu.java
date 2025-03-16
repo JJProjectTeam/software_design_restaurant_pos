@@ -41,7 +41,7 @@ public class Menu {
     }
 
     private void initializeSampleMenu() {
-        System.out.println("[Menu] Initializing sample menu with recipes");
+        logger.info("[Menu] Initializing sample menu with recipes");
         // Pass inventoryService to recipe constructor
         availableRecipes.add(new BurgerRecipe(inventoryService));
     }

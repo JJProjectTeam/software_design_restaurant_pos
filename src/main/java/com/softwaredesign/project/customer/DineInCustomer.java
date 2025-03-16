@@ -36,7 +36,7 @@ public class DineInCustomer extends Customer {
                 // RecipeValidator.getInstance().validateIngredients(selectedRecipe.getIngredients());
                 validChoice = true;
             } catch (RecipeValidationException e) {
-                System.out.println("Sorry, that item is unavailable. Selecting something else...");
+                logger.info("Sorry, that item is unavailable. Selecting something else...");
             }
         }
         return selectedRecipe;
@@ -63,7 +63,7 @@ public class DineInCustomer extends Customer {
                         // RecipeValidator.getInstance().validateIngredients(List.of(addIngredient));
                         addedIngredients.add(addIngredient);
                     } catch (RecipeValidationException e) {
-                        System.out.println("Can't add " + addIngredient.getName() + ". Skipping...");
+                        logger.info("Can't add " + addIngredient.getName() + ". Skipping...");
                     }
                 }
             } else {
@@ -80,7 +80,7 @@ public class DineInCustomer extends Customer {
         Ingredient additionalIngredient = menu.getRandomAdditionalIngredient();
         if (additionalIngredient != null) {
             recipe.addIngredient(additionalIngredient);
-            System.out.println("Customer requested additional " + additionalIngredient.getName());
+            logger.info("Customer requested additional " + additionalIngredient.getName());
         }
     }
 

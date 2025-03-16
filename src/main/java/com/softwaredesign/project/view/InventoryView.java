@@ -48,12 +48,12 @@ public class InventoryView extends GamePlayView {
     @Override
     public void setupView() {
         super.setupView();
-        System.out.println("[InventoryView] Setup view called");
+        logger.info("[InventoryView] Setup view called");
     }
 
     @Override
     protected void addViewContent() {
-        System.out.println("[InventoryView] Adding view content");
+        logger.info("[InventoryView] Adding view content");
         window.addLabel("Inventory Status", 2, 2);
         createInventoryTable();
         
@@ -68,7 +68,7 @@ public class InventoryView extends GamePlayView {
     }
 
     protected void createInventoryTable() {
-        System.out.println("[InventoryView] Creating inventory table...");
+        logger.info("[InventoryView] Creating inventory table...");
         inventoryTable = window.addTable(2, TABLE_Y, window.getWidth() - 4, TABLE_HEIGHT, COLUMN_HEADERS.length, 1);
         
         // Set column labels and widths
@@ -84,7 +84,7 @@ public class InventoryView extends GamePlayView {
     public void onIngredientUpdate(String ingredient, int stock, double price) {
         InventoryUpdate update = new InventoryUpdate(ingredient, stock, price);
         if (!isInitialized) {
-            System.out.println("[InventoryView] View not yet initialized, queueing update for ingredient: " + ingredient);
+            logger.info("[InventoryView] View not yet initialized, queueing update for ingredient: " + ingredient);
             pendingUpdates.offer(update);
         } else {
             updateIngredientInTable(ingredient, stock, price);
@@ -93,7 +93,7 @@ public class InventoryView extends GamePlayView {
 
     private void updateIngredientInTable(String ingredient, int stock, double price) {
         if (inventoryTable == null) {
-            System.err.println("[InventoryView] Inventory table not initialized");
+            logger.error("[InventoryView] Inventory table not initialized");
             return;
         }
 
@@ -110,17 +110,17 @@ public class InventoryView extends GamePlayView {
                 // Add new row if needed
                 while (nextRowIndex >= inventoryTable.getRowCount()) {
                     inventoryTable.insertRowBelow(inventoryTable.getRowCount() - 1);
-                    System.out.println("[InventoryView] Added row " + (inventoryTable.getRowCount() - 1) + " to table");
+                    logger.info("[InventoryView] Added row " + (inventoryTable.getRowCount() - 1) + " to table");
                 }
                 
                 rowIndex = nextRowIndex++;
                 ingredientRowMap.put(ingredient, rowIndex);
-                System.out.println("[InventoryView] Created new row " + rowIndex + " for ingredient " + ingredient);
+                logger.info("[InventoryView] Created new row " + rowIndex + " for ingredient " + ingredient);
             }
 
             // Check if the row index is valid before setting cell text
             if (rowIndex >= inventoryTable.getRowCount()) {
-                System.out.println("[InventoryView] Row index " + rowIndex + " is out of bounds, adding more rows");
+                logger.info("[InventoryView] Row index " + rowIndex + " is out of bounds, adding more rows");
                 while (rowIndex >= inventoryTable.getRowCount()) {
                     inventoryTable.insertRowBelow(inventoryTable.getRowCount() - 1);
                 }
@@ -132,14 +132,14 @@ public class InventoryView extends GamePlayView {
             inventoryTable.setCellText(2, rowIndex, String.format("$%.2f", price));
 
         } catch (Exception e) {
-            System.err.println("[InventoryView] Error updating ingredient " + ingredient + ": " + e.getMessage());
+            logger.error("[InventoryView] Error updating ingredient " + ingredient + ": " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     @Override
     public void initialize(TWindow window) {
-        System.out.println("[InventoryView] Initializing view");
+        logger.info("[InventoryView] Initializing view");
         // Reset the row index and map when reinitializing
         this.nextRowIndex = 0;
         this.ingredientRowMap.clear();
@@ -149,7 +149,7 @@ public class InventoryView extends GamePlayView {
 
     @Override
     public void cleanup() {
-        System.out.println("[InventoryView] Cleaning up view");
+        logger.info("[InventoryView] Cleaning up view");
         if (window != null) {
             window.close();
         }
@@ -158,6 +158,6 @@ public class InventoryView extends GamePlayView {
     @Override
     public void setBankBalance(double newBalance) {
         super.setBankBalance(newBalance);
-        System.out.println("[InventoryView] Updated bank balance to: $" + String.format("%.2f", bankBalance));
+        logger.info("[InventoryView] Updated bank balance to: $" + String.format("%.2f", bankBalance));
     }
 }
