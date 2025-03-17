@@ -118,7 +118,6 @@ public class Table {
 
     public int getTableNumber() {
         return tableNumber;
-    
     }
 
     public int getTableCapacity() {

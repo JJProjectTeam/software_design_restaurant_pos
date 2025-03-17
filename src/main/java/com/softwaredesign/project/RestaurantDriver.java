@@ -125,7 +125,7 @@ public class RestaurantDriver {
             logger.info("[RestaurantDriver] Starting application...");
             
             initializeConfiguration();
-            app.showView(ViewType.END_OF_GAME);
+            app.showView(ViewType.WELCOME);
 
             // Create a timer for the game loop
             java.util.Timer gameTimer = new java.util.Timer();
