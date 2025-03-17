@@ -56,7 +56,7 @@ public class DiningRoomView extends GamePlayView {
     @Override
     protected void addViewContent() {
         window.addLabel("Dining Room", 2, 2);
-        tableWidget = window.addTable(2, TABLE_Y, window.getWidth() - 4, TABLE_HEIGHT, 5, 1);
+        tableWidget = window.addTable(2, TABLE_Y, window.getWidth() - 4, TABLE_HEIGHT, 4, 1);
         
         // Set column labels and widths
         for (int i = 0; i < COLUMN_HEADERS.length; i++) {
