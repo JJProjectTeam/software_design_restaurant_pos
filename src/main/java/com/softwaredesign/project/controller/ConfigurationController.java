@@ -427,7 +427,7 @@ public class ConfigurationController extends BaseController {
         return switch (strategyName.toUpperCase()) {
             case "FIFO", "OLDEST" -> new OldestOrderFirstStrategy();
             case "LIFO", "NEWEST" -> new LongestQueueFirstStrategy(); 
-            default -> new SimpleChefStrategy(); 
+            default -> new PriorityBasedChefStrategy(); 
         };
     }
 

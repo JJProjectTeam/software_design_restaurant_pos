@@ -169,7 +169,7 @@ public class Chef extends StaffMember {
             return currentStation;
         }
         
-        // Revised logic: Only search among assigned stations.
+        // Only search among assigned stations
         List<Station> stationsToCheck = new ArrayList<>();
         
         if (!assignedStations.isEmpty()) {
@@ -180,8 +180,7 @@ public class Chef extends StaffMember {
              return null;
         }
         
-
-        // TODO: remove all this priority hocus pocus and refactor it just to workstrategy
+        // Use the strategy for station selection
         Station nextStation = workStrategy.chooseNextStation(stationsToCheck);
         
         // If we found a station, register with it
