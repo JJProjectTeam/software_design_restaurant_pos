@@ -40,8 +40,9 @@ public class DineInCustomer extends Customer {
         while (!validChoice) {
             selectedRecipe = menu.getRandomRecipe();
             try {
-                // Validate base recipe ingredients
-                // RecipeValidator.getInstance().validateIngredients(selectedRecipe.getIngredients());
+                if (selectedRecipe == null) {
+                    throw new RecipeValidationException("Selected recipe is null");
+                }
                 validChoice = true;
             } catch (RecipeValidationException e) {
                 logger.info("Sorry, that item is unavailable. Selecting something else...");
