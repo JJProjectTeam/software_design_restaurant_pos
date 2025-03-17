@@ -32,11 +32,14 @@ import com.softwaredesign.project.staff.ChefManager;
 import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.DynamicChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
+import com.softwaredesign.project.orderfulfillment.FloorManager;
+import com.softwaredesign.project.demo.DemoHelper;
 import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
 import com.softwaredesign.project.staff.staffspeeds.StimulantAddictDecorator;
 import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
 import com.softwaredesign.project.order.Meal;
 import com.softwaredesign.project.order.Recipe;
+import com.softwaredesign.project.inventory.InventoryStockTracker;
 
 /**
  * Main driver class for the Restaurant POS system.
@@ -80,6 +83,8 @@ public class RestaurantDriver {
     private List<Chef> chefs = new ArrayList<>();
     private List<Waiter> waiters = new ArrayList<>();
     private List<Table> tables = new ArrayList<>();
+    private FloorManager floorManager;
+    private DemoHelper demoHelper;
     
     // Controllers and UI
     private RestaurantApplication app;
@@ -120,7 +125,7 @@ public class RestaurantDriver {
             logger.info("[RestaurantDriver] Starting application...");
             
             initializeConfiguration();
-            app.showView(ViewType.END_OF_GAME);
+            app.showView(ViewType.WELCOME);
 
             // Create a timer for the game loop
             java.util.Timer gameTimer = new java.util.Timer();
@@ -150,16 +155,8 @@ public class RestaurantDriver {
                                 Thread.sleep(100);
                             }
 
-                            // Demo sequence handling
-                            if (!hasStartedDemo) {
-                                tickCount++;
-                                if (tickCount >= DEMO_DELAY) {
-                                    hasStartedDemo = true;
-                                    logger.info("\n=== STARTING DEMO SEQUENCE ===\n");
-                                }
-                            } else {
-                                handleDemoStep();
-                            }
+                            // Update demo using DemoHelper
+                            updateDemo();
 
                             // Step the game engine to update all entities
                             gameEngine.step();
@@ -228,6 +225,11 @@ public class RestaurantDriver {
         } else {
             logger.info("[RestaurantDriver] Using StationManager from configuration with " + 
                 stationManager.getAllStations().size() + " stations");
+            // Ensure it's using the same CollectionPoint
+            logger.info("[RestaurantDriver] Setting common CollectionPoint for all stations");
+            for (Station station : stationManager.getAllStations()) {
+                station.setCollectionPoint(collectionPoint);
+            }
         }
         
         // Create kitchen with null OrderManager (will be set later)
@@ -237,7 +239,7 @@ public class RestaurantDriver {
         this.chefManager = new ChefManager();
         gameEngine.registerEntity(chefManager);
         
-        // Create OrderManager with StationManager from kitchen
+        // Create OrderManager with StationManager from kitchen and the common CollectionPoint
         this.orderManager = new OrderManager(collectionPoint, kitchen.getStationManager());
         
         // Set OrderManager in kitchen
@@ -249,18 +251,32 @@ public class RestaurantDriver {
             createDefaultStations(stationManager);
         }
         
-        // Set kitchen reference in all stations
+        // Ensure all stations have proper references
         for (Station station : stationManager.getAllStations()) {
             station.setKitchen(kitchen);
+            // Double-check the CollectionPoint is set correctly
+            station.setCollectionPoint(collectionPoint);
             logger.info("[RestaurantDriver] Set kitchen reference for station: " + station.getType());
         }
         
         // Create and assign chefs with strategies
         setupChefs();
         
+        // Create and assign waiters
+        setupWaiters();
+        
+        // Create the FloorManager (new entity)
+        this.floorManager = new FloorManager(seatingPlan, waiters, orderManager);
+        
+        // Set the CollectionPoint in the FloorManager to enable order delivery
+        floorManager.setCollectionPoint(collectionPoint);
+        System.out.println("[RestaurantDriver] Set CollectionPoint in FloorManager for order delivery");
+        
         // Register entities with GameEngine
         registerEntitiesWithGameEngine();
         
+        // Create DemoHelper
+        this.demoHelper = new DemoHelper(floorManager, kitchen, orderManager, seatingPlan, chefManager, inventory);        
         logger.info("[RestaurantDriver] Entity creation complete");
     }
     
@@ -378,6 +394,56 @@ public class RestaurantDriver {
     }
 
     /**
+     * Sets up waiters for the restaurant
+     * Creates default waiters and assigns them to the waiters list
+     */
+    private void setupWaiters() {
+        System.out.println("[RestaurantDriver] Setting up waiters...");
+        
+        // Get menu from configuration controller or create a new one
+        Menu menu = configController.getMenu();
+        if (menu == null) {
+            System.out.println("[RestaurantDriver] Warning: No menu found for waiters");
+            // Create a simple menu if needed
+            if (inventory != null) {
+                menu = new Menu(inventory);
+                System.out.println("[RestaurantDriver] Created default menu for waiters");
+            }
+        }
+        
+        // Create InventoryStockTracker for waiters
+        InventoryStockTracker stockTracker = new InventoryStockTracker();
+        
+        // Register the stock tracker as an observer with the inventory
+        if (inventory != null) {
+            // Add the stock tracker as a global observer
+            inventory.attach(stockTracker);
+            
+            // Update with current stock for all ingredients
+            for (String ingredientName : inventory.getAllIngredients()) {
+                stockTracker.update(ingredientName, inventory.getStock(ingredientName));
+            }
+            
+            System.out.println("[RestaurantDriver] Registered InventoryStockTracker with inventory");
+        }
+        
+        // Create base speed component for waiters
+        ISpeedComponent baseSpeed = new BaseSpeed();
+        
+        // Create default waiters
+        Waiter waiter1 = new Waiter(12.0, baseSpeed, orderManager, menu, stockTracker);
+        waiters.add(waiter1);
+        
+        Waiter waiter2 = new Waiter(14.0, baseSpeed, orderManager, menu, stockTracker);
+        waiters.add(waiter2);
+        
+        Waiter waiter3 = new Waiter(10.0, baseSpeed, orderManager, menu, stockTracker);
+        waiters.add(waiter3);
+        
+        System.out.println("[RestaurantDriver] Created " + waiters.size() + " waiters");
+    }
+
+    /**
      * Register all entities with the GameEngine for the tick system.
      * Note: Only classes that extend Entity can be registered.
      * To register other classes, they would need to be modified to extend Entity
@@ -397,6 +463,10 @@ public class RestaurantDriver {
         // Register ChefManager (which extends Entity)
         gameEngine.registerEntity(chefManager);
         logger.info("[RestaurantDriver] Registered ChefManager with GameEngine");
+        
+        // Register FloorManager
+        gameEngine.registerEntity(floorManager);
+        System.out.println("[RestaurantDriver] Registered FloorManager with GameEngine");
         
         // Register all stations
         StationManager stationManager = kitchen.getStationManager();
@@ -478,20 +548,22 @@ public class RestaurantDriver {
     }
 
     private void setupDemoScenario() {
-        // Create different chef strategies like in KitchenSimulator
-        ChefStrategy dynamicStrategy = new DynamicChefStrategy(kitchen.getStationManager());
-        ChefStrategy simpleStrategy = new SimpleChefStrategy();
+        // Initialize the demo through our DemoHelper
+        demoHelper.setupChefStrategies();
+    }
+
+    // Merged updateDemo method that uses DemoHelper
+    private void updateDemo() {
+        // Update tickCount
+        tickCount++;
         
-        // Assign strategies to existing chefs
-        for (int i = 0; i < chefs.size(); i++) {
-            Chef chef = chefs.get(i);
-            //TODO wtf this should be set in the configuration controller
-            chef.setWorkStrategy(i % 2 == 0 ? dynamicStrategy : simpleStrategy);
-            logger.info("Assigned " + (i % 2 == 0 ? "dynamic" : "simple") + 
-                " strategy to chef " + chef.getName());
+        // Use DemoHelper to update the demo
+        if (demoHelper != null) {
+            demoHelper.update(tickCount);
         }
     }
 
+    // Keep the handleDemoStep method for reference or possible future use
     private void handleDemoStep() {
         switch (demoStep) {
             case 0:
@@ -653,6 +725,7 @@ public class RestaurantDriver {
         }
     }
 
+    // Utility methods needed by handleDemoStep (keeping for reference)
     private List<Table> getOccupiedTables() {
         List<Table> occupiedTables = new ArrayList<>();
         for (Table table : seatingPlan.getAllTables()) {

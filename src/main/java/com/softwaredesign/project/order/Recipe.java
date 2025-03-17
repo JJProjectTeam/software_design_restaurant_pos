@@ -4,6 +4,7 @@ import com.softwaredesign.project.engine.Entity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 import com.softwaredesign.project.inventory.Ingredient;
 import com.softwaredesign.project.inventory.InventoryService;
@@ -47,6 +48,14 @@ public abstract class Recipe {
     
     // New method for initializing tasks - to be implemented by subclasses
     protected abstract void initializeTasks();
+
+    /**
+     * Creates a new instance of this recipe type.
+     * This method ensures that each order gets its own copy of a recipe
+     * without sharing state between different orders.
+     * @return A fresh copy of this recipe without an orderId
+     */
+    public abstract Recipe copy();
 
     public void addIngredient(Ingredient ingredient) {
         ingredients.add(ingredient);
@@ -121,17 +130,44 @@ public abstract class Recipe {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
+            System.out.println("[DEBUG-RECIPE-EQUALS] Same instance comparison for recipe: " + name + 
+                              ", orderId: " + orderId);
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
+            System.out.println("[DEBUG-RECIPE-EQUALS] Different class comparison for recipe: " + name);
             return false;
+        }
         Recipe recipe = (Recipe) o;
-        return name.equals(recipe.name);
+        System.out.println("[DEBUG-RECIPE-EQUALS] Comparing recipes - THIS: " + name + " (orderId: " + orderId + "), " +
+                         "OTHER: " + recipe.name + " (orderId: " + recipe.orderId + ")");
+        
+        // If both recipes have an orderId, compare both name and orderId
+        if (this.orderId != null && recipe.orderId != null) {
+            boolean isEqual = name.equals(recipe.name) && orderId.equals(recipe.orderId);
+            System.out.println("[DEBUG-RECIPE-EQUALS] Both orderIds non-null. Equal? " + isEqual + 
+                              " (name equal: " + name.equals(recipe.name) + 
+                              ", orderId equal: " + orderId.equals(recipe.orderId) + ")");
+            return isEqual;
+        }
+        // Otherwise, fall back to comparing name
+        boolean isEqual = name.equals(recipe.name);
+        System.out.println("[DEBUG-RECIPE-EQUALS] At least one orderId is null. Equal based on name only? " + isEqual);
+        return isEqual;
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(name);
+        if (orderId != null) {
+            int hash = Objects.hash(name, orderId);
+            System.out.println("[DEBUG-RECIPE-HASHCODE] Recipe " + name + " with orderId " + orderId + 
+                              " hashCode: " + hash);
+            return hash;
+        }
+        int hash = Objects.hash(name);
+        System.out.println("[DEBUG-RECIPE-HASHCODE] Recipe " + name + " without orderId hashCode: " + hash);
+        return hash;
     }
 
     public Meal buildMeal() {
