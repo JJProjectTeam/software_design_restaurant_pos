@@ -323,10 +323,6 @@ public class RestaurantDriver {
         // Get station manager from kitchen
         StationManager stationManager = kitchen.getStationManager();
         
-        // Create strategies
-        ChefStrategy dynamicStrategy = new DynamicChefStrategy(stationManager);
-        ChefStrategy simpleStrategy = new SimpleChefStrategy();
-        
         // Create chefs from configuration
         List<Chef> configChefs = configController.getChefs();
         
@@ -336,11 +332,7 @@ public class RestaurantDriver {
             configChefs = createDefaultChefs(stationManager);
         }
         
-        for (int i = 0; i < configChefs.size(); i++) {
-            Chef chef = configChefs.get(i);
-            // Assign alternating strategies
-            chef.setWorkStrategy(i % 2 == 0 ? dynamicStrategy : simpleStrategy);
-            
+        for (Chef chef : configChefs) {
             // Add to chef manager
             chefManager.addChef(chef);
             
@@ -363,8 +355,7 @@ public class RestaurantDriver {
             }
             
             // Don't choose initial station - let the chef's strategy decide where to go based on work
-            logger.info("Chef " + chef.getName() + " initialized with " + 
-                (i % 2 == 0 ? "dynamic" : "simple") + " strategy");
+            logger.info("Chef " + chef.getName() + " initialized with strategy: " + chef.getWorkStrategy().getClass().getSimpleName());
         }
     }
     

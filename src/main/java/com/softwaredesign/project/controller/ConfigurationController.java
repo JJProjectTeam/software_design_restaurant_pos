@@ -633,12 +633,4 @@ public class ConfigurationController extends BaseController {
         }
     }
 
-    private double calculateChefCost(int speed, int numberOfStations) {
-        return chefStandardPay * (speed * chefPayMultiplierBySpeed) * 
-               (numberOfStations * chefPayMultiplierByStation);
-    }
-
-    private double calculateWaiterCost(int speed) {
-        return waiterStandardPay;
-    }
 }
