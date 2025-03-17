@@ -1,6 +1,5 @@
 package com.softwaredesign.project.staff.staffspeeds;
 
-import com.fasterxml.jackson.databind.JsonSerializable.Base;
 
 public class BaseSpeed implements ISpeedComponent {
     double speed;

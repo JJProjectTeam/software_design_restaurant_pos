@@ -8,7 +8,6 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import com.softwaredesign.project.staff.Waiter;
-import com.softwaredesign.project.staff.staffspeeds.SpeedDecorator;
 import com.softwaredesign.project.order.OrderManager;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.order.Recipe;
@@ -17,8 +16,6 @@ import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 import com.softwaredesign.project.kitchen.StationManager;
 import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.kitchen.StationType;
-import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
-import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
 
 /**
  * Test suite to validate the inventory validation logic when placing orders.

@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.model.StatisticsSingleton;
-import com.softwaredesign.project.orderfulfillment.Table;
 
 public class SeatingPlan {
     private List<Table> tables;

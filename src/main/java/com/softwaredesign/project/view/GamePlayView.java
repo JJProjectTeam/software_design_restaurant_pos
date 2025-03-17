@@ -1,7 +1,6 @@
 package com.softwaredesign.project.view;
 
 import jexer.*;
-import com.softwaredesign.project.model.BankBalanceSingleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

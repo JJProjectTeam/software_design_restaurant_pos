@@ -1,9 +1,6 @@
 package com.softwaredesign.project.view;
 
-import com.softwaredesign.project.controller.BaseController;
-import com.softwaredesign.project.controller.DiningRoomController;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
-import com.softwaredesign.project.orderfulfillment.Table;
 import jexer.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

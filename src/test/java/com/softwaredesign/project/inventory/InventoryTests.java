@@ -5,10 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.After;
 
-import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.inventory.InventoryAlert;
-import com.softwaredesign.project.inventory.IngredientStore;
-
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.HashMap;

@@ -3,8 +3,6 @@ package com.softwaredesign.project.staff.chefstrategies;
 import java.util.List;
 
 import com.softwaredesign.project.kitchen.Station;
-import com.softwaredesign.project.order.Order;
-import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.order.RecipeTask;
 
 public class ShortestQueueFirstStrategy implements ChefStrategy {

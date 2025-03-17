@@ -13,16 +13,10 @@ import com.softwaredesign.project.kitchen.StationManager;
 import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.staff.Waiter;
-import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
-import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
-import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.inventory.InventoryService;
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.order.Meal;
 import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.order.RecipeTask;
-import com.softwaredesign.project.kitchen.StationManager;
-import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.inventory.InventoryStockTracker;
 
 public class OrderFulfillmentTest {

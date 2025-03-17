@@ -13,8 +13,6 @@ import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.inventory.Ingredient;
 import com.softwaredesign.project.inventory.Inventory;
 import com.softwaredesign.project.inventory.InventoryStockTracker;
-import com.softwaredesign.project.kitchen.Kitchen;
-import com.softwaredesign.project.kitchen.Station;
 import com.softwaredesign.project.kitchen.StationManager;
 import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.menu.Menu;

@@ -2,8 +2,6 @@ package com.softwaredesign.project.view;
 
 import jexer.*;
 import java.util.Map;
-import java.util.HashMap;
-import com.softwaredesign.project.model.BankBalanceSingleton;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
 
 public class EndOfGameView implements View {

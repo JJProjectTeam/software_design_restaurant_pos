@@ -15,7 +15,6 @@ import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.view.*;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
 import com.softwaredesign.project.menu.Menu;
-import com.softwaredesign.project.order.Order;
 import com.softwaredesign.project.order.OrderManager;
 import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 import com.softwaredesign.project.orderfulfillment.SeatingPlan;
@@ -100,8 +99,6 @@ public class RestaurantDriver {
             
             // Set this driver instance in the application for restart functionality
             this.app.setDriver(this);
-
-
         }
         catch (Exception e){
             logger.error("[RestaurantDriver] Fatal error running application: {}", e.getMessage());
@@ -191,18 +188,6 @@ public class RestaurantDriver {
     private void initializeConfiguration() {
         configController = new ConfigurationController();
         mediator.registerController("Configuration", configController);
-    }
-
-    private void waitForConfiguration() {
-        // This could be improved with proper synchronization
-        while (!configController.isConfigurationComplete()) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
     }
 
     private void createEntitiesFromConfiguration() {
@@ -412,8 +397,6 @@ public class RestaurantDriver {
             logger.info("[RestaurantDriver] Registered InventoryStockTracker with inventory");
         }
         
-        // Create base speed component for waiters
-        ISpeedComponent baseSpeed = new BaseSpeed();
         
         // Create default waiters
         Waiter waiter1 = new Waiter(12.0, orderManager, menu, stockTracker);
