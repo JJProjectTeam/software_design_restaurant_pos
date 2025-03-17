@@ -11,7 +11,6 @@ import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
 
-import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
 import com.softwaredesign.project.inventory.InventoryStockTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +22,9 @@ public class Waiter extends StaffMember {
     private Menu menu;
     private InventoryStockTracker inventoryStockTracker;
 
-    public Waiter(double payPerHour, ISpeedComponent speedDecorator, OrderManager orderManager, Menu menu,
+    public Waiter(double payPerHour, OrderManager orderManager, Menu menu,
             InventoryStockTracker inventoryStockTracker) {
-        super(payPerHour, speedDecorator);
+        super(payPerHour);
         this.assignedTables = new ArrayList<>();
         this.orderManager = orderManager;
         this.menu = menu;

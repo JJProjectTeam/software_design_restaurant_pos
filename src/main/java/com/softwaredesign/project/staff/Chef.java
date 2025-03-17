@@ -22,9 +22,11 @@ public class Chef extends StaffMember {
     private String name;
     private boolean isWorking; // Flag to indicate if the chef is currently working on a task
     private static int chefCounter = 0;
+    private ISpeedComponent speedDecorator;
     
     public Chef(double payPerHour, ISpeedComponent speedDecorator, ChefStrategy strategy, StationManager stationManager) {
-        super(payPerHour, speedDecorator);
+        super(payPerHour);
+        this.speedDecorator = speedDecorator;
         this.assignedStations = new ArrayList<>();
         this.workStrategy = strategy;
         this.stationManager = stationManager;
@@ -34,7 +36,8 @@ public class Chef extends StaffMember {
     }
     
     public Chef(String name, double payPerHour, ISpeedComponent speedDecorator, ChefStrategy strategy, StationManager stationManager) {
-        super(payPerHour, speedDecorator);
+        super(payPerHour);
+        this.speedDecorator = speedDecorator;
         this.assignedStations = new ArrayList<>();
         this.workStrategy = strategy;
         this.stationManager = stationManager;
@@ -305,4 +308,9 @@ public class Chef extends StaffMember {
     public void clearStationAssignments() {
         assignedStations.clear();
     }
+
+    public double getSpeedMultiplier() {
+        return speedDecorator.getSpeedMultiplier();
+    }
+
 }

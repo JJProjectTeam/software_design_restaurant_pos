@@ -65,7 +65,7 @@ public class InventoryValidationTest {
         table.addCustomer(customer);
 
         // Create waiter with necessary components
-        Waiter waiter = new Waiter(15.0, new BaseSpeed(1), orderManager, menu, inventoryTracker);
+        Waiter waiter = new Waiter(15.0, orderManager, menu, inventoryTracker);
         waiter.assignTable(table);
 
         // Attempt to take order - should throw IllegalStateException
@@ -96,7 +96,7 @@ public class InventoryValidationTest {
         table.addCustomer(customer);
 
         // Create waiter with necessary components
-        Waiter waiter = new Waiter(15.0, new BaseSpeed(1), orderManager, menu, inventoryTracker);
+        Waiter waiter = new Waiter(15.0, orderManager, menu, inventoryTracker);
         waiter.assignTable(table);
 
         // Take the order - should succeed
@@ -130,7 +130,7 @@ public class InventoryValidationTest {
         table.addCustomer(customer2);
 
         // Create waiter and take order
-        Waiter waiter = new Waiter(15.0, new BaseSpeed(1), orderManager, menu, inventoryTracker);
+        Waiter waiter = new Waiter(15.0, orderManager, menu, inventoryTracker);
         waiter.assignTable(table);
         waiter.takeTableOrder(table);
 
@@ -156,7 +156,7 @@ public class InventoryValidationTest {
         TestCustomer customer1 = new TestCustomer(recipe1);
         table.addCustomer(customer1);
 
-        Waiter waiter = new Waiter(15.0, new BaseSpeed(1), orderManager, menu, inventoryTracker);
+        Waiter waiter = new Waiter(15.0, orderManager, menu, inventoryTracker);
         waiter.assignTable(table);
         waiter.takeTableOrder(table);
 
@@ -204,7 +204,7 @@ public class InventoryValidationTest {
         TestCustomer customer = new TestCustomer(testRecipe);
         table.addCustomer(customer);
 
-        Waiter waiter = new Waiter(15.0, new BaseSpeed(1), orderManager, menu, inventoryTracker);
+        Waiter waiter = new Waiter(15.0, orderManager, menu, inventoryTracker);
         waiter.assignTable(table);
         waiter.takeTableOrder(table);
 
