@@ -12,7 +12,6 @@ public class DiningConfigurationView extends ConfigurationView {
     private TTableWidget waiterTable;
     private TField nameField;
     private TField removeNameField;
-    private TComboBox speedCombo;
     private TLabel tableCountLabel;
     private TLabel tableCapacityLabel;
     private TLabel maxTablesLabel;
@@ -23,9 +22,7 @@ public class DiningConfigurationView extends ConfigurationView {
     private int currentTableCapacity = 1;
     private int minWaiters;
     private int maxWaiters; 
-    private int maxSpeed = 5; // Default value
     private double standardPayPerHour = 10.0; // Default value
-    private double payMultiplierBySpeed = 1.0; // Default value
 
     // Public setters for configuration constants
     public void setMaxTables(int maxTables) {
@@ -60,28 +57,8 @@ public class DiningConfigurationView extends ConfigurationView {
         this.maxWaiters = maxWaiters;
     }
 
-    public void setMaxSpeed(int maxSpeed) {
-        this.maxSpeed = maxSpeed;
-        // Update the speed combo box if it exists
-        if (speedCombo != null) {
-            try {
-                List<String> speeds = new ArrayList<>();
-                for (int i = 1; i <= maxSpeed; i++) {
-                    speeds.add(String.valueOf(i));
-                }
-                speedCombo.setList(speeds);
-            } catch (Exception e) {
-                logger.error("[DiningConfigurationView] Error updating speed combo box: " + e.getMessage());
-            }
-        }
-    }
-
     public void setStandardPayPerHour(double standardPayPerHour) {
         this.standardPayPerHour = standardPayPerHour;
-    }
-
-    public void setPayMultiplierBySpeed(double payMultiplierBySpeed) {
-        this.payMultiplierBySpeed = payMultiplierBySpeed;
     }
 
     // Local storage for waiter data
@@ -90,23 +67,17 @@ public class DiningConfigurationView extends ConfigurationView {
     // Inner class to hold waiter data
     public static class WaiterData {
         String name;
-        int speed;
         double costPerHour;
         List<Integer> assignedTables;
 
-        WaiterData(String name, int speed, double costPerHour) {
+        WaiterData(String name, double costPerHour) {
             this.name = name;
-            this.speed = speed;
             this.costPerHour = costPerHour;
             this.assignedTables = new ArrayList<>();
         }
         
         public String getName() {
             return name;
-        }
-        
-        public int getSpeed() {
-            return speed;
         }
         
         public double getCostPerHour() {
@@ -118,7 +89,7 @@ public class DiningConfigurationView extends ConfigurationView {
         super(app);
         mediator.registerView(ViewType.DINING_CONFIGURATION, this);
         // Initialize with a default waiter
-        waiters.put("Default Waiter", new WaiterData("Default Waiter", 2, 20.0));
+        waiters.put("Default Waiter", new WaiterData("Default Waiter", 20.0));
     }
 
     // Getters for external access
@@ -161,15 +132,13 @@ public class DiningConfigurationView extends ConfigurationView {
             
             // Set column labels
             waiterTable.setColumnLabel(0, "Waiter Name");
-            waiterTable.setColumnLabel(1, "Speed");
-            waiterTable.setColumnLabel(2, "Cost/Hour");
-            waiterTable.setColumnLabel(3, "Tables Assigned");
+            waiterTable.setColumnLabel(1, "Cost/Hour");
+            waiterTable.setColumnLabel(2, "Tables Assigned");
 
             // Set column widths
             waiterTable.setColumnWidth(0, 25);
             waiterTable.setColumnWidth(1, 15);
             waiterTable.setColumnWidth(2, 20);
-            waiterTable.setColumnWidth(3, 20);
 
             // Populate from local storage
             refreshWaiterTable();
@@ -198,7 +167,7 @@ public class DiningConfigurationView extends ConfigurationView {
             // Populate from local storage without deducting costs again
             for (var entry : waiters.entrySet()) {
                 var waiter = entry.getValue();
-                addWaiterToTable(waiter.name, waiter.speed, waiter.costPerHour, false);
+                addWaiterToTable(waiter.name, waiter.costPerHour, false);
             }
         } catch (Exception e) {
             logger.error("[DiningConfigurationView] Error refreshing waiter table: " + e.getMessage());
@@ -293,14 +262,6 @@ public class DiningConfigurationView extends ConfigurationView {
             window.addLabel("Name:", 2, 18);
             nameField = window.addField(8, 18, 20, false);
             
-            // Speed selection
-            window.addLabel("Speed:", 30, 18);
-            List<String> speeds = new ArrayList<>();
-            for (int i = 1; i <= maxSpeed; i++) {
-                speeds.add(String.valueOf(i));
-            }
-            speedCombo = window.addComboBox(36, 18, 10, speeds, 0, 3, nullAction);
-            
             // Add waiter button
             window.addButton("Add Waiter", 50, 18, new TAction() {
                 public void DO() {
@@ -327,8 +288,7 @@ public class DiningConfigurationView extends ConfigurationView {
                 return;
             }
 
-            int speed = Integer.parseInt(speedCombo.getText());
-            double costPerHour = calculateCost(speed);
+            double costPerHour = calculateCost();
 
             // Check if adding this waiter would cause bank balance to go negative
             if (bankBalance - costPerHour < 0) {
@@ -337,14 +297,13 @@ public class DiningConfigurationView extends ConfigurationView {
             }
 
             // Add to local storage
-            waiters.put(name, new WaiterData(name, speed, costPerHour));
+            waiters.put(name, new WaiterData(name, costPerHour));
             
             // Add to table and deduct cost
-            addWaiterToTable(name, speed, costPerHour, true);
+            addWaiterToTable(name, costPerHour, true);
 
             // Clear inputs
             nameField.setText("");
-            speedCombo.setIndex(0);
         } catch (Exception e) {
             logger.error("[DiningConfigurationView] Error adding waiter: " + e.getMessage());
             e.printStackTrace();
@@ -352,12 +311,11 @@ public class DiningConfigurationView extends ConfigurationView {
         }
     }
 
-    private void addWaiterToTable(String name, int speed, double costPerHour, boolean deductCost) {
+    private void addWaiterToTable(String name, double costPerHour, boolean deductCost) {
         try {
             int row = waiterTable.getRowCount();
             waiterTable.insertRowBelow(row-1);
             waiterTable.setCellText(0, row, name);
-            waiterTable.setCellText(1, row, String.valueOf(speed));
             waiterTable.setCellText(2, row, String.format("%.2f", costPerHour));
             waiterTable.setCellText(3, row, "0"); // Initially no tables assigned
             
@@ -370,8 +328,8 @@ public class DiningConfigurationView extends ConfigurationView {
         }
     }
 
-    private double calculateCost(int speed) {
-        return standardPayPerHour * (1 + (speed - 1) * payMultiplierBySpeed);
+    private double calculateCost() {
+        return standardPayPerHour;
     }
 
     @Override

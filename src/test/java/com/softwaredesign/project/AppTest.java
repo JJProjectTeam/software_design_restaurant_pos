@@ -43,8 +43,7 @@ public class AppTest {
         StationManager stationManager = new StationManager(collectionPoint);
         OrderManager orderManager = new OrderManager(collectionPoint, stationManager);
         SeatingPlan seatingPlan = new SeatingPlan(5, 40, 15, menu);
-        ISpeedComponent baseSpeed = new BaseSpeed();
-        Waiter waiter = new Waiter(15.0, baseSpeed, orderManager, menu, inventoryStockTracker);
+        Waiter waiter = new Waiter(15.0, orderManager, menu, inventoryStockTracker);
 
         assertNotNull("Inventory service should not be null", inventory);
         assertTrue("Bun stock should be positive", inventory.getStock("Bun") > 0);

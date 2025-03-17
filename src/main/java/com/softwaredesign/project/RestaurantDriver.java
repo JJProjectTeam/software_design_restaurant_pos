@@ -323,10 +323,6 @@ public class RestaurantDriver {
         // Get station manager from kitchen
         StationManager stationManager = kitchen.getStationManager();
         
-        // Create strategies
-        ChefStrategy dynamicStrategy = new DynamicChefStrategy(stationManager);
-        ChefStrategy simpleStrategy = new SimpleChefStrategy();
-        
         // Create chefs from configuration
         List<Chef> configChefs = configController.getChefs();
         
@@ -336,11 +332,7 @@ public class RestaurantDriver {
             configChefs = createDefaultChefs(stationManager);
         }
         
-        for (int i = 0; i < configChefs.size(); i++) {
-            Chef chef = configChefs.get(i);
-            // Assign alternating strategies
-            chef.setWorkStrategy(i % 2 == 0 ? dynamicStrategy : simpleStrategy);
-            
+        for (Chef chef : configChefs) {
             // Add to chef manager
             chefManager.addChef(chef);
             
@@ -363,8 +355,7 @@ public class RestaurantDriver {
             }
             
             // Don't choose initial station - let the chef's strategy decide where to go based on work
-            logger.info("Chef " + chef.getName() + " initialized with " + 
-                (i % 2 == 0 ? "dynamic" : "simple") + " strategy");
+            logger.info("Chef " + chef.getName() + " initialized with strategy: " + chef.getWorkStrategy().getClass().getSimpleName());
         }
     }
     
@@ -431,13 +422,13 @@ public class RestaurantDriver {
         ISpeedComponent baseSpeed = new BaseSpeed();
         
         // Create default waiters
-        Waiter waiter1 = new Waiter(12.0, baseSpeed, orderManager, menu, stockTracker);
+        Waiter waiter1 = new Waiter(12.0, orderManager, menu, stockTracker);
         waiters.add(waiter1);
         
-        Waiter waiter2 = new Waiter(14.0, baseSpeed, orderManager, menu, stockTracker);
+        Waiter waiter2 = new Waiter(14.0, orderManager, menu, stockTracker);
         waiters.add(waiter2);
         
-        Waiter waiter3 = new Waiter(10.0, baseSpeed, orderManager, menu, stockTracker);
+        Waiter waiter3 = new Waiter(10.0, orderManager, menu, stockTracker);
         waiters.add(waiter3);
         
         System.out.println("[RestaurantDriver] Created " + waiters.size() + " waiters");
@@ -769,15 +760,11 @@ public class RestaurantDriver {
 //TODOS:
 /*
  * 
- * Money system, both during game and at configuraiton 1
+ * remove waiter speed
+ * make chef strategy in the right place
+ * game loop to end of game then show end of game screen
  * 
- * Help menu 4
- * 
- * restart 3
- * 
- * speed multiplier 2.5
- * 
- * expand entities 2
+ * order validation error handling
  * 
  *
  */

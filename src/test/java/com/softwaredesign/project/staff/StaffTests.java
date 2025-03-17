@@ -48,7 +48,7 @@ public class StaffTests {
         
         // Create staff with base speed
         ISpeedComponent baseSpeed = new BaseSpeed();
-        waiter = new Waiter(15.0, baseSpeed, orderManager, menu, inventoryStockTracker);
+        waiter = new Waiter(15.0, orderManager, menu, inventoryStockTracker);
         ChefStrategy simpleStrategy = new SimpleChefStrategy();
         chef = new Chef("Test Chef", 20.0, baseSpeed, simpleStrategy, stationManager);
     }

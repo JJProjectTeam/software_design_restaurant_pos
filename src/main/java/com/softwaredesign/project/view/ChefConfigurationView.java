@@ -301,11 +301,13 @@ public class ChefConfigurationView extends ConfigurationView {
             }
             speedCombo = window.addComboBox(36, 18, 8, speeds, 0, 4, localNullAction);
             
-            // Strategy selection
+            // Strategy selection - Updated to match ConfigurationController options
             window.addLabel("Strategy:", 50, 18);
             List<String> strategies = new ArrayList<>();
-            strategies.add("FIFO");
-            strategies.add("LIFO");
+            strategies.add("DYNAMIC");    // DynamicChefStrategy
+            strategies.add("OLDEST");     // OldestOrderFirstStrategy
+            strategies.add("LONGEST_QUEUE"); // LongestQueueFirstStrategy
+            strategies.add("SIMPLE");     // SimpleChefStrategy
             strategyCombo = window.addComboBox(58, 18, 15, strategies, 0, 4, localNullAction);
             
             // Station checkboxes

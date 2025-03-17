@@ -19,6 +19,7 @@ import com.softwaredesign.project.staff.chefstrategies.LongestQueueFirstStrategy
 import com.softwaredesign.project.staff.chefstrategies.OldestOrderFirstStrategy;
 import com.softwaredesign.project.staff.chefstrategies.PriorityBasedChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
+import com.softwaredesign.project.staff.chefstrategies.DynamicChefStrategy;
 import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
 import com.softwaredesign.project.staff.staffspeeds.CaffeineAddictDecorator;
 import com.softwaredesign.project.staff.staffspeeds.StimulantAddictDecorator;
@@ -57,7 +58,6 @@ public class ConfigurationController extends BaseController {
     private double chefPayMultiplierBySpeed;
     private double chefPayMultiplierByStation;
     private double waiterStandardPay;
-    private double waiterPayMultiplierBySpeed;
 
     private List<Recipe> possibleRecipes;
 
@@ -129,9 +129,8 @@ public class ConfigurationController extends BaseController {
             JsonNode waiterPay = payConfig.path("waiters");
             if (!waiterPay.isMissingNode()) {
                 this.waiterStandardPay = waiterPay.path("standardPay").asDouble(10.0);
-                this.waiterPayMultiplierBySpeed = waiterPay.path("payMultiplierBySpeed").asDouble(1.0);
-                logger.info("[ConfigurationController] Loaded waiter pay config - Standard Pay: ${}, Speed Multiplier: {}", 
-                    waiterStandardPay, waiterPayMultiplierBySpeed);
+                logger.info("[ConfigurationController] Loaded waiter pay config - Standard Pay: ${}", 
+                    waiterStandardPay);
             }
 
             // Initialize other components
@@ -246,17 +245,13 @@ public class ConfigurationController extends BaseController {
             if (!waiterRules.isMissingNode()) {
                 int minWaiters = waiterRules.path("min").asInt(1); // Default to 1 if not found
                 int maxWaiters = waiterRules.path("max").asInt(10); // Default to 10 if not found
-                int maxSpeed = waiterRules.path("maxSpeed").asInt(5);
                 double standardPayPerHour = waiterRules.path("standardPayPerHour").asDouble(10.0);
-                double payMultiplierBySpeed = waiterRules.path("payMultiplierBySpeed").asDouble(1.0);
                 diningView.setMinWaiters(minWaiters);
                 diningView.setMaxWaiters(maxWaiters);
-                diningView.setMaxSpeed(maxSpeed);
                 diningView.setStandardPayPerHour(standardPayPerHour);
-                diningView.setPayMultiplierBySpeed(payMultiplierBySpeed);
                 
                 logger.info("[ConfigurationController] Set waiter constants - Min Waiters: {}, Max Waiters: {}, Max Speed: {}, Standard Pay: {}, Speed Multiplier: {}", 
-                    minWaiters, maxWaiters, maxSpeed, standardPayPerHour, payMultiplierBySpeed);
+                    minWaiters, maxWaiters, standardPayPerHour);
             }
             
             // Set menu configuration constants
@@ -345,7 +340,7 @@ public class ConfigurationController extends BaseController {
         
 
         // Create default waiter
-        Waiter waiter = new Waiter(20.0, new BaseSpeed(), orderManager, menu, inventoryStockTracker);
+        Waiter waiter = new Waiter(20.0, orderManager, menu, inventoryStockTracker);
         
         // Assign tables to waiter
         for (Table table : seatingPlan.getAllTables()) {
@@ -377,6 +372,7 @@ public class ConfigurationController extends BaseController {
         
         for (ChefConfigurationView.ChefData data : chefData.values()) {
             try {
+                // Create strategy based on configuration
                 ChefStrategy strategy = createChefStrategy(data.getStrategy());
                 ISpeedComponent speedComponent = new BaseSpeed(data.getSpeed());
                 
@@ -422,12 +418,17 @@ public class ConfigurationController extends BaseController {
         }
     }
 
-    //TODO: add actual strategies
     private ChefStrategy createChefStrategy(String strategyName) {
+        logger.info("[ConfigurationController] Creating chef strategy: {}", strategyName);
         return switch (strategyName.toUpperCase()) {
-            case "FIFO", "OLDEST" -> new OldestOrderFirstStrategy();
-            case "LIFO", "NEWEST" -> new LongestQueueFirstStrategy(); 
-            default -> new PriorityBasedChefStrategy(); 
+            case "DYNAMIC" -> new DynamicChefStrategy(stationManager);
+            case "OLDEST" -> new OldestOrderFirstStrategy();
+            case "LONGEST_QUEUE" -> new LongestQueueFirstStrategy();
+            case "SIMPLE" -> new SimpleChefStrategy();
+            default -> {
+                logger.warn("[ConfigurationController] Unknown strategy '{}', defaulting to PriorityBasedChefStrategy", strategyName);
+                yield new PriorityBasedChefStrategy();
+            }
         };
     }
 
@@ -458,26 +459,11 @@ public class ConfigurationController extends BaseController {
             e.printStackTrace();
             return;
         }
-        double chanceOfCaffieneAddict = waiterRules.path("chanceOfCaffieneAddict").asDouble(0.3);
-        double chanceOfLethargic = waiterRules.path("chanceOfLethargic").asDouble(0.3);
-        double chanceOfStimulantAddict = waiterRules.path("chanceOfStimulantAddict").asDouble(0.25);
         
         for (var entry : waiterData.entrySet()) {
             var data = entry.getValue();
-            ISpeedComponent speedComponent = new BaseSpeed();
-            
-            // Apply speed modifiers in a consistent order to maintain SOLID principles
-            if (Math.random() < chanceOfLethargic) {
-                speedComponent = new LethargicDecorator(speedComponent);
-            }
-            if (Math.random() < chanceOfCaffieneAddict) {
-                speedComponent = new CaffeineAddictDecorator(speedComponent);
-            }
-            if (Math.random() < chanceOfStimulantAddict) {
-                speedComponent = new StimulantAddictDecorator(speedComponent);
-            }
-            
-            Waiter waiter = new Waiter(data.getCostPerHour(), speedComponent, orderManager, menu, inventoryStockTracker);
+
+            Waiter waiter = new Waiter(data.getCostPerHour(), orderManager, menu, inventoryStockTracker);
             
             // Calculate tables for this waiter
             int tablesToAssign = tablesPerWaiter + (waiters.size() < extraTables ? 1 : 0);
@@ -648,12 +634,4 @@ public class ConfigurationController extends BaseController {
         }
     }
 
-    private double calculateChefCost(int speed, int numberOfStations) {
-        return chefStandardPay * (speed * chefPayMultiplierBySpeed) * 
-               (numberOfStations * chefPayMultiplierByStation);
-    }
-
-    private double calculateWaiterCost(int speed) {
-        return waiterStandardPay * (speed * waiterPayMultiplierBySpeed);
-    }
 }
