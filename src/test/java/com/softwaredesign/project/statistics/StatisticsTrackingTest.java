@@ -414,6 +414,11 @@ public class StatisticsTrackingTest {
         protected void initializeTasks() {
             // No tasks needed for testing
         }
+        
+        @Override
+        public Recipe copy() {
+            return new TestRecipe(getName(), (Inventory)inventoryService);
+        }
     }
 
     /**

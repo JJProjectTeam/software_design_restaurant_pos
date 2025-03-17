@@ -236,6 +236,11 @@ public class InventoryValidationTest {
         protected void initializeTasks() {
             // No tasks needed for testing
         }
+        
+        @Override
+        public Recipe copy() {
+            return new TestRecipe(getName(), inventoryService);
+        }
     }
 
     private class TestCustomer extends DineInCustomer {
