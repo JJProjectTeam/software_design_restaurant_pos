@@ -4,21 +4,24 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.softwaredesign.project.orderfulfillment.CollectionPoint;
-import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.order.OrderManager;
-import com.softwaredesign.project.staff.chefstrategies.*;
-import com.softwaredesign.project.menu.Menu;
-import com.softwaredesign.project.inventory.InventoryService;
-import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.kitchen.Station;
-import com.softwaredesign.project.kitchen.StationManager;
-import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.order.RecipeTask;
+import com.softwaredesign.project.orderfulfillment.CollectionPoint;
+import com.softwaredesign.project.orderfulfillment.Table;
+import com.softwaredesign.project.kitchen.StationManager;
+import com.softwaredesign.project.kitchen.Station;
+import com.softwaredesign.project.kitchen.StationType;
+import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.menu.BurgerRecipe;
-import java.util.List;
-import java.util.Objects;
+import com.softwaredesign.project.inventory.InventoryStockTracker;
+import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
+import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
+import com.softwaredesign.project.staff.chefstrategies.LongestQueueFirstStrategy;
+import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
+import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
+import com.softwaredesign.project.inventory.Inventory;
+import com.softwaredesign.project.inventory.InventoryService;
 
 public class StaffTests {
     private Waiter waiter;
@@ -28,20 +31,26 @@ public class StaffTests {
 
     @Before
     public void setUp() {
-        InventoryService inventoryService = new Inventory();
-        inventoryService.addIngredient("Beef Patty", 10, 1.0, StationType.GRILL);
-        inventoryService.addIngredient("Bun", 10, 1.0, StationType.PREP);
-        inventoryService.addIngredient("Lettuce", 10, 1.0, StationType.PREP);
-        inventoryService.addIngredient("Tomato", 10, 1.0, StationType.PREP);
-        inventoryService.addIngredient("Cheese", 10, 1.0, StationType.PREP);
-        inventoryService.addIngredient("Mustard", 10, 0.5, StationType.PREP);
+        Inventory inventory = new Inventory();
+        InventoryStockTracker inventoryStockTracker = new InventoryStockTracker();
+        inventory.attach(inventoryStockTracker);
+        inventory.addIngredient("Beef Patty", 10, 1.0, StationType.GRILL);
+        inventory.addIngredient("Bun", 10, 1.0, StationType.PREP);
+        inventory.addIngredient("Lettuce", 10, 1.0, StationType.PREP);
+        inventory.addIngredient("Tomato", 10, 1.0, StationType.PREP);
+        inventory.addIngredient("Cheese", 10, 1.0, StationType.PREP);
+        inventory.addIngredient("Mustard", 10, 0.5, StationType.PREP);
         
-        menu = new Menu(inventoryService);
+        menu = new Menu(inventory);
         CollectionPoint collectionPoint = new CollectionPoint();
         StationManager stationManager = new StationManager(collectionPoint);
         orderManager = new OrderManager(collectionPoint, stationManager);
-        waiter = new Waiter(15.0, 1.0, orderManager, menu);
-        chef = new Chef(20.0, 1.5, new ShortestQueueFirst(), stationManager);
+        
+        // Create staff with base speed
+        ISpeedComponent baseSpeed = new BaseSpeed();
+        waiter = new Waiter(15.0, baseSpeed, orderManager, menu, inventoryStockTracker);
+        ChefStrategy simpleStrategy = new SimpleChefStrategy();
+        chef = new Chef("Test Chef", 20.0, baseSpeed, simpleStrategy, stationManager);
     }
 
     @Test

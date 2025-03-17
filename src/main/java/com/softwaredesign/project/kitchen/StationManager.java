@@ -7,8 +7,11 @@ import java.util.Map;
 
 import com.softwaredesign.project.engine.GameEngine;
 import com.softwaredesign.project.orderfulfillment.CollectionPoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class StationManager {
+public class StationManager{
+    private static final Logger logger = LoggerFactory.getLogger(StationManager.class);
     private Map<StationType, List<Station>> stations;
     private CollectionPoint collectionPoint;
     
@@ -36,7 +39,7 @@ public class StationManager {
         // Ensure the station uses the same CollectionPoint instance
         station.setCollectionPoint(collectionPoint);
         GameEngine.getInstance().registerEntity(station);
-        System.out.println("[StationManager] Added station: " + type + 
+        logger.info("[StationManager] Added station: " + type + 
             " (Total: " + stations.get(type).size() + ")");
     }
     
@@ -86,6 +89,6 @@ public class StationManager {
         for (List<Station> stationList : stations.values()) {
             stationList.clear();
         }
-        System.out.println("[StationManager] Cleared all stations");
+        logger.info("[StationManager] Cleared all stations");
     }
 }

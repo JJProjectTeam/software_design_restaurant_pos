@@ -74,4 +74,18 @@ public class Order {
     public boolean isComplete() {
         return recipes.stream().allMatch(Recipe::isComplete);
     }
+
+    public Map<String, Integer> getIngredients() {
+        Map<String, Integer> ingredients = new HashMap<>();
+        List<Ingredient> allIngredients = new ArrayList<>();
+
+        for (Recipe recipe : recipes) {
+            allIngredients.addAll(recipe.getIngredients());
+            for (Ingredient ingredient : recipe.getIngredients()) {
+                ingredients.merge(ingredient.getName(), 1, Integer::sum);
+            }
+        }
+
+        return ingredients;
+    }
 }

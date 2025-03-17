@@ -8,9 +8,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.softwaredesign.project.inventory.Ingredient;
 import com.softwaredesign.project.kitchen.StationManager;
+import com.softwaredesign.project.model.StatisticsSingleton;
 import com.softwaredesign.project.orderfulfillment.CollectionPoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OrderManager {
+    private static final Logger logger = LoggerFactory.getLogger(OrderManager.class);
     private Queue<Order> orders;
     private StationMapper stationMapper;
     private CollectionPoint collectionPoint;
@@ -24,6 +28,7 @@ public class OrderManager {
 
     /**
      * Generates a sequential order ID starting from 1000
+     * 
      * @return A string representation of the order ID (e.g., "Order-1001")
      */
     public String generateOrderId() {
@@ -33,10 +38,15 @@ public class OrderManager {
     public void addOrder(Order order) {
         collectionPoint.registerOrder(order.getOrderId(), order.getRecipes().size());
         orders.add(order);
+
+        // Track statistics
+        StatisticsSingleton.getInstance().incrementStat("ordersReceived");
+        StatisticsSingleton.getInstance().incrementStat("totalRecipesOrdered", order.getRecipes().size());
     }
 
     /**
      * Processes the next order in the queue
+     * 
      * @return A list of recipes from the order
      */
     public List<Recipe> processOrder() {
@@ -48,13 +58,16 @@ public class OrderManager {
         Order order = orders.poll();
         List<Recipe> recipes = order.getRecipes();
 
+        // Track statistics
+        StatisticsSingleton.getInstance().incrementStat("ordersProcessed");
+
         // Ensure the order is registered with the collection point
         // This is a safety check in case the order was not properly registered before
         String orderId = order.getOrderId();
         // Only re-register if it's not already registered
         if (collectionPoint.getTotalMealsExpected(orderId) == 0) {
             collectionPoint.registerOrder(orderId, recipes.size());
-            System.out.println("[DEBUG] Re-registered order " + orderId + " with collection point");
+            logger.info("[DEBUG] Re-registered order " + orderId + " with collection point");
         }
 
         // Create a list to hold cloned recipes
@@ -103,12 +116,17 @@ public class OrderManager {
             recipe.addIngredient(ingredient);
         }
     }
-    
+
     /**
      * Get a copy of the pending orders queue for display purposes
+     * 
      * @return a copy of the pending orders queue
      */
     public Queue<Order> getPendingOrders() {
         return new LinkedList<>(orders);
+    }
+
+    public List<Order> getOrders() {
+        return new ArrayList<>(orders);
     }
 }

@@ -1,23 +1,27 @@
 package com.softwaredesign.project.view;
 
 import com.softwaredesign.project.controller.BaseController;
-import com.softwaredesign.project.controller.ConfigurationController;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
 
 import jexer.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class ConfigurationView implements View, ConfigurableView {
     protected final RestaurantApplication app;
     protected TWindow window;
     protected RestaurantViewMediator mediator;
     protected TTableWidget configTable;
+    protected double bankBalance = 0.0;
+    protected TLabel bankBalanceLabel;
+    private static final Logger logger = LoggerFactory.getLogger(ConfigurationView.class);
 
     public ConfigurationView(RestaurantApplication app) {
         if (app == null) {
             throw new IllegalArgumentException("RestaurantApplication cannot be null");
         }
-        System.out.println("[ConfigurationView] Constructor called");
         this.app = app;
+        logger.info("[ConfigurationView] Constructor called");
         this.mediator = RestaurantViewMediator.getInstance();
     }
 
@@ -46,12 +50,15 @@ public abstract class ConfigurationView implements View, ConfigurableView {
 
     protected void setupCommonElements() {
         try {
-            // Add the configuration title and money label
+            // Add the configuration title
             window.addLabel("Configuration Settings", 2, 2);
-            window.addLabel("$", window.getWidth() - 15, 2);
+            
+            // Create and store reference to bank balance label
+            bankBalanceLabel = window.addLabel(String.format("Bank Balance: $%.2f", bankBalance), 
+                window.getWidth() - 30, 2);
             
         } catch (Exception e) {
-            System.err.println("[ConfigurationView] Error in setupCommonElements: " + e.getMessage());
+            logger.error("[ConfigurationView] Error in setupCommonElements: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -81,7 +88,7 @@ public abstract class ConfigurationView implements View, ConfigurableView {
                 }
             });
         } catch (Exception e) {
-            System.err.println("[ConfigurationView] Error in setupNavigationButtons: " + e.getMessage());
+            logger.error("[ConfigurationView] Error in setupNavigationButtons: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -91,18 +98,18 @@ public abstract class ConfigurationView implements View, ConfigurableView {
             // Use a message box instead of a label
             new TMessageBox(window.getApplication(), "Error", message, TMessageBox.Type.OK);
         } catch (Exception e) {
-            System.err.println("[ConfigurationView] Error showing error message box: " + e.getMessage());
+            logger.error("[ConfigurationView] Error showing error message box: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     protected void showWarning(String message) {
-        System.out.println("[ConfigurationView] showWarning called with message: " + message);
+        logger.info("[ConfigurationView] showWarning called with message: " + message);
         try {
             // Use a message box instead of a label
             new TMessageBox(window.getApplication(), "Warning", message, TMessageBox.Type.OK);
         } catch (Exception e) {
-            System.err.println("[ConfigurationView] Error showing warning message box: " + e.getMessage());
+            logger.error("[ConfigurationView] Error showing warning message box: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -117,6 +124,28 @@ public abstract class ConfigurationView implements View, ConfigurableView {
     @Override
     public void onUpdate(BaseController controller) {
 
+    }
+
+    // Add getter and setter for bank balance
+    protected double getBankBalance() {
+        return bankBalance;
+    }
+
+    protected void setBankBalance(double newBalance) {
+        this.bankBalance = newBalance;
+        updateBankBalanceLabel();
+    }
+
+    // Add method to update the label
+    private void updateBankBalanceLabel() {
+        if (bankBalanceLabel != null) {
+            try {
+                bankBalanceLabel.setLabel(String.format("Bank Balance: $%.2f", bankBalance));
+            } catch (Exception e) {
+                logger.error("[ConfigurationView] Error updating bank balance label: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
 
 }

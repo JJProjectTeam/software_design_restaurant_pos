@@ -3,7 +3,11 @@ package com.softwaredesign.project.orderfulfillment;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.softwaredesign.project.inventory.Ingredient;
+import com.softwaredesign.project.model.BankBalanceSingleton;
+import com.softwaredesign.project.model.StatisticsSingleton;
 import com.softwaredesign.project.order.Meal;
+import com.softwaredesign.project.order.Recipe;
 
 public class CollectionPoint {
     private Map<String, List<Meal>> completedMeals;
@@ -28,9 +32,14 @@ public class CollectionPoint {
         }
         completedMeals.get(orderId).add(meal);
 
+        // Track statistics for completed meals
+        StatisticsSingleton.getInstance().incrementStat("mealsCompleted");
+
         // Check if order is complete
         if (isOrderComplete(orderId)) {
             readyOrders.add(orderId);
+            // Track statistics for completed orders
+            StatisticsSingleton.getInstance().incrementStat("ordersCompleted");
         }
     }
 
@@ -45,6 +54,12 @@ public class CollectionPoint {
         }
         String orderId = readyOrders.poll();
         List<Meal> meals = completedMeals.remove(orderId);
+
+        // Track statistics for order collection
+        StatisticsSingleton.getInstance().incrementStat("ordersCollected");
+
+        // Update bank balance - this already tracks revenue
+        addMealsToBankBalance(meals);
         mealsPerOrder.remove(orderId);
         return meals;
     }
@@ -52,26 +67,29 @@ public class CollectionPoint {
     public boolean hasReadyOrders() {
         return !readyOrders.isEmpty();
     }
-    
+
     /**
-     * Returns a set of order IDs that have at least one completed meal but are not fully complete
+     * Returns a set of order IDs that have at least one completed meal but are not
+     * fully complete
+     * 
      * @return List of order IDs that are partially completed
      */
     public List<String> getPartiallyCompletedOrderIds() {
         List<String> partiallyCompleted = new ArrayList<>();
-        
+
         for (Map.Entry<String, List<Meal>> entry : completedMeals.entrySet()) {
             String orderId = entry.getKey();
             if (!entry.getValue().isEmpty() && !readyOrders.contains(orderId)) {
                 partiallyCompleted.add(orderId);
             }
         }
-        
+
         return partiallyCompleted;
     }
-    
+
     /**
      * Gets the number of completed meals for a specific order
+     * 
      * @param orderId The order ID to check
      * @return The number of completed meals for the order
      */
@@ -81,9 +99,10 @@ public class CollectionPoint {
         }
         return completedMeals.get(orderId).size();
     }
-    
+
     /**
      * Gets the total number of meals expected for a specific order
+     * 
      * @param orderId The order ID to check
      * @return The total number of meals expected for the order
      */
@@ -92,5 +111,13 @@ public class CollectionPoint {
             return 0;
         }
         return mealsPerOrder.get(orderId);
+    }
+
+    public void addMealsToBankBalance(List<Meal> meals) {
+        for (Meal meal : meals) {
+            for (Ingredient ingredient : meal.getIngredients()) {
+                BankBalanceSingleton.getInstance().updateBankBalance(ingredient.getPrice());
+            }
+        }
     }
 }

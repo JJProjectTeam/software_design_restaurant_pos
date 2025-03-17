@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.order.Meal;
+import com.softwaredesign.project.model.StatisticsSingleton;
 import com.softwaredesign.project.order.Recipe;
 
 public class Table {
@@ -64,6 +65,11 @@ public class Table {
         }
         isOrdering = false;
         orderPlaced = true;
+
+        // Track statistics
+        StatisticsSingleton.getInstance().incrementStat("tablesOrdered");
+        StatisticsSingleton.getInstance().incrementStat("recipesOrderedByTables", tableOrders.size());
+
         return tableOrders;
     }
     
@@ -109,10 +115,12 @@ public class Table {
         return pendingMeals.size();
     }
     
+
     public int getTableNumber() {
         return tableNumber;
     
     }
+
     public int getTableCapacity() {
         return tableCapacity;
     }

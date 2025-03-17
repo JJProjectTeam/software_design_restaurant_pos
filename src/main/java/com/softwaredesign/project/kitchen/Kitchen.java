@@ -14,8 +14,11 @@ import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.order.RecipeTask;
 import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 import com.softwaredesign.project.staff.Chef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Kitchen extends Entity {
+    private static final Logger logger = LoggerFactory.getLogger(Kitchen.class);
     private OrderManager orderManager;
     private CollectionPoint collectionPoint;
     private StationManager stationManager;
@@ -49,26 +52,26 @@ public class Kitchen extends Entity {
      */
     public void getRecipes() {
         if (orderManager == null) {
-            System.out.println("OrderManager is not set");
+            logger.info("OrderManager is not set");
             return;
         }
         
         List<Recipe> newRecipes = orderManager.processOrder(); // returns a registered order (list of recipes)
-        System.out.println("[DEBUG-KITCHEN] Got " + (newRecipes != null ? newRecipes.size() : 0) + " new recipes from OrderManager");
+        logger.info("[DEBUG-KITCHEN] Got " + (newRecipes != null ? newRecipes.size() : 0) + " new recipes from OrderManager");
         
         if (newRecipes != null && !newRecipes.isEmpty()) { // if there are new recipes
             // Print details about each new recipe
             for (Recipe recipe : newRecipes) {
-                System.out.println("[DEBUG-KITCHEN] New recipe: " + recipe.getName() + 
+                logger.info("[DEBUG-KITCHEN] New recipe: " + recipe.getName() + 
                                   ", orderId: " + recipe.getOrderId() + 
                                   ", hashCode: " + recipe.hashCode());
             }
             
             // Log the state of pendingRecipes before adding new ones
-            System.out.println("[DEBUG-KITCHEN] pendingRecipes before adding new ones (size: " + 
+            logger.info("[DEBUG-KITCHEN] pendingRecipes before adding new ones (size: " + 
                               pendingRecipes.size() + "):");
             for (Recipe recipe : pendingRecipes) {
-                System.out.println("  - " + recipe.getName() + 
+                logger.info("  - " + recipe.getName() + 
                                   " (orderId: " + recipe.getOrderId() + 
                                   ", hashCode: " + recipe.hashCode() + ")");
             }
@@ -76,10 +79,10 @@ public class Kitchen extends Entity {
             pendingRecipes.addAll(newRecipes); 
             
             // Log the updated pendingRecipes
-            System.out.println("[DEBUG-KITCHEN] pendingRecipes after adding new ones (size: " + 
+            logger.info("[DEBUG-KITCHEN] pendingRecipes after adding new ones (size: " + 
                               pendingRecipes.size() + "):");
             for (Recipe recipe : pendingRecipes) {
-                System.out.println("  - " + recipe.getName() + 
+                logger.info("  - " + recipe.getName() + 
                                   " (orderId: " + recipe.getOrderId() + 
                                   ", hashCode: " + recipe.hashCode() + ")");
             }
@@ -87,36 +90,29 @@ public class Kitchen extends Entity {
             // Add all incomplete tasks from new recipes to pending tasks (unpack!)
             for (Recipe recipe : newRecipes) {
                 List<RecipeTask> incompleteTasks = recipe.getIncompleteTasks();
-                System.out.println("[DEBUG-KITCHEN] Recipe " + recipe.getName() + 
+                logger.info("[DEBUG-KITCHEN] Recipe " + recipe.getName() + 
                                   " (orderId: " + recipe.getOrderId() + 
                                   ") has " + incompleteTasks.size() + " incomplete tasks");
                 
                 // Check if we already have this recipe in pendingTasks
                 if (pendingTasks.containsKey(recipe)) {
-                    System.out.println("[DEBUG-KITCHEN] WARNING: Recipe " + recipe.getName() + 
+                    logger.info("[DEBUG-KITCHEN] WARNING: Recipe " + recipe.getName() + 
                                       " with orderId " + recipe.getOrderId() + 
                                       " already exists in pendingTasks map!");
                     
                     // Check which recipe in the map is equal to this one
                     for (Recipe existingRecipe : pendingTasks.keySet()) {
                         if (existingRecipe.equals(recipe)) {
-                            System.out.println("[DEBUG-KITCHEN] Found equal recipe: " + existingRecipe.getName() + 
+                            logger.info("[DEBUG-KITCHEN] Found equal recipe: " + existingRecipe.getName() + 
                                               " with orderId " + existingRecipe.getOrderId());
                         }
                     }
                 }
                 
                 pendingTasks.put(recipe, new ArrayList<>(incompleteTasks));
-                
-                // Log task details
-                for (RecipeTask task : incompleteTasks) {
-                    System.out.println("  - Task: " + task.getName() + 
-                                      ", station: " + task.getStationType() + 
-                                      ", hashCode: " + task.hashCode());
-                }
             }
             
-            System.out.println("Kitchen received " + newRecipes.size() + " new recipes");
+            logger.info("Kitchen received " + newRecipes.size() + " new recipes");
         }
     }
     
@@ -131,7 +127,7 @@ public class Kitchen extends Entity {
             
             // Instead, just add the station to the chef's assigned stations list
             chef.assignToStation(stationType);
-            System.out.println("Chef assigned to " + stationType + " station pool");
+            logger.info("Chef assigned to " + stationType + " station pool");
         }
     }
     
@@ -140,7 +136,7 @@ public class Kitchen extends Entity {
         if (station != null && station.getAssignedChef() == chef) {
             station.unregisterChef();
             chef.removeStationAssignment(station);
-            System.out.println("Chef unassigned from " + stationType + " station");
+            logger.info("Chef unassigned from " + stationType + " station");
         }
     }
     
@@ -177,7 +173,7 @@ public class Kitchen extends Entity {
                 if (station != null) {
                     station.addTask(task);
                     assignedTasks.add(task);
-                    System.out.println("[DEBUG] Queued task " + task.getName() + " in " + task.getStationType() + " station backlog");
+                    logger.info("[DEBUG] Queued task " + task.getName() + " in " + task.getStationType() + " station backlog");
                 }
             }
             
@@ -211,7 +207,7 @@ public class Kitchen extends Entity {
                     station.addTask(task);
                     assignedTasks.add(task);
                     assignedAnyTask = true;
-                    System.out.println("[DEBUG] Queued new task " + task.getName() + " in " + task.getStationType() + " station backlog");
+                    logger.info("[DEBUG] Queued new task " + task.getName() + " in " + task.getStationType() + " station backlog");
                 }
             }
             
@@ -241,14 +237,14 @@ public class Kitchen extends Entity {
         List<Station> stations = stationManager.getStationsByType(task.getStationType());
         
         if (stations.isEmpty()) {
-            System.out.println("[ERROR] No stations found for type " + task.getStationType() + " for task " + task.getName());
+            logger.info("[ERROR] No stations found for type " + task.getStationType() + " for task " + task.getName());
             return null;
         }
         
         // First preference: Station that's not busy and has a chef ready
         for (Station station : stations) {
             if (!station.isBusy() && station.hasChef() && !station.getAssignedChef().isWorking()) {
-                System.out.println("[DEBUG] Found optimal station " + station.getType() + " for task " + 
+                logger.info("[DEBUG] Found optimal station " + station.getType() + " for task " + 
                                   task.getName() + " (not busy with available chef)");
                 return station;
             }
@@ -258,14 +254,14 @@ public class Kitchen extends Entity {
         // This will allow the task to be queued up for when a chef arrives
         for (Station station : stations) {
             if (!station.isBusy()) {
-                System.out.println("[DEBUG] Found available station " + station.getType() + " for task " + 
+                logger.info("[DEBUG] Found available station " + station.getType() + " for task " + 
                                   task.getName() + " (no chef currently assigned)");
                 return station;
             }
         }
         
         // No available station found, log that information
-        System.out.println("[DEBUG] All stations of type " + task.getStationType() + 
+        logger.info("[DEBUG] All stations of type " + task.getStationType() + 
                           " are busy. Task " + task.getName() + " will wait.");
         return null;
     }
@@ -280,12 +276,14 @@ public class Kitchen extends Entity {
 
     @Override
     public void readState() {
+        logger.info("Reading Kitchen state");
         // Get new recipes from order manager
         getRecipes();
     }
 
     @Override
     public void writeState() {
+        logger.info("Writing Kitchen state");
         // Check for tasks that were previously waiting for dependencies that are now met
         updateTaskAvailability();
         
@@ -305,7 +303,7 @@ public class Kitchen extends Entity {
      * the system even when no dependencies or other triggers have changed.
      */
     private void checkAndAssignTasks() {
-        System.out.println("\n[DEBUG] Checking for idle stations to assign tasks to...");
+        logger.info("\n[DEBUG] Checking for idle stations to assign tasks to...");
         
         // Get all stations from the station manager
         for (StationType stationType : StationType.values()) {
@@ -319,9 +317,9 @@ public class Kitchen extends Entity {
                 
                 // If this is a PREP station, log with higher visibility
                 if (stationType == StationType.PREP) {
-                    System.out.println("[IMPORTANT] PREP station is idle, looking for tasks to assign");
+                    logger.info("[IMPORTANT] PREP station is idle, looking for tasks to assign");
                 } else {
-                    System.out.println("[DEBUG] " + stationType + " station is idle, looking for tasks to assign");
+                    logger.info("[DEBUG] " + stationType + " station is idle, looking for tasks to assign");
                 }
                 
                 // Check all orders for tasks that could be assigned to this station
@@ -342,7 +340,7 @@ public class Kitchen extends Entity {
                                 task.updateDependenciesStatus();
                                 
                                 if (task.areDependenciesMet()) {
-                                    System.out.println("[DEBUG] Found task " + task.getName() + 
+                                    logger.info("[DEBUG] Found task " + task.getName() + 
                                                      " for idle " + stationType + " station" +
                                                      " from order: " + recipe.getOrderId());
                                     
@@ -351,7 +349,7 @@ public class Kitchen extends Entity {
                                     
                                     // If this is a PREP task, log it with higher visibility
                                     if (stationType == StationType.PREP) {
-                                        System.out.println("[IMPORTANT] Successfully assigned PREP task " + 
+                                        logger.info("[IMPORTANT] Successfully assigned PREP task " + 
                                                          task.getName() + " to PREP station");
                                     }
                                     
@@ -396,7 +394,7 @@ public class Kitchen extends Entity {
                 
                 if (task.areDependenciesMet() && !task.isCompleted()) {
                     readyTasks.add(task);
-                    System.out.println("Task is now available: " + task.getName() + " for " + recipe.getName() + 
+                    logger.info("Task is now available: " + task.getName() + " for " + recipe.getName() + 
                                     " (dependencies met)");
                     
                     // Always ensure the order is in the station's backlog for any ready task
@@ -430,7 +428,7 @@ public class Kitchen extends Entity {
                             if (!taskAlreadyInBacklog) {
                                 // FIXED: Add the task to the station backlog directly without checking
                                 // if the order is still in the pending orders queue
-                                System.out.println("[DEBUG] Adding order " + orderId + " to " + 
+                                logger.info("[DEBUG] Adding order " + orderId + " to " + 
                                             stationType + " station backlog (task now ready)");
                                 // Only add the specific task that's ready, not all tasks from the order
                                 station.addTask(task);

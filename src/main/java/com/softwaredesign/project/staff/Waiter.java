@@ -12,16 +12,25 @@ import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.menu.Menu;
 
+import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
+import com.softwaredesign.project.inventory.InventoryStockTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Waiter extends StaffMember {
+    private static final Logger logger = LoggerFactory.getLogger(Waiter.class);
     private List<Table> assignedTables;
     private OrderManager orderManager;
     private Menu menu;
+    private InventoryStockTracker inventoryStockTracker;
 
-    public Waiter(double payPerHour, double speedMultiplier, OrderManager orderManager, Menu menu) {
-        super(payPerHour, speedMultiplier);
+    public Waiter(double payPerHour, ISpeedComponent speedDecorator, OrderManager orderManager, Menu menu,
+            InventoryStockTracker inventoryStockTracker) {
+        super(payPerHour, speedDecorator);
         this.assignedTables = new ArrayList<>();
         this.orderManager = orderManager;
         this.menu = menu;
+        this.inventoryStockTracker = inventoryStockTracker;
     }
 
     public void assignTable(Table table) {
@@ -32,7 +41,7 @@ public class Waiter extends StaffMember {
      * Takes an order from a table and adds it to the OrderManager.
      * @param table The table to take an order from
      */
-    public void takeTableOrder(Table table) {
+    public boolean takeTableOrder(Table table) {
         if (!assignedTables.contains(table)) {
             throw new IllegalArgumentException("This table is not assigned to this waiter");
         }
@@ -44,22 +53,35 @@ public class Waiter extends StaffMember {
         String orderId = orderManager.generateOrderId();
         Order tableOrder = new Order(orderId);
 
+        // First collect all orders without checking inventory
         for (DineInCustomer customer : table.getCustomers()) {
-            Recipe customerRecipe = customer.selectRecipeFromMenu(menu);
-            customer.requestRecipeModification(menu);
-            tableOrder.addRecipes(customerRecipe);
-            for (Ingredient ingredient : customer.getRemovedIngredients()) {
-                tableOrder.addModification(customerRecipe, ingredient, false);
-            }
-            for (Ingredient ingredient : customer.getAddedIngredients()) {
-                tableOrder.addModification(customerRecipe, ingredient, true);
+            try {
+                Recipe customerRecipe = customer.selectRecipeFromMenu(menu);
+                customer.requestRecipeModification(menu);
+                tableOrder.addRecipes(customerRecipe);
+                for (Ingredient ingredient : customer.getRemovedIngredients()) {
+                    tableOrder.addModification(customerRecipe, ingredient, false);
+                }
+                for (Ingredient ingredient : customer.getAddedIngredients()) {
+                    tableOrder.addModification(customerRecipe, ingredient, true);
+                }
+
+                if (!inventoryStockTracker.canFulfillOrder(tableOrder.getIngredients())) {
+                    throw new IllegalStateException("Not enough ingredients to fulfill the order");
+                }
+            } catch (IllegalArgumentException e) {
+                logger.info(e.getMessage());
+                // TODO: Handle what to do if the order cannot be fulfilled
+                return false;
             }
         }
 
+        // Only add the order if we have all ingredients
         orderManager.addOrder(tableOrder);
         
         // Mark the table's order as placed
         table.markOrderPlaced();
+        return true;
     }
     
     /**
