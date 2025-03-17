@@ -4,7 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.engine.Entity;
 import com.softwaredesign.project.order.Meal;
@@ -32,6 +37,12 @@ public class FloorManager extends Entity {
     // List of meals waiting to be delivered to tables
     private Map<Table, List<Meal>> mealsToDeliver;
     
+    // Random number generator for customer spawning
+    private Random random = new Random();
+    
+    // Configuration values
+    private int maxGroupSize = 10; // Default value, will be overridden from config
+    
     public FloorManager(SeatingPlan seatingPlan, List<Waiter> waiters, OrderManager orderManager) {
         this.seatingPlan = seatingPlan;
         this.waiters = new ArrayList<>(waiters);
@@ -39,6 +50,58 @@ public class FloorManager extends Entity {
         this.tablesToProcess = new ArrayList<>();
         this.orderToTableMap = new HashMap<>();
         this.mealsToDeliver = new HashMap<>();
+        
+        // Load configuration values
+        loadConfigValues();
+    }
+    
+    /**
+     * Loads configuration values from config.json
+     */
+    private void loadConfigValues() {
+        try {
+            String configPath = "src/main/config.json";
+            String jsonContent = Files.readString(Paths.get(configPath));
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode config = mapper.readTree(jsonContent);
+            
+            // Get maxGroupSize from config
+            this.maxGroupSize = config.path("diningRoomRules").path("maxGroupSize").asInt(10);
+            System.out.println("[FloorManager] Loaded maxGroupSize from config: " + maxGroupSize);
+        } catch (Exception e) {
+            System.out.println("[FloorManager] Error loading config values: " + e.getMessage());
+            // Keep default values if config loading fails
+        }
+    }
+    
+    /**
+     * Spawns a random number of customers and attempts to seat them.
+     * This method creates a group of 0 to maxGroupSize customers and tries to find a table for them.
+     */
+    public void spawnCustomers() {
+        // Generate a random group size between 0 and maxGroupSize
+        int groupSize = random.nextInt(maxGroupSize + 1);
+        
+        if (groupSize > 0) {
+            System.out.println("[FloorManager] Attempting to spawn a group of " + groupSize + " customers");
+            
+            // Create the customer group
+            List<DineInCustomer> customerGroup = new ArrayList<>();
+            for (int i = 0; i < groupSize; i++) {
+                customerGroup.add(new DineInCustomer());
+            }
+            
+            // Try to seat the group
+            Table table = seatCustomers(customerGroup);
+            
+            if (table != null) {
+                System.out.println("[FloorManager] Seated a group of " + groupSize + 
+                                  " customers at table " + table.getTableNumber());
+            } else {
+                System.out.println("[FloorManager] Could not find a table for a group of " + 
+                                  groupSize + " customers");
+            }
+        }
     }
     
     /**
@@ -265,6 +328,12 @@ public class FloorManager extends Entity {
                     table.removeCustomer(customer);
                     System.out.println("Customer has finished eating and left table " + table.getTableNumber());
                 }
+                
+                // Check if the table is now empty and reset its state if it is
+                if (table.getCustomers().isEmpty()) {
+                    table.resetTableState();
+                    System.out.println("All customers have left table " + table.getTableNumber() + ", table state reset");
+                }
             }
         }
     }
@@ -276,6 +345,9 @@ public class FloorManager extends Entity {
     
     @Override
     public void writeState() {
+        // Spawn new customers each tick
+        spawnCustomers();
+        
         // Update customer browsing status
         updateCustomerBrowsingStatus();
         

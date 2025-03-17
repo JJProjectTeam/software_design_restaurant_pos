@@ -132,7 +132,6 @@ public class Kitchen extends Entity {
         Station station = stationManager.getStation(stationType);
         if (station != null && station.getAssignedChef() == chef) {
             station.unregisterChef();
-            chef.removeStationAssignment(station);
             logger.info("Chef unassigned from " + stationType + " station");
         }
     }
@@ -198,13 +197,19 @@ public class Kitchen extends Entity {
             List<RecipeTask> assignedTasks = new ArrayList<>();
             
             for (RecipeTask task : recipeTasks) {
-                // Instead of auto-assigning, add the task to the station's backlog
-                Station station = stationManager.getStation(task.getStationType());
-                if (station != null) {
-                    station.addTask(task);
-                    assignedTasks.add(task);
-                    assignedAnyTask = true;
-                    logger.info("[DEBUG] Queued new task " + task.getName() + " in " + task.getStationType() + " station backlog");
+                // Update dependencies status and check if they are met before queuing
+                task.updateDependenciesStatus();
+                if (task.areDependenciesMet()) {
+                    // Only add the task to the station's backlog if dependencies are met
+                    Station station = stationManager.getStation(task.getStationType());
+                    if (station != null) {
+                        station.addTask(task);
+                        assignedTasks.add(task);
+                        assignedAnyTask = true;
+                        logger.info("[DEBUG] Queued new task " + task.getName() + " in " + task.getStationType() + " station backlog (dependencies met)");
+                    }
+                } else {
+                    logger.info("[DEBUG] Task " + task.getName() + " for " + recipe.getName() + " has unmet dependencies, not queuing yet");
                 }
             }
             

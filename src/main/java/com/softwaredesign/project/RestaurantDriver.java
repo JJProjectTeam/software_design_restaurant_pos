@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.softwaredesign.project.controller.*;
-import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.inventory.Inventory;
 import com.softwaredesign.project.kitchen.Kitchen;
 import com.softwaredesign.project.kitchen.Station;
@@ -16,8 +15,6 @@ import com.softwaredesign.project.kitchen.StationManager;
 import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.view.*;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
-import com.softwaredesign.project.menu.BurgerRecipe;
-import com.softwaredesign.project.menu.KebabRecipe;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.order.Order;
 import com.softwaredesign.project.order.OrderManager;
@@ -37,8 +34,6 @@ import com.softwaredesign.project.demo.DemoHelper;
 import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
 import com.softwaredesign.project.staff.staffspeeds.StimulantAddictDecorator;
 import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
-import com.softwaredesign.project.order.Meal;
-import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.inventory.InventoryStockTracker;
 
 /**
@@ -176,7 +171,7 @@ public class RestaurantDriver {
                         gameTimer.cancel();
                     }
                 }
-            }, 0, 1000); // Check every second
+            }, 0, 250); // Check every second
 
             // This will block until the window is closed
             app.run();
@@ -548,206 +543,15 @@ public class RestaurantDriver {
         
         // Use DemoHelper to update the demo
         if (demoHelper != null) {
+            // Update the demo sequence
             demoHelper.update(tickCount);
+            
+            // Spawn random customers every tick
+            demoHelper.seatCustomers();
         }
     }
 
-    // Keep the handleDemoStep method for reference or possible future use
-    private void handleDemoStep() {
-        switch (demoStep) {
-            case 0:
-                logger.info("\n=== SEATING CUSTOMERS ===");
-                // Add customers to tables
-                for (Table table : seatingPlan.getAllTables()) {
-                    if (table.getCustomers().isEmpty()) {
-                        DineInCustomer customer = new DineInCustomer();
-                        table.addCustomer(customer);
-                        customer.finishBrowsing(); // Ready to order
-                        logger.info("Seated customer at table " + table.getTableNumber());
-                        if (table.getTableNumber() >= 3) break; // Limit to 3 tables for demo
-                    }
-                }
-                demoStep++;
-                break;
 
-            case 1:
-                logger.info("\n=== CREATING ORDERS ===");
-                // Create orders for seated customers
-                for (Table table : getOccupiedTables()) {
-                    if (!table.isOrderPlaced()) {
-                        Order order = table.getTableNumber() % 2 == 0 ? 
-                            createBurgerOrder() : createKebabOrder();
-                        // Table reference not needed in Order
-                        orderManager.addOrder(order);
-                        // Register order with CollectionPoint (1 meal per order in demo)
-                        collectionPoint.registerOrder(order.getOrderId(), 1);
-                        createdOrders.add(order);
-                        logger.info("Created {} order for table {}", 
-                            (table.getTableNumber() % 2 == 0 ? "burger" : "kebab"),
-                            table.getTableNumber());
-                    }
-                }
-                demoStep++;
-                break;
-
-            case 2:
-                logger.info("\n=== KITCHEN PROCESSING ===");
-                // Let the game engine handle order processing through its tick system
-                // The following methods are already called in Kitchen.writeState():
-                // - getRecipes()
-                // - assignRecipesToStations()
-                // - updateTaskAvailability()
-                
-                // Give the game engine time to process orders (3 ticks)
-                for (int i = 0; i < 3; i++) {
-                    gameEngine.step();
-                    
-                    // Have chefs check for work after each step
-                    for (Chef chef : chefManager.getAllChefs()) {
-                        if (!chef.isWorking()) {
-                            logger.info("Chef {} checking for work...", chef.getName());
-                            // Unregister from current station if not working
-                            if (chef.getCurrentStation() != null) {
-                                chef.getCurrentStation().unregisterChef();
-                            }
-                            chef.checkForWork();
-                        }
-                    }
-                    
-                    try {
-                        Thread.sleep(100); // Small delay between steps
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
-                
-                demoStep++;
-                break;
-                
-            case 3:
-                logger.info("\n=== CHECKING STATION STATUS ===");
-                // Log the status of all stations
-                StationManager stationManager = kitchen.getStationManager();
-                for (Station station : stationManager.getAllStations()) {
-                    logger.info("Station {} status:", station.getType());
-                    logger.info("  - Has chef: {}", station.getAssignedChef() != null);
-                    if (station.getAssignedChef() != null) {
-                        logger.info("  - Chef: {}", station.getAssignedChef().getName());
-                    }
-                    logger.info("  - Is busy: {}", station.isBusy());
-                    logger.info("  - Current recipe: {}", 
-                        (station.getCurrentRecipe() != null ? station.getCurrentRecipe().getName() : "None"));
-                    logger.info("  - Current task: {}", 
-                        (station.getCurrentTask() != null ? station.getCurrentTask().getName() : "None"));
-                    logger.info("  - Backlog size: {}", station.getBacklog().size());
-                }
-                
-                // Process tasks at stations - this happens automatically in the writeState method
-                // of the Station class when the GameEngine steps
-                for (Station station : stationManager.getAllStations()) {
-                    if (station.getCurrentTask() != null && station.getAssignedChef() != null) {
-                        logger.info("Station {} has task: {} (processing will happen in tick)", station.getType(), station.getCurrentTask().getName());
-                    }
-                }
-                
-                // Update task availability again - this is now handled in Kitchen.writeState()
-                // but we'll call it explicitly here for clarity
-                kitchen.updateTaskAvailability();
-                
-                demoStep++;
-                break;
-
-            default:
-                // Increment tick count for ongoing operations
-                tickCount++;
-                
-                // Existing code for collecting already complete orders…
-                if (collectionPoint.hasReadyOrders()) {
-                    logger.info("\n=== ORDER COMPLETED ===");
-                    logger.info("Order ready for pickup!");
-                    collectionPoint.collectNextOrder();
-                }
-
-                // Ensure kitchen is processing orders
-                kitchen.getRecipes();
-                kitchen.updateTaskAvailability();
-
-                // NEW: Force completion manually from the createdOrders list
-                for (Iterator<Order> it = createdOrders.iterator(); it.hasNext();) {
-                    Order order = it.next();
-                    if (!order.isComplete()) { // only process if not complete
-                        Meal completedMeal = createCompletedMealForOrder(order);
-                        if (completedMeal != null) {
-                            collectionPoint.addCompletedMeal(completedMeal);
-                            logger.info("Manually forced completion of order {}", order.getOrderId());
-                        }
-                        // Remove the order from the list once forced completed,
-                        // because its registration will be cleared upon collection.
-                        it.remove();
-                    }
-                }
-                
-                // Collect any orders that are now ready
-                if (collectionPoint.hasReadyOrders()) {
-                    logger.info("\n=== FORCING ORDER COMPLETION MANUALLY ===");
-                    collectionPoint.collectNextOrder();
-                }
-                
-                // (Station status logging remains unchanged.)
-                if (tickCount % 5 == 0) {
-                    logger.info("\n=== STATION STATUS UPDATE ===");
-                    StationManager sm = kitchen.getStationManager();
-                    for (Station station : sm.getAllStations()) {
-                        if (station.getCurrentTask() != null || station.getAssignedChef() != null) {
-                            logger.info("Station {}:", station.getType());
-                            logger.info("  - Chef: {}", 
-                                (station.getAssignedChef() != null ? station.getAssignedChef().getName() : "None"));
-                            logger.info("  - Task: {}", 
-                                (station.getCurrentTask() != null ? station.getCurrentTask().getName() : "None"));
-                            logger.info("  - Progress: {} / {}", station.getCookingProgress(), 
-                                (station.getCurrentTask() != null ? station.getCurrentTask().getCookingWorkRequired() : ""));
-                        }
-                    }
-                }
-                break;
-        }
-    }
-
-    // Utility methods needed by handleDemoStep (keeping for reference)
-    private List<Table> getOccupiedTables() {
-        List<Table> occupiedTables = new ArrayList<>();
-        for (Table table : seatingPlan.getAllTables()) {
-            if (!table.getCustomers().isEmpty()) {
-                occupiedTables.add(table);
-            }
-        }
-        return occupiedTables;
-    }
-
-    private Order createBurgerOrder() {
-        Order order = new Order(orderManager.generateOrderId());
-        order.addRecipes(new BurgerRecipe(inventory));
-        return order;
-    }
-
-    private Order createKebabOrder() {
-        Order order = new Order(orderManager.generateOrderId());
-        order.addRecipes(new KebabRecipe(inventory));
-        return order;
-    }
-
-    private Meal createCompletedMealForOrder(Order order) {
-        if (order == null) return null;
-        
-        // Get the first recipe from the order
-        if (!order.getRecipes().isEmpty()) {
-            Recipe recipe = order.getRecipes().get(0); // Get first recipe for demo
-            // Create a new meal using the proper constructor:
-            return new Meal(recipe.getName(), recipe.getIngredients(), inventory, order.getOrderId());
-        }
-        
-        return null;
-    }
 
     public static void main(String[] args) {
         RestaurantDriver driver = new RestaurantDriver();

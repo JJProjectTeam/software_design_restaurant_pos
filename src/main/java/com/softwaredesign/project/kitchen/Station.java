@@ -260,8 +260,9 @@ public class Station extends Entity {
             if (currentTask != null) {
                 logger.info("Chef " + assignedChef.getName() + " has left " + type + " station, task reassigned");
             }
-            // Unregister the current chef
-            assignedChef.removeStationAssignment(this);
+            // Unregister the current chef but don't remove from their assigned stations
+            // assignedChef.removeStationAssignment(this);
+            assignedChef.setCurrentStation(null);
             assignedChef = null;
         }
         
@@ -366,10 +367,6 @@ public class Station extends Entity {
             Chef departingChef = assignedChef;
             logger.info("[DEBUG-STATION] Setting assignedChef to null");
             assignedChef = null;
-            
-            // Make sure the chef's assigned stations list no longer contains this station
-            logger.info("[DEBUG-STATION] Removing station from chef's assigned stations list");
-            departingChef.removeStationAssignment(this);
             
             // Reset working status if appropriate
             if (departingChef.isWorking() && (taskChef == null || taskChef != departingChef)) {
@@ -722,17 +719,17 @@ public class Station extends Entity {
             // and we have a chef who isn't working, this might be a good time for them to look elsewhere
             if (currentTask == null && assignedChef != null && !assignedChef.isWorking()) {
                 logger.info("[DEBUG-CHEF-IDLE] Chef " + assignedChef.getName() + 
-                    " is idle at " + type + " station with no tasks. Releasing chef to look for work elsewhere.");
+                    " is idle at " + type + " station with no tasks. Letting chef check for work elsewhere.");
                 
-                // Store chef reference before clearing it
+                // Store chef reference before we potentially modify anything
                 Chef idleChef = assignedChef;
                 
-                // We should unregister this chef from the station since there's no work here
-                unregisterChef();
-                
-                // Have the chef look for work elsewhere
+                // Don't unregister the chef anymore - this caused the chef to become "invisible"
+                // Just have them check for work across all their assigned stations
+                // The chef will remain assigned to this station but might choose to work at another
+                // if there are pending tasks
                 if (idleChef != null) {
-                    idleChef.chooseNextStation();
+                    idleChef.checkForWork();
                 }
             }
         }
@@ -754,35 +751,58 @@ public class Station extends Entity {
         }
         
         if (!backlog.isEmpty()) {
-            // Get the first task (which should be the oldest order due to our sorting)
-            RecipeTask nextTask = backlog.remove(0);
-            Recipe recipe = nextTask.getRecipe();
-            logger.info("[DEBUG] " + type + " station pulling queued task: " + nextTask.getName());
-            currentRecipe = recipe;
-            currentTask = nextTask;
-            cookingProgress = 0; // Explicitly reset cooking progress to zero
-            needsIngredients = true; // Always need ingredients for a new task
+            // Find the first task whose dependencies are met
+            int taskIndex = -1;
+            RecipeTask readyTask = null;
             
-            // Additional logging to verify working values
-            logger.info("[DEBUG-TASK-VALUES] New task initialized. cookingWorkRequired=" + 
-                nextTask.getCookingWorkRequired() + ", chef speed=" + 
-                (assignedChef != null ? assignedChef.getSpeedMultiplier() : "n/a") + 
-                ", estimated required work=" + 
-                (assignedChef != null ? 
-                    Math.max(1, (int)Math.round(nextTask.getCookingWorkRequired() / assignedChef.getSpeedMultiplier())) : 
-                    "n/a"));
-
-            if (assignedChef != null) {
-                assignedChef.setWorking(true);
-                logger.info("[DEBUG-STATION] Chef " + assignedChef.getName() + " is now working on task " + nextTask.getName());
-            } else {
-                logger.info("[DEBUG-STATION] No chef assigned to " + type + " station, queued task " + nextTask.getName() + " remains waiting for chef assignment");
+            for (int i = 0; i < backlog.size(); i++) {
+                RecipeTask task = backlog.get(i);
+                task.updateDependenciesStatus();
+                if (task.areDependenciesMet()) {
+                    taskIndex = i;
+                    readyTask = task;
+                    break;
+                } else {
+                    Recipe r = task.getRecipe();
+                    String orderId = (r != null) ? r.getOrderId() : "unknown";
+                    logger.info("[DEBUG] Skipping task " + task.getName() + " (Order: " + orderId + ") - dependencies not met");
+                }
             }
-            return;
+            
+            // If we found a task with met dependencies, assign it
+            if (taskIndex >= 0 && readyTask != null) {
+                // Remove the ready task from the backlog
+                backlog.remove(taskIndex);
+                Recipe recipe = readyTask.getRecipe();
+                logger.info("[DEBUG] " + type + " station pulling queued task: " + readyTask.getName() + " (dependencies met)");
+                currentRecipe = recipe;
+                currentTask = readyTask;
+                cookingProgress = 0; // Explicitly reset cooking progress to zero
+                needsIngredients = true; // Always need ingredients for a new task
+                
+                // Additional logging to verify working values
+                logger.info("[DEBUG-TASK-VALUES] New task initialized. cookingWorkRequired=" + 
+                    readyTask.getCookingWorkRequired() + ", chef speed=" + 
+                    (assignedChef != null ? assignedChef.getSpeedMultiplier() : "n/a") + 
+                    ", estimated required work=" + 
+                    (assignedChef != null ? 
+                        Math.max(1, (int)Math.round(readyTask.getCookingWorkRequired() / assignedChef.getSpeedMultiplier())) : 
+                        "n/a"));
+
+                if (assignedChef != null) {
+                    assignedChef.setWorking(true);
+                    logger.info("[DEBUG-STATION] Chef " + assignedChef.getName() + " is now working on task " + readyTask.getName());
+                } else {
+                    logger.info("[DEBUG-STATION] No chef assigned to " + type + " station, queued task " + readyTask.getName() + " remains waiting for chef assignment");
+                }
+                return;
+            } else {
+                logger.info("[DEBUG] " + type + " station has " + backlog.size() + " tasks in backlog, but none have their dependencies met yet");
+            }
         }
         
         // Instead of asking kitchen for new recipes, simply log that we're waiting for new tasks
-        logger.info("[DEBUG] " + type + " station backlog is empty, waiting for new tasks");
+        logger.info("[DEBUG] " + type + " station has no ready tasks, waiting for tasks with met dependencies");
         return;
     }
 

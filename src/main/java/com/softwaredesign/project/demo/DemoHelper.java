@@ -2,7 +2,12 @@ package com.softwaredesign.project.demo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.softwaredesign.project.customer.DineInCustomer;
 import com.softwaredesign.project.inventory.Inventory;
 import com.softwaredesign.project.kitchen.Kitchen;
@@ -69,6 +74,8 @@ public class DemoHelper {
         return processCurrentDemoStep();
     }
     
+
+    
     /**
      * Process the current step in the demo sequence
      * @return True if any action was taken
@@ -109,26 +116,59 @@ public class DemoHelper {
     /**
      * Demo Step 1: Seat customers at tables
      */
-    private boolean seatCustomers() {
+    public boolean seatCustomers() {
         System.out.println("\n=== SEATING CUSTOMERS ===");
         boolean customersSeated = false;
         
-        // Add customers to tables
-        for (Table table : seatingPlan.getAllTables()) {
-            if (table.getCustomers().isEmpty()) {
-                DineInCustomer customer = new DineInCustomer();
-                table.addCustomer(customer);
-                customer.finishBrowsing(); // Ready to order
-                System.out.println("Seated customer at table " + table.getTableNumber());
-                customersSeated = true;
-                if (table.getTableNumber() >= 3) break; // Limit to 3 tables for demo
-            }
+        // Generate a random group size between 1 and maxGroupSize (from config)
+        int maxGroupSize = getMaxGroupSizeFromConfig();
+        int groupSize = new Random().nextInt(maxGroupSize) + 1; // +1 to ensure at least 1 customer
+        
+        System.out.println("Attempting to seat a group of " + groupSize + " customers");
+        
+        // Create the customer group
+        List<DineInCustomer> customerGroup = new ArrayList<>();
+        for (int i = 0; i < groupSize; i++) {
+            DineInCustomer customer = new DineInCustomer();
+            customer.finishBrowsing(); // Ready to order
+            customerGroup.add(customer);
+        }
+        
+        // Try to seat the group
+        Table table = floorManager.seatCustomer(customerGroup.get(0));
+        
+        if (table != null) {
+            System.out.println("Seated a group of " + groupSize + " customers at table " + table.getTableNumber());
+            customersSeated = true;
+        } else {
+            System.out.println("Could not find a table for a group of " + groupSize + " customers");
         }
         
         if (customersSeated) {
             demoStep++;
         }
         return customersSeated;
+    }
+    
+    /**
+     * Gets the maximum group size from the configuration file
+     * @return The maximum group size, or 10 as default if not found
+     */
+    private int getMaxGroupSizeFromConfig() {
+        try {
+            String configPath = "src/main/config.json";
+            String jsonContent = Files.readString(Paths.get(configPath));
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode config = mapper.readTree(jsonContent);
+            
+            // Get maxGroupSize from config
+            int maxGroupSize = config.path("diningRoomRules").path("maxGroupSize").asInt(10);
+            return maxGroupSize;
+        } catch (Exception e) {
+            System.out.println("[DemoHelper] Error loading config values: " + e.getMessage());
+            // Return default value if config loading fails
+            return 10;
+        }
     }
     
     /**
@@ -235,7 +275,42 @@ public class DemoHelper {
             }
         }
         
+        // Every 3 ticks, check for tables with customers ready to order
+        if (tickCount % 3 == 0) {
+            // Check for customers ready to order and create orders
+            boolean ordersCreated = createOrdersForReadyTables();
+            if (ordersCreated) {
+                actionTaken = true;
+            }
+        }
+        
         return actionTaken;
+    }
+    
+    /**
+     * Create orders for tables with customers ready to order
+     * @return true if any orders were created
+     */
+    private boolean createOrdersForReadyTables() {
+        boolean ordersCreated = false;
+        
+        // Create orders for seated customers who are ready to order
+        for (Table table : getOccupiedTables()) {
+            if (!table.isOrderPlaced() && table.isEveryoneReadyToOrder()) {
+                Order order = table.getTableNumber() % 2 == 0 ? 
+                    createBurgerOrder() : createKebabOrder();
+                // Add order to the OrderManager
+                orderManager.addOrder(order);
+                // Mark the table as having an order placed
+                table.markOrderPlaced();
+                System.out.println("Created " + 
+                    (table.getTableNumber() % 2 == 0 ? "burger" : "kebab") + 
+                    " order for table " + table.getTableNumber());
+                ordersCreated = true;
+            }
+        }
+        
+        return ordersCreated;
     }
     
     /**
