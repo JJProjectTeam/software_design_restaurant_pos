@@ -70,18 +70,41 @@ public class OrderManager {
             logger.info("[DEBUG] Re-registered order " + orderId + " with collection point");
         }
 
-        for (Recipe recipe : recipes) {
-            // Set the orderId on the recipe to ensure proper tracking
-            recipe.setOrderId(orderId);
-            makeAmendments(recipe, order);
+        // Create a list to hold cloned recipes
+        List<Recipe> clonedRecipes = new ArrayList<>();
+        
+        for (Recipe originalRecipe : recipes) {
+            // Create a fresh copy of the recipe
+            Recipe clonedRecipe = originalRecipe.copy();
+            
+            // Set the orderId on the cloned recipe
+            clonedRecipe.setOrderId(orderId);
+            
+            // Apply any modifications to the cloned recipe
+            makeAmendments(clonedRecipe, order);
+            
+            // Add the cloned recipe to our result list
+            clonedRecipes.add(clonedRecipe);
+            
+            // Add debug logging to track recipe cloning
+            System.out.println("[DEBUG-CLONE] Created copy of recipe " + clonedRecipe.getName() + 
+                               " for order " + orderId);
         }
-
-        // Clone the recipes list to avoid modifying the original order's recipes
-        return new ArrayList<>(recipes);
+        
+        // Return the list of cloned recipes
+        return clonedRecipes;
     }
 
     private void makeAmendments(Recipe recipe, Order order) {
         RecipeModification modifications = order.getModificationsForRecipe(recipe);
+        
+        // Add null check to prevent NullPointerException
+        if (modifications == null) {
+            // Log warning and return early if no modifications are found
+            System.out.println("[DEBUG-AMENDMENTS] No modifications found for recipe " + 
+                              recipe.getName() + " in order " + order.getOrderId());
+            return;
+        }
 
         // Remove ingredients
         for (Ingredient ingredient : modifications.getRemovedIngredients()) {

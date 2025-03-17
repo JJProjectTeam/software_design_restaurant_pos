@@ -233,7 +233,7 @@ public class Chef extends StaffMember {
                 return station;
             }
         }
-        
+        // TODO: remove all this priority hocus pocus and refactor it just to workstrategy
         // PRIORITY 4: Use the strategy for normal station selection
         Station nextStation = workStrategy.chooseNextStation(stationsToCheck);
         

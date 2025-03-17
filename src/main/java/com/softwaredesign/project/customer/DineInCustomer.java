@@ -7,6 +7,7 @@ import java.util.Random;
 import com.softwaredesign.project.exceptions.RecipeValidationException;
 import com.softwaredesign.project.menu.Menu;
 import com.softwaredesign.project.inventory.Ingredient;
+import com.softwaredesign.project.order.Meal;
 import com.softwaredesign.project.order.Recipe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,8 @@ public class DineInCustomer extends Customer {
     private Recipe selectedRecipe;
     private List<Ingredient> addedIngredients;
     private List<Ingredient> removedIngredients;
+    private boolean hasEaten;
+    private int satisfaction;
     private static final Logger logger = LoggerFactory.getLogger(DineInCustomer.class);
 
     public DineInCustomer() {
@@ -23,6 +26,8 @@ public class DineInCustomer extends Customer {
         this.selectedRecipe = null;
         this.addedIngredients = new ArrayList<>();
         this.removedIngredients = new ArrayList<>();
+        this.hasEaten = false;
+        this.satisfaction = 50; // Default satisfaction level (0-100)
     }
 
     @Override
@@ -85,6 +90,49 @@ public class DineInCustomer extends Customer {
             recipe.addIngredient(additionalIngredient);
             logger.info("Customer requested additional " + additionalIngredient.getName());
         }
+    }
+    
+    /**
+     * Customer eats a meal that has been delivered to their table.
+     * @param meal The meal to eat
+     */
+    public void eatMeal(Meal meal) {
+        // Increment satisfaction based on the meal
+        int satisfactionChange = calculateSatisfaction(meal);
+        satisfaction = Math.min(100, Math.max(0, satisfaction + satisfactionChange));
+        
+        System.out.println("Customer ate a meal. Satisfaction: " + satisfaction + "/100");
+        
+        hasEaten = true;
+    }
+    
+    /**
+     * Calculate satisfaction change from eating a meal.
+     * In a real system, this would be more complex and consider many factors.
+     * @param meal The meal being eaten
+     * @return The change in satisfaction (positive or negative)
+     */
+    private int calculateSatisfaction(Meal meal) {
+        // For simplicity, we'll just return a random positive value
+        // In a real system, this would consider if the meal matches what they ordered,
+        // if it was delivered promptly, quality, etc.
+        return new Random().nextInt(20) + 10; // Random satisfaction boost between 10-30
+    }
+    
+    /**
+     * Checks if this customer has eaten.
+     * @return true if the customer has eaten, false otherwise
+     */
+    public boolean hasEaten() {
+        return hasEaten;
+    }
+    
+    /**
+     * Gets the customer's current satisfaction level.
+     * @return The satisfaction level (0-100)
+     */
+    public int getSatisfaction() {
+        return satisfaction;
     }
 
     public List<Ingredient> getAddedIngredients() {

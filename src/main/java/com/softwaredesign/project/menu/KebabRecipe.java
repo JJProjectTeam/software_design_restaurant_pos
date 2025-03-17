@@ -42,4 +42,16 @@ public class KebabRecipe extends Recipe {
         plateTask.addDependency(grillTask);
         tasks.add(plateTask);
     }
+    
+    /**
+     * Creates a fresh copy of this kebab recipe.
+     * The copy will have the same inventory service but will initialize its own tasks and ingredients.
+     * @return A brand new KebabRecipe instance without any orderId
+     */
+    @Override
+    public Recipe copy() {
+        // Simply create a new KebabRecipe with the same inventory service
+        // The constructor will initialize the ingredients and tasks
+        return new KebabRecipe(inventoryService);
+    }
 }

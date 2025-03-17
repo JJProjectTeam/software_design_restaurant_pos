@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 public class InventoryView extends GamePlayView {
     private static final Logger logger = LoggerFactory.getLogger(InventoryView.class);
-    private final RestaurantApplication app;
     private TTableWidget inventoryTable;
     private Queue<InventoryUpdate> pendingUpdates;
     private Map<String, Integer> ingredientRowMap;  // Track row indices for ingredients
@@ -41,7 +40,6 @@ public class InventoryView extends GamePlayView {
 
     public InventoryView(RestaurantApplication app) {
         super(app);
-        this.app = app;
         this.pendingUpdates = new LinkedList<>();
         this.ingredientRowMap = new HashMap<>();
         this.isInitialized = false;

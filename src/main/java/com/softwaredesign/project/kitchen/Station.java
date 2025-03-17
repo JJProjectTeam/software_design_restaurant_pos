@@ -85,14 +85,62 @@ public class Station extends Entity {
             return;
         }
         
+        System.out.println("[DEBUG-STATION-ADD] Adding task " + task.getName() + 
+                         " from recipe " + task.getRecipe().getName() + 
+                         " with orderId " + task.getRecipe().getOrderId() + 
+                         " to " + type + " station backlog");
+        
         // Check if this specific task is already in the backlog to prevent duplicates
         boolean taskAlreadyExists = false;
         
+        // First, print all backlog tasks with their details
+        System.out.println("[DEBUG-STATION-ADD] Current backlog for " + type + " station:");
+        for (int i = 0; i < backlog.size(); i++) {
+            RecipeTask existingTask = backlog.get(i);
+            Recipe existingRecipe = existingTask.getRecipe();
+            String existingOrderId = existingRecipe != null ? existingRecipe.getOrderId() : "null";
+            System.out.println("  " + i + ": " + existingTask.getName() + 
+                             " (recipe: " + (existingRecipe != null ? existingRecipe.getName() : "null") + 
+                             ", orderId: " + existingOrderId + 
+                             ", hashCode: " + existingTask.hashCode() + ")");
+        }
+        
         for (RecipeTask existingTask : backlog) {
-            // Use the enhanced equals method which now considers the recipe's orderId
-            if (existingTask.equals(task)) {
+            // Manually check if tasks appear to be duplicates
+            boolean sameTaskName = existingTask.getName().equals(task.getName());
+            boolean sameStationType = existingTask.getStationType() == task.getStationType();
+            
+            // Get recipes and orderIds
+            Recipe existingRecipe = existingTask.getRecipe();
+            Recipe newTaskRecipe = task.getRecipe();
+            String existingOrderId = existingRecipe != null ? existingRecipe.getOrderId() : null;
+            String newOrderId = newTaskRecipe != null ? newTaskRecipe.getOrderId() : null;
+            
+            System.out.println("[DEBUG-STATION-ADD] Comparing with existing task: " + existingTask.getName() + 
+                             ", sameTaskName: " + sameTaskName + 
+                             ", sameStationType: " + sameStationType);
+            
+            if (existingRecipe != null && newTaskRecipe != null) {
+                boolean sameRecipeName = existingRecipe.getName().equals(newTaskRecipe.getName());
+                System.out.println("[DEBUG-STATION-ADD]   Both have recipes. sameRecipeName: " + sameRecipeName);
+                
+                if (existingOrderId != null && newOrderId != null) {
+                    boolean sameOrderId = existingOrderId.equals(newOrderId);
+                    System.out.println("[DEBUG-STATION-ADD]   Both have orderIds. sameOrderId: " + sameOrderId + 
+                                     " (" + existingOrderId + " vs " + newOrderId + ")");
+                } else {
+                    System.out.println("[DEBUG-STATION-ADD]   At least one orderId is null. existingOrderId: " + 
+                                     existingOrderId + ", newOrderId: " + newOrderId);
+                }
+            }
+            
+            // Now use the equals method and track the result
+            boolean equals = existingTask.equals(task);
+            System.out.println("[DEBUG-STATION-ADD]   Tasks equal according to equals(): " + equals);
+            
+            if (equals) {
                 taskAlreadyExists = true;
-                logger.info("[DEBUG] Prevented duplicate task: " + task.getName() + 
+                logger.info("[DEBUG-STATION-ADD] Prevented duplicate task: " + task.getName() + 
                                " for recipe: " + (task.getRecipe() != null ? task.getRecipe().getName() : "unknown") +
                                " with orderId: " + (task.getRecipe() != null ? task.getRecipe().getOrderId() : "unknown"));
                 break;
@@ -101,10 +149,67 @@ public class Station extends Entity {
         
         // Only add the task if it's not already in the backlog
         if (!taskAlreadyExists) {
-            backlog.add(task);
-            logger.info("[DEBUG] Added task to " + type + " station backlog: " + task.getName() + 
-                           " for recipe: " + (task.getRecipe() != null ? task.getRecipe().getName() : "unknown") +
-                           " with orderId: " + (task.getRecipe() != null ? task.getRecipe().getOrderId() : "unknown"));
+            // FIXED: Insert the task at the correct position based on order ID (to process older orders first)
+            String orderId = task.getRecipe().getOrderId();
+            boolean inserted = false;
+            
+            // If the task has an order ID, find the correct position to insert it
+            if (orderId != null) {
+                // Extract the numerical portion of the order ID (e.g., "1000" from "Order-1000")
+                int orderNum = extractOrderNumber(orderId);
+                
+                // Find the correct position to insert based on order number
+                for (int i = 0; i < backlog.size(); i++) {
+                    RecipeTask existingTask = backlog.get(i);
+                    String existingOrderId = existingTask.getRecipe() != null ? 
+                                             existingTask.getRecipe().getOrderId() : null;
+                    
+                    if (existingOrderId != null) {
+                        int existingOrderNum = extractOrderNumber(existingOrderId);
+                        
+                        // If the new task's order number is lower, insert it here
+                        if (orderNum < existingOrderNum) {
+                            backlog.add(i, task);
+                            inserted = true;
+                            System.out.println("[DEBUG] Inserted task " + task.getName() + 
+                                           " for order " + orderId + " at position " + i + 
+                                           " (before order " + existingOrderId + ")");
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // If not inserted yet, add to the end
+            if (!inserted) {
+                backlog.add(task);
+            }
+            
+            System.out.println("[DEBUG-BACKLOG] Current " + type + " station backlog contents:");
+            for (int i = 0; i < backlog.size(); i++) {
+                RecipeTask t = backlog.get(i);
+                System.out.println("  " + i + ": " + t.getName() + " (Order: " + 
+                    (t.getRecipe() != null ? t.getRecipe().getOrderId() : "null") + ")");
+            }
+        }
+    }
+    
+    /**
+     * Helper method to extract the numerical portion of an order ID
+     * @param orderId The order ID (e.g., "Order-1000")
+     * @return The numerical value (e.g., 1000)
+     */
+    private int extractOrderNumber(String orderId) {
+        if (orderId == null || !orderId.contains("-")) {
+            return Integer.MAX_VALUE; // Default to highest value for unrecognized format
+        }
+        
+        try {
+            String[] parts = orderId.split("-");
+            return Integer.parseInt(parts[1]);
+        } catch (Exception e) {
+            System.out.println("[WARNING] Could not parse order number from ID: " + orderId);
+            return Integer.MAX_VALUE; // Default to highest value for unparseable IDs
         }
     }
     
@@ -558,7 +663,18 @@ public class Station extends Entity {
      */
     private void tryAssignNewTask() {
         logger.info("[DEBUG] " + type + " station checking backlog for new tasks");
+        
+        // Print the current backlog to help diagnose the issue
+        logger.info("[DEBUG-BACKLOG] " + type + " station backlog before assignment:");
+        for (int i = 0; i < backlog.size(); i++) {
+            RecipeTask t = backlog.get(i);
+            Recipe r = t.getRecipe();
+            String orderId = (r != null) ? r.getOrderId() : "unknown";
+            logger.info("  " + i + ": " + t.getName() + " (Order: " + orderId + ")");
+        }
+        
         if (!backlog.isEmpty()) {
+            // Get the first task (which should be the oldest order due to our sorting)
             RecipeTask nextTask = backlog.remove(0);
             Recipe recipe = nextTask.getRecipe();
             logger.info("[DEBUG] " + type + " station pulling queued task: " + nextTask.getName());
@@ -575,6 +691,7 @@ public class Station extends Entity {
             }
             return;
         }
+        
         // Instead of asking kitchen for new recipes, simply log that we're waiting for new tasks
         logger.info("[DEBUG] " + type + " station backlog is empty, waiting for new tasks");
         return;
@@ -587,5 +704,54 @@ public class Station extends Entity {
     @Override
     public String toString() {
         return type.toString() + " Station";
+    }
+
+    /**
+     * Sets the CollectionPoint for this station.
+     * This ensures all stations use the same CollectionPoint instance.
+     * @param collectionPoint The CollectionPoint to use for this station
+     */
+    public void setCollectionPoint(CollectionPoint collectionPoint) {
+        this.collectionPoint = collectionPoint;
+    }
+
+    /**
+     * Completes the current meal and adds it to the collection point.
+     * This is a critical method for order fulfillment.
+     */
+    private void completeMeal() {
+        if (currentRecipe != null && currentTask != null && currentTask.isCompleted()) {
+            // Check if this is the last task for the recipe
+            if (currentRecipe.isComplete()) {
+                logger.info("[Station] Recipe complete: " + currentRecipe.getName());
+                
+                try {
+                    // Build the meal using the recipe's buildMeal method
+                    Meal meal = currentRecipe.buildMeal();
+                    
+                    logger.info("[Station] Adding completed meal to collection point: " + 
+                        meal.getOrderId() + " - " + currentRecipe.getName());
+                    
+                    // This is the critical step - use the correct CollectionPoint
+                    if (collectionPoint != null) {
+                        collectionPoint.addCompletedMeal(meal);
+                        logger.info("[Station] Successfully added meal to collection point");
+                    } else {
+                        logger.error("[Station] ERROR: CollectionPoint is null! Meal cannot be added.");
+                    }
+                } catch (Exception e) {
+                            logger.error("[Station] ERROR creating meal: " + e.getMessage());
+                }
+                
+                // Clear current recipe and task
+                currentRecipe = null;
+                currentTask = null;
+                cookingProgress = 0;
+            } else {
+                // Only the task is complete, but more tasks remain for the recipe
+                currentTask = null;
+                cookingProgress = 0;
+            }
+        }
     }
 }
