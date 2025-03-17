@@ -183,7 +183,7 @@ public class ConfigurationController extends BaseController {
                     int maxChefs = chefRules.path("max").asInt(20);
                     int maxStationsPerChef = chefRules.path("maxStationsPerChef").asInt(10);
                     int maxSpeed = chefRules.path("maxSpeed").asInt(5);
-                    double standardPayPerHour = chefRules.path("standardPayPerHour").asDouble(15.0);
+                    double standardPayr = chefRules.path("standardPay").asDouble(15.0);
                     double payMultiplierBySpeed = chefRules.path("payMultiplierBySpeed").asDouble(1.0);
                     double payMultiplierByStation = chefRules.path("payMultiplierByStation").asDouble(1.0);
 
@@ -245,13 +245,13 @@ public class ConfigurationController extends BaseController {
             if (!waiterRules.isMissingNode()) {
                 int minWaiters = waiterRules.path("min").asInt(1); // Default to 1 if not found
                 int maxWaiters = waiterRules.path("max").asInt(10); // Default to 10 if not found
-                double standardPayPerHour = waiterRules.path("standardPayPerHour").asDouble(10.0);
+                double standardPay = waiterRules.path("standardPay").asDouble(10.0);
                 diningView.setMinWaiters(minWaiters);
                 diningView.setMaxWaiters(maxWaiters);
-                diningView.setStandardPayPerHour(standardPayPerHour);
+                diningView.setStandardPay(standardPay);
                 
-                logger.info("[ConfigurationController] Set waiter constants - Min Waiters: {}, Max Waiters: {}, Max Speed: {}, Standard Pay: {}, Speed Multiplier: {}", 
-                    minWaiters, maxWaiters, standardPayPerHour);
+                logger.info("[ConfigurationController] Set waiter constants - Min Waiters: {}, Max Waiters: {}, Standard Pay: {}", 
+                    minWaiters, maxWaiters, standardPay);
             }
             
             // Set menu configuration constants
@@ -462,7 +462,7 @@ public class ConfigurationController extends BaseController {
         for (var entry : waiterData.entrySet()) {
             var data = entry.getValue();
 
-            Waiter waiter = new Waiter(data.getCostPerHour(), orderManager, menu, inventoryStockTracker);
+            Waiter waiter = new Waiter(data.getCost(), orderManager, menu, inventoryStockTracker);
             
             // Calculate tables for this waiter
             int tablesToAssign = tablesPerWaiter + (waiters.size() < extraTables ? 1 : 0);

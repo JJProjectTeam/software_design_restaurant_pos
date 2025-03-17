@@ -136,4 +136,12 @@ public class Table {
         return orderPlaced;
     }
     
+    /**
+     * Resets the table state after all customers have left.
+     * This ensures the table is ready for new customers.
+     */
+    public void resetTableState() {
+        this.orderPlaced = false;
+        System.out.println("Table " + tableNumber + " has been reset and is ready for new customers");
+    }
 }

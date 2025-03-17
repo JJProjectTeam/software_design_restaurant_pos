@@ -24,8 +24,8 @@ public class Chef extends StaffMember {
     private static int chefCounter = 0;
     private ISpeedComponent speedDecorator;
     
-    public Chef(double payPerHour, ISpeedComponent speedDecorator, ChefStrategy strategy, StationManager stationManager) {
-        super(payPerHour);
+    public Chef(double pay, ISpeedComponent speedDecorator, ChefStrategy strategy, StationManager stationManager) {
+        super(pay);
         this.speedDecorator = speedDecorator;
         this.assignedStations = new ArrayList<>();
         this.workStrategy = strategy;
@@ -35,8 +35,8 @@ public class Chef extends StaffMember {
         logger.info("[DEBUG] Created new chef: " + name + speedDecorator.getSpeedMultiplier());
     }
     
-    public Chef(String name, double payPerHour, ISpeedComponent speedDecorator, ChefStrategy strategy, StationManager stationManager) {
-        super(payPerHour);
+    public Chef(String name, double pay, ISpeedComponent speedDecorator, ChefStrategy strategy, StationManager stationManager) {
+        super(pay);
         this.speedDecorator = speedDecorator;
         this.assignedStations = new ArrayList<>();
         this.workStrategy = strategy;
@@ -59,28 +59,36 @@ public class Chef extends StaffMember {
             logger.info("[DEBUG] No current station");
         }
         
-        // Instead of always choosing a new station if not busy, check if any assigned station actually has tasks
+        // Check if any assigned station actually has tasks
         int totalBacklog = 0;
         for (Station station : assignedStations) {
             totalBacklog += station.getBacklogSize();
         }
         
-        if (totalBacklog == 0) {
-            logger.info("[DEBUG] " + name + " finds no pending tasks in assigned stations, staying at " + (currentStation != null ? currentStation.getType() : "no station"));
-            return;
-        }
-        
-        // There are pending tasks, proceed to choose a new station
-        logger.info("[DEBUG] " + name + " found pending tasks, choosing next station");
-        Station newStation = chooseNextStation();
-        if (newStation != null) {
-            logger.info("[DEBUG] " + name + " chose station: " + newStation.getType());
-            if (newStation.getCurrentTask() != null) {
-                isWorking = true;
-                logger.info("[DEBUG] " + name + " is now working on task: " + newStation.getCurrentTask().getName());
+        if (totalBacklog > 0) {
+            // There are pending tasks, proceed to choose a new station
+            logger.info("[DEBUG] " + name + " found pending tasks, choosing next station");
+            Station newStation = chooseNextStation();
+            if (newStation != null) {
+                logger.info("[DEBUG] " + name + " chose station: " + newStation.getType());
+                if (newStation.getCurrentTask() != null) {
+                    isWorking = true;
+                    logger.info("[DEBUG] " + name + " is now working on task: " + newStation.getCurrentTask().getName());
+                }
+            } else {
+                logger.info("[DEBUG] " + name + " couldn't find a suitable station despite pending tasks");
             }
         } else {
-            logger.info("[DEBUG] " + name + " couldn't find a suitable station despite pending tasks");
+            // No pending tasks, but we should still ensure the chef has a current station
+            logger.info("[DEBUG] " + name + " finds no pending tasks in assigned stations");
+            
+            // If chef doesn't have a current station, choose one to remain visible
+            if (currentStation == null) {
+                logger.info("[DEBUG] " + name + " has no current station, choosing one to remain visible");
+                chooseNextStation(); // This will ensure the chef gets assigned to a station
+            } else {
+                logger.info("[DEBUG] " + name + " staying at " + currentStation.getType());
+            }
         }
     }
 
@@ -180,6 +188,9 @@ public class Chef extends StaffMember {
              stationsToCheck.addAll(assignedStations);
         } else {
              logger.info("[DEBUG-CHEF-CHOOSE] " + name + " has no assigned stations, cannot check work outside assignments");
+             
+             // If chef has no assigned stations, this is likely an error - recover by logging
+             logger.info("[DEBUG-CHEF-CHOOSE] RECOVERY: " + name + " has no assigned stations - please check initialization");
              return null;
         }
         
@@ -210,7 +221,35 @@ public class Chef extends StaffMember {
             logger.info(logMessage.toString());
             return nextStation;
         } else {
-            // No station available, clear the current station
+            // No station with pending tasks was found, but we should still ensure the chef
+            // is assigned to one of their assigned stations to remain visible
+            logger.info("[DEBUG-CHEF-CHOOSE] No station with pending tasks found, but ensuring chef stays visible");
+            
+            // If chef is already at a station, keep them there
+            if (currentStation != null && assignedStations.contains(currentStation)) {
+                logger.info("[DEBUG-CHEF-CHOOSE] " + name + " staying at current station: " + currentStation.getType() + " (no pending tasks)");
+                return currentStation;
+            }
+            
+            // Otherwise, assign to the first available station in their assigned list
+            for (Station station : assignedStations) {
+                if (!station.hasChef()) {
+                    logger.info("[DEBUG-CHEF-CHOOSE] " + name + " moving to " + station.getType() + " station (no pending tasks but staying visible)");
+                    station.registerChef(this);
+                    return station;
+                }
+            }
+            
+            // If all stations have chefs, pick the first one anyway
+            if (!assignedStations.isEmpty()) {
+                Station defaultStation = assignedStations.get(0);
+                logger.info("[DEBUG-CHEF-CHOOSE] " + name + " moving to " + defaultStation.getType() + " station (all stations occupied but staying visible)");
+                defaultStation.registerChef(this);
+                return defaultStation;
+            }
+            
+            // Only if we really can't find any station, set current station to null
+            logger.info("[DEBUG-CHEF-CHOOSE] " + name + " couldn't find any station to stay visible at");
             currentStation = null;
             return null;
         }
