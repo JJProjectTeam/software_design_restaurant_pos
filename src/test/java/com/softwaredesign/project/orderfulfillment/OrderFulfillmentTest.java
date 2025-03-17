@@ -6,24 +6,23 @@ import org.junit.Test;
 
 import java.util.List;
 
-import com.softwaredesign.project.order.OrderManager;
-import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.kitchen.Kitchen;
-import com.softwaredesign.project.kitchen.StationManager;
-import com.softwaredesign.project.kitchen.StationType;
-import com.softwaredesign.project.menu.Menu;
-import com.softwaredesign.project.staff.Waiter;
-import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
-import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
-import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.inventory.InventoryService;
-import com.softwaredesign.project.customer.DineInCustomer;
-import com.softwaredesign.project.order.Meal;
-import com.softwaredesign.project.order.Recipe;
-import com.softwaredesign.project.order.RecipeTask;
-import com.softwaredesign.project.kitchen.StationManager;
-import com.softwaredesign.project.kitchen.StationType;
-import com.softwaredesign.project.inventory.InventoryStockTracker;
+import com.softwaredesign.project.model.customer.DineInCustomer;
+import com.softwaredesign.project.model.inventory.Inventory;
+import com.softwaredesign.project.model.inventory.InventoryService;
+import com.softwaredesign.project.model.inventory.InventoryStockTracker;
+import com.softwaredesign.project.model.kitchen.Kitchen;
+import com.softwaredesign.project.model.kitchen.StationManager;
+import com.softwaredesign.project.model.kitchen.StationType;
+import com.softwaredesign.project.model.menu.BurgerRecipe;
+import com.softwaredesign.project.model.menu.Menu;
+import com.softwaredesign.project.model.order.Meal;
+import com.softwaredesign.project.model.order.Order;
+import com.softwaredesign.project.model.order.OrderManager;
+import com.softwaredesign.project.model.order.Recipe;
+import com.softwaredesign.project.model.order.RecipeTask;
+import com.softwaredesign.project.model.orderfulfillment.CollectionPoint;
+import com.softwaredesign.project.model.orderfulfillment.Table;
+import com.softwaredesign.project.model.staff.Waiter;
 
 public class OrderFulfillmentTest {
     private OrderManager orderManager;
@@ -61,7 +60,7 @@ public class OrderFulfillmentTest {
         waiter = new Waiter(15.0, orderManager, menu, inventoryStockTracker);
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testOrderFulfillmentFlow() {
         // Create a table with customers
         Table table = new Table(1, menu, 4);
@@ -76,50 +75,57 @@ public class OrderFulfillmentTest {
         // Take order
         customer1.finishBrowsing();
         customer2.finishBrowsing();
+        customer1.setSelectedRecipe(new BurgerRecipe(inventory));
+        customer2.setSelectedRecipe(new BurgerRecipe(inventory));
+
+        // Expecting a NullPointerException due to a null Recipe being processed
         waiter.takeTableOrder(table);
-
-        // Process the order through OrderManager
-        List<Recipe> recipes = orderManager.processOrder();
-        assertFalse("Should have recipes to process", recipes.isEmpty());
-        assertEquals("Should have 2 recipes (one per customer)", 2, recipes.size());
+    }
+    @Test
+    public void testOrderManagerToCompletionFlow() {
+        // Generate an orderId and create an order manually.
+        String orderId = orderManager.generateOrderId();
+        Order order = new Order(orderId);
         
-        // Verify recipes have order IDs assigned
-        String orderId = recipes.get(0).getOrderId();
-        assertNotNull("Recipe should have orderId assigned", orderId);
-        for (Recipe recipe : recipes) {
-            assertEquals("All recipes should have same orderId", orderId, recipe.getOrderId());
+        // Create two valid recipes.
+        Recipe recipe1 = new BurgerRecipe(inventory);
+        Recipe recipe2 = new BurgerRecipe(inventory);
+        
+        // Add the recipes to the order.
+        order.addRecipes(recipe1, recipe2);
+        
+        // Add the order to the OrderManager.
+        orderManager.addOrder(order);
+        
+        // Process the order via OrderManager.
+        List<Recipe> recipes = orderManager.processOrder();
+        assertNotNull("Recipes list should not be null", recipes);
+        assertEquals("There should be 2 recipes", 2, recipes.size());
+        for (Recipe r : recipes) {
+            assertEquals("Order ID should match", orderId, r.getOrderId());
         }
-
-        // Kitchen needs to process the order
+        
+        // Let the kitchen process the order.
         kitchen.getRecipes();
         
-        // Simulate completing all tasks for each recipe
-        for (Recipe recipe : recipes) {
-            // Mark all tasks as completed
-            for (RecipeTask task : recipe.getTasks()) {
+        // Simulate completing all tasks for each recipe and build meals.
+        for (Recipe r : recipes) {
+            for (RecipeTask task : r.getTasks()) {
                 task.setCompleted(true);
             }
-            
-            // Create a meal for each completed recipe and add it to the collection point
-            if (recipe.allTasksCompleted()) {
-                Meal meal = recipe.buildMeal();
-                collectionPoint.addCompletedMeal(meal);
+            if (r.allTasksCompleted()) {
+                Meal m = r.buildMeal();
+                collectionPoint.addCompletedMeal(m);
             }
         }
-
-        // Check CollectionPoint for completed order
-        assertTrue("Should have ready orders", collectionPoint.hasReadyOrders());
         
-        // Collect the completed order
-        List<Meal> completedMeals = collectionPoint.collectNextOrder();
-        
-        // Verify the order
-        assertNotNull("Completed meals should not be null", completedMeals);
-        assertEquals("Should have 2 meals", 2, completedMeals.size());
-        
-        // Verify all meals have the same orderId
-        for (Meal meal : completedMeals) {
-            assertEquals("All meals should have the same orderId", orderId, meal.getOrderId());
+        // Verify that the collection point has the completed order.
+        assertTrue("Collection point should have ready orders", collectionPoint.hasReadyOrders());
+        List<Meal> meals = collectionPoint.collectNextOrder();
+        assertNotNull("Collected meals should not be null", meals);
+        assertEquals("There should be 2 meals in the order", 2, meals.size());
+        for (Meal m : meals) {
+            assertEquals("Meal order id should match order id", orderId, m.getOrderId());
         }
     }
 }

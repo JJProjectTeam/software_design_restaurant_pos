@@ -1,9 +1,9 @@
 package com.softwaredesign.project.controller;
 
-import com.softwaredesign.project.kitchen.Kitchen;
-import com.softwaredesign.project.kitchen.Station;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
-import com.softwaredesign.project.model.BankBalanceSingleton;
+import com.softwaredesign.project.model.kitchen.Kitchen;
+import com.softwaredesign.project.model.kitchen.Station;
+import com.softwaredesign.project.model.singletons.BankBalanceSingleton;
 import com.softwaredesign.project.view.KitchenView;
 import com.softwaredesign.project.view.View;
 import com.softwaredesign.project.view.ViewType;

@@ -1,9 +1,6 @@
 package com.softwaredesign.project.view;
 
-import com.softwaredesign.project.controller.BaseController;
-import com.softwaredesign.project.controller.DiningRoomController;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
-import com.softwaredesign.project.orderfulfillment.Table;
 import jexer.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +56,7 @@ public class DiningRoomView extends GamePlayView {
     @Override
     protected void addViewContent() {
         window.addLabel("Dining Room", 2, 2);
-        tableWidget = window.addTable(2, TABLE_Y, window.getWidth() - 4, TABLE_HEIGHT, 5, 1);
+        tableWidget = window.addTable(2, TABLE_Y, window.getWidth() - 4, TABLE_HEIGHT, 4, 1);
         
         // Set column labels and widths
         for (int i = 0; i < COLUMN_HEADERS.length; i++) {

@@ -9,26 +9,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.softwaredesign.project.customer.DineInCustomer;
-import com.softwaredesign.project.inventory.Ingredient;
-import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.inventory.InventoryStockTracker;
-import com.softwaredesign.project.kitchen.Kitchen;
-import com.softwaredesign.project.kitchen.Station;
-import com.softwaredesign.project.kitchen.StationManager;
-import com.softwaredesign.project.kitchen.StationType;
-import com.softwaredesign.project.menu.Menu;
-import com.softwaredesign.project.model.BankBalanceSingleton;
-import com.softwaredesign.project.model.StatisticsSingleton;
-import com.softwaredesign.project.order.Meal;
-import com.softwaredesign.project.order.Order;
-import com.softwaredesign.project.order.OrderManager;
-import com.softwaredesign.project.order.Recipe;
-import com.softwaredesign.project.orderfulfillment.CollectionPoint;
-import com.softwaredesign.project.orderfulfillment.SeatingPlan;
-import com.softwaredesign.project.orderfulfillment.Table;
-import com.softwaredesign.project.staff.Waiter;
-import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
+import com.softwaredesign.project.model.customer.DineInCustomer;
+import com.softwaredesign.project.model.inventory.Ingredient;
+import com.softwaredesign.project.model.inventory.Inventory;
+import com.softwaredesign.project.model.inventory.InventoryStockTracker;
+import com.softwaredesign.project.model.kitchen.StationManager;
+import com.softwaredesign.project.model.kitchen.StationType;
+import com.softwaredesign.project.model.menu.Menu;
+import com.softwaredesign.project.model.order.Meal;
+import com.softwaredesign.project.model.order.Order;
+import com.softwaredesign.project.model.order.OrderManager;
+import com.softwaredesign.project.model.order.Recipe;
+import com.softwaredesign.project.model.orderfulfillment.CollectionPoint;
+import com.softwaredesign.project.model.orderfulfillment.SeatingPlan;
+import com.softwaredesign.project.model.orderfulfillment.Table;
+import com.softwaredesign.project.model.singletons.BankBalanceSingleton;
+import com.softwaredesign.project.model.singletons.StatisticsSingleton;
+import com.softwaredesign.project.model.staff.Waiter;
 
 /**
  * Test suite to validate the statistics tracking functionality.

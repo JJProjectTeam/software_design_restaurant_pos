@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 public class ChefConfigurationView extends ConfigurationView {
     // Local storage for chef data
     private Map<String, ChefData> chefs = new HashMap<>();
-    private Map<String, Integer> stationCounts = new HashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(ChefConfigurationView.class);
     
     // Station counts
@@ -408,7 +407,6 @@ public class ChefConfigurationView extends ConfigurationView {
             }
             
             // Check if removing this chef would break station coverage
-            ChefData chefToRemove = chefs.get(chefName);
             Map<String, ChefData> tempChefs = new HashMap<>(chefs);
             tempChefs.remove(chefName);
             

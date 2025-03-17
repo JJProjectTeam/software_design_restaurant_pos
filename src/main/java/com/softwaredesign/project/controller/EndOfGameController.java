@@ -2,7 +2,7 @@ package com.softwaredesign.project.controller;
 
 
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
-import com.softwaredesign.project.model.StatisticsSingleton;
+import com.softwaredesign.project.model.singletons.StatisticsSingleton;
 import com.softwaredesign.project.view.EndOfGameView;
 import com.softwaredesign.project.view.View;
 import com.softwaredesign.project.view.ViewType;

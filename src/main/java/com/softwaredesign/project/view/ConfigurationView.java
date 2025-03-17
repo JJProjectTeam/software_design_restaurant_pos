@@ -7,7 +7,7 @@ import jexer.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class ConfigurationView implements View, ConfigurableView {
+public abstract class ConfigurationView implements ConfigurableView {
     protected final RestaurantApplication app;
     protected TWindow window;
     protected RestaurantViewMediator mediator;
