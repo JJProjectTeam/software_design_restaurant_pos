@@ -2,7 +2,6 @@ package com.softwaredesign.project;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +19,6 @@ import com.softwaredesign.project.order.Order;
 import com.softwaredesign.project.order.OrderManager;
 import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 import com.softwaredesign.project.orderfulfillment.SeatingPlan;
-import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.staff.Chef;
 import com.softwaredesign.project.staff.Waiter;
 import com.softwaredesign.project.engine.GameEngine;
@@ -74,10 +72,8 @@ public class RestaurantDriver {
     private Inventory inventory;
     private ChefManager chefManager;
     private SeatingPlan seatingPlan;
-    private Menu menu;
     private List<Chef> chefs = new ArrayList<>();
     private List<Waiter> waiters = new ArrayList<>();
-    private List<Table> tables = new ArrayList<>();
     private FloorManager floorManager;
     private DemoHelper demoHelper;
     
