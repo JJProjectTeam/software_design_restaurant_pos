@@ -270,7 +270,7 @@ public class RestaurantDriver {
         
         // Set the CollectionPoint in the FloorManager to enable order delivery
         floorManager.setCollectionPoint(collectionPoint);
-        System.out.println("[RestaurantDriver] Set CollectionPoint in FloorManager for order delivery");
+        logger.info("[RestaurantDriver] Set CollectionPoint in FloorManager for order delivery");
         
         // Register entities with GameEngine
         registerEntitiesWithGameEngine();
@@ -346,16 +346,14 @@ public class RestaurantDriver {
                 if (stationsOfType != null && !stationsOfType.isEmpty()) {
                     // Assign chef to this station type
                     chef.assignToStation(stationType);
-                    logger.info("[RestaurantDriver] Assigned chef " + chef.getName() + 
-                        " to station type " + stationType);
+                    logger.info("[RestaurantDriver] Assigned chef {} to station type {}", chef.getName(), stationType);
                 } else {
-                    logger.info("[RestaurantDriver] Warning: No stations of type " + 
-                        stationType + " found for chef " + chef.getName());
+                    logger.info("[RestaurantDriver] Warning: No stations of type {} found for chef {}", stationType, chef.getName());
                 }
             }
             
             // Don't choose initial station - let the chef's strategy decide where to go based on work
-            logger.info("Chef " + chef.getName() + " initialized with strategy: " + chef.getWorkStrategy().getClass().getSimpleName());
+            logger.info("Chef {} initialized with strategy: {}", chef.getName(), chef.getWorkStrategy().getClass().getSimpleName());
         }
     }
     
@@ -379,7 +377,7 @@ public class RestaurantDriver {
         defaultChefs.add(chef1);
         defaultChefs.add(chef2);
         
-        logger.info("[RestaurantDriver] Created default chefs: " + chef1.getName() + ", " + chef2.getName());
+        logger.info("[RestaurantDriver] Created default chefs: {} and {}", chef1.getName(), chef2.getName());
         
         return defaultChefs;
     }
@@ -389,16 +387,16 @@ public class RestaurantDriver {
      * Creates default waiters and assigns them to the waiters list
      */
     private void setupWaiters() {
-        System.out.println("[RestaurantDriver] Setting up waiters...");
+        logger.info("[RestaurantDriver] Setting up waiters...");
         
         // Get menu from configuration controller or create a new one
         Menu menu = configController.getMenu();
         if (menu == null) {
-            System.out.println("[RestaurantDriver] Warning: No menu found for waiters");
+            logger.info("[RestaurantDriver] Warning: No menu found for waiters");
             // Create a simple menu if needed
             if (inventory != null) {
                 menu = new Menu(inventory);
-                System.out.println("[RestaurantDriver] Created default menu for waiters");
+                logger.info("[RestaurantDriver] Created default menu for waiters");
             }
         }
         
@@ -415,7 +413,7 @@ public class RestaurantDriver {
                 stockTracker.update(ingredientName, inventory.getStock(ingredientName));
             }
             
-            System.out.println("[RestaurantDriver] Registered InventoryStockTracker with inventory");
+            logger.info("[RestaurantDriver] Registered InventoryStockTracker with inventory");
         }
         
         // Create base speed component for waiters
@@ -431,7 +429,7 @@ public class RestaurantDriver {
         Waiter waiter3 = new Waiter(10.0, orderManager, menu, stockTracker);
         waiters.add(waiter3);
         
-        System.out.println("[RestaurantDriver] Created " + waiters.size() + " waiters");
+        logger.info("[RestaurantDriver] Created {} waiters", waiters.size());
     }
 
     /**
@@ -457,14 +455,14 @@ public class RestaurantDriver {
         
         // Register FloorManager
         gameEngine.registerEntity(floorManager);
-        System.out.println("[RestaurantDriver] Registered FloorManager with GameEngine");
+        logger.info("[RestaurantDriver] Registered FloorManager with GameEngine");
         
         // Register all stations
         StationManager stationManager = kitchen.getStationManager();
         if (stationManager != null) {
             for (Station station : stationManager.getAllStations()) {
                 gameEngine.registerEntity(station);
-                logger.info("[RestaurantDriver] Registered Station " + station.getType() + " with GameEngine");
+                logger.info("[RestaurantDriver] Registered Station {} with GameEngine", station.getType());
             }
         }
         
@@ -584,9 +582,9 @@ public class RestaurantDriver {
                         // Register order with CollectionPoint (1 meal per order in demo)
                         collectionPoint.registerOrder(order.getOrderId(), 1);
                         createdOrders.add(order);
-                        logger.info("Created " + 
-                            (table.getTableNumber() % 2 == 0 ? "burger" : "kebab") + 
-                            " order for table " + table.getTableNumber());
+                        logger.info("Created {} order for table {}", 
+                            (table.getTableNumber() % 2 == 0 ? "burger" : "kebab"),
+                            table.getTableNumber());
                     }
                 }
                 demoStep++;
@@ -607,7 +605,7 @@ public class RestaurantDriver {
                     // Have chefs check for work after each step
                     for (Chef chef : chefManager.getAllChefs()) {
                         if (!chef.isWorking()) {
-                            logger.info("Chef " + chef.getName() + " checking for work...");
+                            logger.info("Chef {} checking for work...", chef.getName());
                             // Unregister from current station if not working
                             if (chef.getCurrentStation() != null) {
                                 chef.getCurrentStation().unregisterChef();
@@ -631,25 +629,24 @@ public class RestaurantDriver {
                 // Log the status of all stations
                 StationManager stationManager = kitchen.getStationManager();
                 for (Station station : stationManager.getAllStations()) {
-                    logger.info("Station " + station.getType() + " status:");
-                    logger.info("  - Has chef: " + (station.getAssignedChef() != null));
+                    logger.info("Station {} status:", station.getType());
+                    logger.info("  - Has chef: {}", station.getAssignedChef() != null);
                     if (station.getAssignedChef() != null) {
-                        logger.info("  - Chef: " + station.getAssignedChef().getName());
+                        logger.info("  - Chef: {}", station.getAssignedChef().getName());
                     }
-                    logger.info("  - Is busy: " + station.isBusy());
-                    logger.info("  - Current recipe: " + 
+                    logger.info("  - Is busy: {}", station.isBusy());
+                    logger.info("  - Current recipe: {}", 
                         (station.getCurrentRecipe() != null ? station.getCurrentRecipe().getName() : "None"));
-                    logger.info("  - Current task: " + 
+                    logger.info("  - Current task: {}", 
                         (station.getCurrentTask() != null ? station.getCurrentTask().getName() : "None"));
-                    logger.info("  - Backlog size: " + station.getBacklog().size());
+                    logger.info("  - Backlog size: {}", station.getBacklog().size());
                 }
                 
                 // Process tasks at stations - this happens automatically in the writeState method
                 // of the Station class when the GameEngine steps
                 for (Station station : stationManager.getAllStations()) {
                     if (station.getCurrentTask() != null && station.getAssignedChef() != null) {
-                        logger.info("Station " + station.getType() + " has task: " + 
-                            station.getCurrentTask().getName() + " (processing will happen in tick)");
+                        logger.info("Station {} has task: {} (processing will happen in tick)", station.getType(), station.getCurrentTask().getName());
                     }
                 }
                 
@@ -682,7 +679,7 @@ public class RestaurantDriver {
                         Meal completedMeal = createCompletedMealForOrder(order);
                         if (completedMeal != null) {
                             collectionPoint.addCompletedMeal(completedMeal);
-                            logger.info("Manually forced completion of order " + order.getOrderId());
+                            logger.info("Manually forced completion of order {}", order.getOrderId());
                         }
                         // Remove the order from the list once forced completed,
                         // because its registration will be cleared upon collection.
@@ -702,13 +699,13 @@ public class RestaurantDriver {
                     StationManager sm = kitchen.getStationManager();
                     for (Station station : sm.getAllStations()) {
                         if (station.getCurrentTask() != null || station.getAssignedChef() != null) {
-                            logger.info("Station " + station.getType() + ":");
-                            logger.info("  - Chef: " + 
+                            logger.info("Station {}:", station.getType());
+                            logger.info("  - Chef: {}", 
                                 (station.getAssignedChef() != null ? station.getAssignedChef().getName() : "None"));
-                            logger.info("  - Task: " + 
+                            logger.info("  - Task: {}", 
                                 (station.getCurrentTask() != null ? station.getCurrentTask().getName() : "None"));
-                            logger.info("  - Progress: " + station.getCookingProgress() + 
-                                (station.getCurrentTask() != null ? "/" + station.getCurrentTask().getCookingWorkRequired() : ""));
+                            logger.info("  - Progress: {} / {}", station.getCookingProgress(), 
+                                (station.getCurrentTask() != null ? station.getCurrentTask().getCookingWorkRequired() : ""));
                         }
                     }
                 }
