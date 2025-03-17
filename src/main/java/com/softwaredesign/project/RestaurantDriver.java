@@ -110,7 +110,7 @@ public class RestaurantDriver {
             this.app.setDriver(this);
         }
         catch (Exception e){
-            logger.error("[RestaurantDriver] Fatal error running application: " + e.getMessage());
+            logger.error("[RestaurantDriver] Fatal error running application: {}", e.getMessage());
             e.printStackTrace();
         }
     }
@@ -174,7 +174,7 @@ public class RestaurantDriver {
                             }
                         }
                     } catch (Exception e) {
-                        logger.error("[RestaurantDriver] Error in game loop: " + e.getMessage());
+                        logger.error("[RestaurantDriver] Error in game loop: {}", e.getMessage());
                         e.printStackTrace();
                         gameTimer.cancel();
                     }
@@ -190,7 +190,7 @@ public class RestaurantDriver {
             logger.info("[RestaurantDriver] Application terminated");
 
         } catch (Exception e) {
-            logger.error("[RestaurantDriver] Fatal error running application: " + e.getMessage());
+            logger.error("[RestaurantDriver] Fatal error running application: {}", e.getMessage());
             e.printStackTrace();
         }
     }
@@ -457,7 +457,7 @@ public class RestaurantDriver {
                 inventoryController.updateView();
             }
         } catch (Exception e) {
-            logger.error("[RestaurantDriver] Error updating views: " + e.getMessage());
+            logger.error("[RestaurantDriver] Error updating views: {}", e.getMessage());
             e.printStackTrace();
         }
     }
