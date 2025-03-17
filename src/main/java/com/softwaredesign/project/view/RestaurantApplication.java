@@ -166,9 +166,4 @@ public class RestaurantApplication extends TApplication {
             showView(ViewType.WELCOME);
         }
     }
-
-    public static void main(String[] args) throws Exception {
-        RestaurantApplication app = new RestaurantApplication();
-        app.run();
-    }
 }
