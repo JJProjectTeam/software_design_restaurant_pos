@@ -120,8 +120,7 @@ public class RestaurantDriver {
             logger.info("[RestaurantDriver] Starting application...");
             
             initializeConfiguration();
-            app.showView(ViewType.END_OF_GAME);
-
+            app.showView(ViewType.WELCOME);
             // Create a timer for the game loop
             java.util.Timer gameTimer = new java.util.Timer();
             gameTimer.scheduleAtFixedRate(new java.util.TimerTask() {
@@ -478,18 +477,8 @@ public class RestaurantDriver {
     }
 
     private void setupDemoScenario() {
-        // Create different chef strategies like in KitchenSimulator
-        ChefStrategy dynamicStrategy = new DynamicChefStrategy(kitchen.getStationManager());
-        ChefStrategy simpleStrategy = new SimpleChefStrategy();
-        
-        // Assign strategies to existing chefs
-        for (int i = 0; i < chefs.size(); i++) {
-            Chef chef = chefs.get(i);
-            //TODO wtf this should be set in the configuration controller
-            chef.setWorkStrategy(i % 2 == 0 ? dynamicStrategy : simpleStrategy);
-            logger.info("Assigned " + (i % 2 == 0 ? "dynamic" : "simple") + 
-                " strategy to chef " + chef.getName());
-        }
+        // Remove the old strategy setup code since it's now handled in ConfigurationController
+        logger.info("\n=== DEMO SCENARIO SETUP ===\n");
     }
 
     private void handleDemoStep() {
@@ -696,15 +685,11 @@ public class RestaurantDriver {
 //TODOS:
 /*
  * 
- * Money system, both during game and at configuraiton 1
+ * remove waiter speed
+ * make chef strategy in the right place
+ * game loop to end of game then show end of game screen
  * 
- * Help menu 4
- * 
- * restart 3
- * 
- * speed multiplier 2.5
- * 
- * expand entities 2
+ * order validation error handling
  * 
  *
  */

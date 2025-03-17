@@ -18,6 +18,7 @@ import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.LongestQueueFirstStrategy;
 import com.softwaredesign.project.staff.chefstrategies.OldestOrderFirstStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
+import com.softwaredesign.project.staff.chefstrategies.DynamicChefStrategy;
 import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
 import com.softwaredesign.project.staff.staffspeeds.CaffeineAddictDecorator;
 import com.softwaredesign.project.staff.staffspeeds.StimulantAddictDecorator;
@@ -376,6 +377,7 @@ public class ConfigurationController extends BaseController {
         
         for (ChefConfigurationView.ChefData data : chefData.values()) {
             try {
+                // Create strategy based on configuration
                 ChefStrategy strategy = createChefStrategy(data.getStrategy());
                 ISpeedComponent speedComponent = new BaseSpeed(data.getSpeed());
                 
@@ -421,12 +423,17 @@ public class ConfigurationController extends BaseController {
         }
     }
 
-    //TODO: add actual strategies
     private ChefStrategy createChefStrategy(String strategyName) {
+        logger.info("[ConfigurationController] Creating chef strategy: {}", strategyName);
         return switch (strategyName.toUpperCase()) {
-            case "FIFO", "OLDEST" -> new OldestOrderFirstStrategy();
-            case "LIFO", "NEWEST" -> new LongestQueueFirstStrategy(); 
-            default -> new SimpleChefStrategy(); 
+            case "DYNAMIC" -> new DynamicChefStrategy(stationManager);
+            case "OLDEST" -> new OldestOrderFirstStrategy();
+            case "LONGEST_QUEUE" -> new LongestQueueFirstStrategy();
+            case "SIMPLE" -> new SimpleChefStrategy();
+            default -> {
+                logger.warn("[ConfigurationController] Unknown strategy '{}', defaulting to SimpleChefStrategy", strategyName);
+                yield new SimpleChefStrategy();
+            }
         };
     }
 
