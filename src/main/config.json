@@ -1,4 +1,5 @@
 {   
+    "gameLengthTicks": 20,
     "initialBankBalance": 1000.00,
     "staffRules": {
         "chefs": {

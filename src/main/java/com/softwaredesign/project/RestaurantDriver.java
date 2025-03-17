@@ -88,6 +88,7 @@ public class RestaurantDriver {
     private DiningRoomController diningRoomController;
     private KitchenController kitchenController;
     private InventoryController inventoryController;
+    private EndOfGameController endOfGameController;
     
     // Demo state
     private boolean hasStartedDemo = false;
@@ -108,6 +109,8 @@ public class RestaurantDriver {
             
             // Set this driver instance in the application for restart functionality
             this.app.setDriver(this);
+
+
         }
         catch (Exception e){
             logger.error("[RestaurantDriver] Fatal error running application: {}", e.getMessage());
@@ -149,20 +152,27 @@ public class RestaurantDriver {
                                 
                                 Thread.sleep(100);
                             }
+                            if (demoHelper.isGameOver()) {
+                                app.showView(ViewType.END_OF_GAME);
+                                endOfGameController.updateView();
+                                gameEngine.stop();
+                                gameTimer.cancel();
 
-                            // Update demo using DemoHelper
-                            updateDemo();
+                            } else {
+                                // Update demo using DemoHelper
+                                updateDemo();
 
-                            // Step the game engine to update all entities
-                            gameEngine.step();
-                            
-                            // Update views
-                            synchronized(mediator) {
-                                diningRoomController.updateView();
-                                Thread.sleep(50);
-                                kitchenController.updateView();
-                                Thread.sleep(50);
-                                inventoryController.updateView();
+                                // Step the game engine to update all entities
+                                gameEngine.step();
+                                
+                                // Update views
+                                synchronized(mediator) {
+                                    diningRoomController.updateView();
+                                    Thread.sleep(50);
+                                    kitchenController.updateView();
+                                    Thread.sleep(50);
+                                    inventoryController.updateView();
+                                }
                             }
                         }
                     } catch (Exception e) {
@@ -482,13 +492,14 @@ public class RestaurantDriver {
             kitchen
         );
 
-        //TODO populate inventory
         inventoryController = new InventoryController(inventory);
+        endOfGameController = new EndOfGameController();
 
         // Register gameplay controllers with mediator
         mediator.registerController("DiningRoom", diningRoomController);
         mediator.registerController("Kitchen", kitchenController);
         mediator.registerController("Inventory", inventoryController);
+        mediator.registerController("EndOfGame", endOfGameController);
         
         logger.info("[RestaurantDriver] Restaurant initialized and ready for operation");
     }

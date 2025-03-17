@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.io.IOException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,8 +41,11 @@ public class DemoHelper {
     
     private int demoStep = 0;
     private int tickCount = 0;
+    private int gameLengthTicks;
     private boolean hasStartedDemo = false;
     private final int DEMO_DELAY = 5;
+    private JsonNode config;
+
     
     public DemoHelper(FloorManager floorManager, Kitchen kitchen, OrderManager orderManager, 
                       SeatingPlan seatingPlan, ChefManager chefManager, Inventory inventory) {
@@ -51,6 +55,18 @@ public class DemoHelper {
         this.seatingPlan = seatingPlan;
         this.chefManager = chefManager;
         this.inventory = inventory;
+
+        try {
+            String configPath = "src/main/config.json";
+            String jsonContent = Files.readString(Paths.get(configPath));
+            ObjectMapper mapper = new ObjectMapper();
+            this.config = mapper.readTree(jsonContent);
+        } catch (IOException e) {
+            System.out.println("[DemoHelper] Failed to load config: " + e.getMessage());
+            this.config = null;
+        }
+
+        this.gameLengthTicks = config.path("gameLengthTicks").asInt(0);
     }
     
     /**
@@ -156,11 +172,6 @@ public class DemoHelper {
      */
     private int getMaxGroupSizeFromConfig() {
         try {
-            String configPath = "src/main/config.json";
-            String jsonContent = Files.readString(Paths.get(configPath));
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode config = mapper.readTree(jsonContent);
-            
             // Get maxGroupSize from config
             int maxGroupSize = config.path("diningRoomRules").path("maxGroupSize").asInt(10);
             return maxGroupSize;
@@ -361,5 +372,9 @@ public class DemoHelper {
             System.out.println("Assigned " + (i % 2 == 0 ? "dynamic" : "simple") + 
                 " strategy to chef " + chef.getName());
         }
+    }
+    
+    public boolean isGameOver(){
+        return tickCount >= gameLengthTicks;
     }
 } 

@@ -1,9 +1,7 @@
 package com.softwaredesign.project.controller;
 
-import java.util.HashMap;
 
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
-import com.softwaredesign.project.model.BankBalanceSingleton;
 import com.softwaredesign.project.model.StatisticsSingleton;
 import com.softwaredesign.project.view.EndOfGameView;
 import com.softwaredesign.project.view.View;
@@ -23,5 +21,7 @@ public class EndOfGameController extends BaseController {
         }
         EndOfGameView endView = (EndOfGameView) view;
         endView.updateStats(StatisticsSingleton.getInstance().getAllStatsFormatted());
+        System.out.println(StatisticsSingleton.getInstance().getAllStatsFormatted());
+        System.out.println(StatisticsSingleton.getInstance().getTotalRevenue());
     }
 }
