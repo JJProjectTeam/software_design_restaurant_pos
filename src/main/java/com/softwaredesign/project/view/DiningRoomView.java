@@ -22,14 +22,12 @@ public class DiningRoomView extends GamePlayView {
         final int capacity;
         final int customers;
         final String status;
-        final char waiterId;
 
-        TableUpdate(int tableNumber, int capacity, int customers, String status, char waiterId) {
-            this.tableNumber = tableNumber;
+        TableUpdate(int tableNumber, int capacity, int customers, String status) {
+            this.tableNumber = tableNumber; 
             this.capacity = capacity;
             this.customers = customers;
             this.status = status;
-            this.waiterId = waiterId;
         }
     }
 
@@ -70,21 +68,21 @@ public class DiningRoomView extends GamePlayView {
         while (!pendingUpdates.isEmpty()) {
             TableUpdate update = pendingUpdates.poll();
             updateTableInWidget(update.tableNumber, update.capacity, update.customers, 
-                update.status, update.waiterId);
+                update.status);
         }
     }
 
-    public void onTableUpdate(int tableNumber, int capacity, int customers, String status, char waiterId) {
-        TableUpdate update = new TableUpdate(tableNumber, capacity, customers, status, waiterId);
+    public void onTableUpdate(int tableNumber, int capacity, int customers, String status) {
+        TableUpdate update = new TableUpdate(tableNumber, capacity, customers, status);
         if (!isInitialized) {
             logger.info("[DiningRoomView] View not yet initialized, queueing update for table: " + tableNumber);
             pendingUpdates.offer(update);
         } else {
-            updateTableInWidget(tableNumber, capacity, customers, status, waiterId);
+            updateTableInWidget(tableNumber, capacity, customers, status);
         }
     }
 
-    private void updateTableInWidget(int tableNumber, int capacity, int customers, String status, char waiterId) {
+    private void updateTableInWidget(int tableNumber, int capacity, int customers, String status) {
         if (tableWidget == null) {
             logger.error("[DiningRoomView] Table widget not initialized");
             return;
@@ -104,7 +102,6 @@ public class DiningRoomView extends GamePlayView {
             tableWidget.setCellText(1, tableNumber - 1, String.valueOf(capacity));
             tableWidget.setCellText(2, tableNumber - 1, String.valueOf(customers));
             tableWidget.setCellText(3, tableNumber - 1, status);
-            tableWidget.setCellText(4, tableNumber - 1, String.valueOf(waiterId));
 
             logger.info("[DiningRoomView] Updated table " + tableNumber);
         } catch (Exception e) {

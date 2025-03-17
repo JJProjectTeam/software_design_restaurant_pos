@@ -1,5 +1,5 @@
 {   
-    "gameLengthTicks": 40,
+    "gameLengthTicks": 100,
     "initialBankBalance": 1000.00,
     "staffRules": {
         "chefs": {
@@ -42,11 +42,11 @@
             "PREP": {
                 "Bun": {
                     "price": 1.00,
-                    "stock": 10
+                    "stock": 100
                 },
                 "Lettuce": {
                     "price": 1.00,
-                    "stock": 10
+                    "stock": 100
                 },
                 "Tomato": {
                     "price": 0.80,
@@ -54,7 +54,7 @@
                 },
                 "Cheese": {
                     "price": 1.00,
-                    "stock": 10
+                    "stock": 100
                 },
                 "Onion": {
                     "price": 0.25,
@@ -88,11 +88,11 @@
             "GRILL": {
                 "Beef Patty": {
                     "price": 1.00,
-                    "stock": 10
+                    "stock": 100
                 },
                 "Kebab Meat": {
                     "price": 1.00,
-                    "stock": 10
+                    "stock": 100
                 },
                 "Lamb": {
                     "price": 3.00,
