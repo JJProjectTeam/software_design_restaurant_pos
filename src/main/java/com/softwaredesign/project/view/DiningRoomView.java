@@ -13,8 +13,8 @@ public class DiningRoomView extends GamePlayView {
     private static final Logger logger = LoggerFactory.getLogger(DiningRoomView.class);
     private TTableWidget tableWidget;
     private Queue<TableUpdate> pendingUpdates;
-    private static final String[] COLUMN_HEADERS = {"Table #", "Capacity", "Customers", "Status", "Waiter"};
-    private static final int[] COLUMN_WIDTHS = {8, 10, 10, 10, 8};
+    private static final String[] COLUMN_HEADERS = {"Table #", "Capacity", "Customers", "Status"};
+    private static final int[] COLUMN_WIDTHS = {8, 10, 10, 10};
     private static final int TABLE_Y = 3;
     private static final int TABLE_HEIGHT = 10;
     private boolean isInitialized;

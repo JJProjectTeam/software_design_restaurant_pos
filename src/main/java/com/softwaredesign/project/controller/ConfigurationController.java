@@ -375,7 +375,6 @@ public class ConfigurationController extends BaseController {
                 // Create strategy based on configuration
                 ChefStrategy strategy = createChefStrategy(data.getStrategy());
                 ISpeedComponent speedComponent = new BaseSpeed(data.getSpeed());
-                
                 // Apply speed modifiers in a consistent order to maintain SOLID principles
                 if (Math.random() < chanceOfLethargic) {
                     speedComponent = new LethargicDecorator(speedComponent);
