@@ -302,7 +302,7 @@ public class StatisticsTrackingTest {
     @Test
     public void testFullSimulationScenario() {
         // Set up a waiter
-        Waiter waiter = new Waiter(15.0, new BaseSpeed(1), orderManager, menu, inventoryTracker);
+        Waiter waiter = new Waiter(15.0, orderManager, menu, inventoryTracker);
 
         // 1. Create and seat customers
         List<DineInCustomer> customerGroup = new ArrayList<>();

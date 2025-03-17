@@ -58,8 +58,7 @@ public class OrderFulfillmentTest {
         menu = new Menu(inventory);
         
         // Create staff members
-        ISpeedComponent baseSpeed = new BaseSpeed();
-        waiter = new Waiter(15.0, baseSpeed, orderManager, menu, inventoryStockTracker);
+        waiter = new Waiter(15.0, orderManager, menu, inventoryStockTracker);
     }
 
     @Test
