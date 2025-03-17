@@ -17,6 +17,7 @@ import com.softwaredesign.project.staff.Waiter;
 import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.LongestQueueFirstStrategy;
 import com.softwaredesign.project.staff.chefstrategies.OldestOrderFirstStrategy;
+import com.softwaredesign.project.staff.chefstrategies.PriorityBasedChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
 import com.softwaredesign.project.staff.chefstrategies.DynamicChefStrategy;
 import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
@@ -326,7 +327,7 @@ public class ConfigurationController extends BaseController {
         }
         
         // Create default chef AFTER stations exist
-        ChefStrategy strategy = new SimpleChefStrategy();
+        ChefStrategy strategy = new PriorityBasedChefStrategy();
         Chef chef = new Chef(200.0, new BaseSpeed(), strategy, stationManager);
         
         // Assign chef to stations
@@ -425,8 +426,8 @@ public class ConfigurationController extends BaseController {
             case "LONGEST_QUEUE" -> new LongestQueueFirstStrategy();
             case "SIMPLE" -> new SimpleChefStrategy();
             default -> {
-                logger.warn("[ConfigurationController] Unknown strategy '{}', defaulting to SimpleChefStrategy", strategyName);
-                yield new SimpleChefStrategy();
+                logger.warn("[ConfigurationController] Unknown strategy '{}', defaulting to PriorityBasedChefStrategy", strategyName);
+                yield new PriorityBasedChefStrategy();
             }
         };
     }

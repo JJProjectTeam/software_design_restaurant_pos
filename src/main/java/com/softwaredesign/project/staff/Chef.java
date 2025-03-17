@@ -172,7 +172,7 @@ public class Chef extends StaffMember {
             return currentStation;
         }
         
-        // Revised logic: Only search among assigned stations.
+        // Only search among assigned stations
         List<Station> stationsToCheck = new ArrayList<>();
         
         if (!assignedStations.isEmpty()) {
@@ -183,58 +183,7 @@ public class Chef extends StaffMember {
              return null;
         }
         
-        // PRIORITY 1: First check if there are any PREP stations with pending tasks
-        // This ensures we prioritize the start of the recipe pipeline
-        for (Station station : stationsToCheck) {
-            if (station.getType() == StationType.PREP && station.hasBacklogItems() && !station.hasChef()) {
-                logger.info("[IMPORTANT] Chef " + name + " prioritizing free PREP station with backlog items");
-                station.registerChef(this);
-                StringBuilder logMessage = new StringBuilder();
-                logMessage.append(name).append(" moved to PREP station (priority assignment)");
-                if (station.getCurrentTask() != null) {
-                    logMessage.append(" to work on: ").append(station.getCurrentTask().getName());
-                } else {
-                    logMessage.append(" (waiting for task assignment)");
-                }
-                logger.info(logMessage.toString());
-                return station;
-            }
-        }
-        
-        // PRIORITY 2: Check if there's a station with a task already assigned but no chef
-        for (Station station : stationsToCheck) {
-            if (station.getCurrentTask() != null && !station.hasChef()) {
-                logger.info("[DEBUG] Chef " + name + " found station with task but no chef");
-                station.registerChef(this);
-                
-                StringBuilder logMessage = new StringBuilder();
-                logMessage.append(name).append(" moved to ").append(station.getType()).append(" station");
-                logMessage.append(" to work on: ").append(station.getCurrentTask().getName());
-                logMessage.append(" for recipe: ").append(station.getCurrentRecipe().getName());
-                
-                if (station.getCurrentRecipe().getOrderId() != null) {
-                    logMessage.append(" (Order ID: ").append(station.getCurrentRecipe().getOrderId()).append(")");
-                }
-                
-                logger.info(logMessage.toString());
-                return station;
-            }
-        }
-        
-        // PRIORITY 3: Check for any station with backlog items
-        for (Station station : stationsToCheck) {
-            if (station.hasBacklogItems() && !station.hasChef()) {
-                logger.info("[DEBUG] Chef " + name + " found free station with backlog items");
-                station.registerChef(this);
-                StringBuilder logMessage = new StringBuilder();
-                logMessage.append(name).append(" moved to ").append(station.getType()).append(" station");
-                logMessage.append(" (station has backlog items)");
-                logger.info(logMessage.toString());
-                return station;
-            }
-        }
-        // TODO: remove all this priority hocus pocus and refactor it just to workstrategy
-        // PRIORITY 4: Use the strategy for normal station selection
+        // Use the strategy for station selection
         Station nextStation = workStrategy.chooseNextStation(stationsToCheck);
         
         // If we found a station, register with it
