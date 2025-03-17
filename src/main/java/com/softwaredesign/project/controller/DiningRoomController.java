@@ -38,14 +38,12 @@ public class DiningRoomController extends BaseController {
             int capacity = table.getTableCapacity();
             int customerCount = table.getCustomers().size();
             String status = determineTableStatus(table);
-            char orderingFlag = table.isOrdering() ? '*' : ' ';
 
             diningView.onTableUpdate(
                 tableNumber,
                 capacity,
                 customerCount,
-                status,
-                orderingFlag
+                status
             );
         }
     }

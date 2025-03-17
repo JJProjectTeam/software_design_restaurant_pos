@@ -122,30 +122,32 @@ public class GameEntryPoint {
                         if (configController.isConfigurationComplete()) {
                             // Only run once when configuration is complete
                             if (kitchen == null) {
-                                logger.info("[RestaurantDriver] Configuration complete, initializing game");
-                                createEntitiesFromConfiguration();
-                                initializeOperation();
-                                setupDemoScenario();
-                                
-                                // Start the game engine
-                                gameEngine.start();
-                                
-                                // Show dining room view and do initial update
-                                app.showView(ViewType.DINING_ROOM);
-                                
-                                // Ensure all gameplay views get an initial update
-                                diningRoomController.updateView();
-                                kitchenController.updateView();
-                                inventoryController.updateView();
-                                
+                                synchronized(mediator) {
+                                    logger.info("[RestaurantDriver] Configuration complete, initializing game");
+                                    createEntitiesFromConfiguration();
+                                    initializeOperation();
+                                    setupDemoScenario();
+                                    
+                                    // Start the game engine
+                                    gameEngine.start();
+                                    
+                                    // Show dining room view and do initial update
+                                    app.showView(ViewType.DINING_ROOM);
+                                    
+                                    // Ensure all gameplay views get an initial update
+                                    diningRoomController.updateView();
+                                    kitchenController.updateView();
+                                    inventoryController.updateView();
+                                }
                                 Thread.sleep(100);
                             }
                             if (demoHelper.isGameOver()) {
-                                app.showView(ViewType.END_OF_GAME);
-                                endOfGameController.updateView();
+                                synchronized(mediator) {
+                                    app.showView(ViewType.END_OF_GAME);
+                                    endOfGameController.updateView();
+                                }
                                 gameEngine.stop();
                                 gameTimer.cancel();
-
                             } else {
                                 // Update demo using DemoHelper
                                 updateDemo();
@@ -153,12 +155,10 @@ public class GameEntryPoint {
                                 // Step the game engine to update all entities
                                 gameEngine.step();
                                 
-                                // Update views
+                                // Update views with proper synchronization
                                 synchronized(mediator) {
                                     diningRoomController.updateView();
-                                    Thread.sleep(50);
                                     kitchenController.updateView();
-                                    Thread.sleep(50);
                                     inventoryController.updateView();
                                 }
                             }
@@ -169,7 +169,7 @@ public class GameEntryPoint {
                         gameTimer.cancel();
                     }
                 }
-            }, 0, 250); // Check every second
+            }, 0, 250);
 
             // This will block until the window is closed
             app.run();
