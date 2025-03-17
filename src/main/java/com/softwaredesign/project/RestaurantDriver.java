@@ -431,13 +431,13 @@ public class RestaurantDriver {
         ISpeedComponent baseSpeed = new BaseSpeed();
         
         // Create default waiters
-        Waiter waiter1 = new Waiter(12.0, baseSpeed, orderManager, menu, stockTracker);
+        Waiter waiter1 = new Waiter(12.0, orderManager, menu, stockTracker);
         waiters.add(waiter1);
         
-        Waiter waiter2 = new Waiter(14.0, baseSpeed, orderManager, menu, stockTracker);
+        Waiter waiter2 = new Waiter(14.0, orderManager, menu, stockTracker);
         waiters.add(waiter2);
         
-        Waiter waiter3 = new Waiter(10.0, baseSpeed, orderManager, menu, stockTracker);
+        Waiter waiter3 = new Waiter(10.0, orderManager, menu, stockTracker);
         waiters.add(waiter3);
         
         System.out.println("[RestaurantDriver] Created " + waiters.size() + " waiters");
