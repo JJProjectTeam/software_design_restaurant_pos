@@ -1,8 +1,8 @@
 package com.softwaredesign.project.controller;
 
-import com.softwaredesign.project.inventory.Inventory;
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
-import com.softwaredesign.project.model.BankBalanceSingleton;
+import com.softwaredesign.project.model.inventory.Inventory;
+import com.softwaredesign.project.model.singletons.BankBalanceSingleton;
 import com.softwaredesign.project.view.InventoryView;
 import com.softwaredesign.project.view.View;
 import com.softwaredesign.project.view.ViewType;

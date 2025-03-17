@@ -3,6 +3,11 @@ package com.softwaredesign.project.inventory;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.softwaredesign.project.model.inventory.IngredientStore;
+import com.softwaredesign.project.model.inventory.Inventory;
+import com.softwaredesign.project.model.inventory.InventoryAlert;
+
 import org.junit.After;
 
 import java.io.ByteArrayOutputStream;

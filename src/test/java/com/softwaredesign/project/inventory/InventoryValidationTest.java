@@ -7,15 +7,19 @@ import org.junit.Before;
 import java.util.*;
 import java.util.concurrent.*;
 
-import com.softwaredesign.project.staff.Waiter;
-import com.softwaredesign.project.order.OrderManager;
-import com.softwaredesign.project.menu.Menu;
-import com.softwaredesign.project.order.Recipe;
-import com.softwaredesign.project.customer.DineInCustomer;
-import com.softwaredesign.project.orderfulfillment.CollectionPoint;
-import com.softwaredesign.project.kitchen.StationManager;
-import com.softwaredesign.project.orderfulfillment.Table;
-import com.softwaredesign.project.kitchen.StationType;
+import com.softwaredesign.project.model.customer.DineInCustomer;
+import com.softwaredesign.project.model.inventory.Ingredient;
+import com.softwaredesign.project.model.inventory.Inventory;
+import com.softwaredesign.project.model.inventory.InventoryService;
+import com.softwaredesign.project.model.inventory.InventoryStockTracker;
+import com.softwaredesign.project.model.kitchen.StationManager;
+import com.softwaredesign.project.model.kitchen.StationType;
+import com.softwaredesign.project.model.menu.Menu;
+import com.softwaredesign.project.model.order.OrderManager;
+import com.softwaredesign.project.model.order.Recipe;
+import com.softwaredesign.project.model.orderfulfillment.CollectionPoint;
+import com.softwaredesign.project.model.orderfulfillment.Table;
+import com.softwaredesign.project.model.staff.Waiter;
 
 /**
  * Test suite to validate the inventory validation logic when placing orders.

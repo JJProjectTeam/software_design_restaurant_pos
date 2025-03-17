@@ -5,7 +5,8 @@ import com.softwaredesign.project.view.View;
 import com.softwaredesign.project.view.ViewType;
 import com.softwaredesign.project.view.ConfigurableView;
 import com.softwaredesign.project.controller.ConfigurationController;
-import com.softwaredesign.project.model.BankBalanceSingleton;
+import com.softwaredesign.project.model.singletons.BankBalanceSingleton;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

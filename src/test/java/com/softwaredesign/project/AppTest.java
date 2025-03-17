@@ -3,16 +3,16 @@ package com.softwaredesign.project;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-import com.softwaredesign.project.order.OrderManager;
-import com.softwaredesign.project.orderfulfillment.CollectionPoint;
-import com.softwaredesign.project.orderfulfillment.SeatingPlan;
-import com.softwaredesign.project.staff.Waiter;
-import com.softwaredesign.project.inventory.InventoryService;
-import com.softwaredesign.project.inventory.InventoryStockTracker;
-import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.kitchen.StationManager;
-import com.softwaredesign.project.kitchen.StationType;
-import com.softwaredesign.project.menu.Menu;
+import com.softwaredesign.project.model.inventory.Inventory;
+import com.softwaredesign.project.model.inventory.InventoryService;
+import com.softwaredesign.project.model.inventory.InventoryStockTracker;
+import com.softwaredesign.project.model.kitchen.StationManager;
+import com.softwaredesign.project.model.kitchen.StationType;
+import com.softwaredesign.project.model.menu.Menu;
+import com.softwaredesign.project.model.order.OrderManager;
+import com.softwaredesign.project.model.orderfulfillment.CollectionPoint;
+import com.softwaredesign.project.model.orderfulfillment.SeatingPlan;
+import com.softwaredesign.project.model.staff.Waiter;
 
 public class AppTest {
     @Test

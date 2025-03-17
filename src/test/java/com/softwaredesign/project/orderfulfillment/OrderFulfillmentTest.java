@@ -6,18 +6,20 @@ import org.junit.Test;
 
 import java.util.List;
 
-import com.softwaredesign.project.order.OrderManager;
-import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.kitchen.Kitchen;
-import com.softwaredesign.project.kitchen.StationManager;
-import com.softwaredesign.project.kitchen.StationType;
-import com.softwaredesign.project.menu.Menu;
-import com.softwaredesign.project.staff.Waiter;
-import com.softwaredesign.project.customer.DineInCustomer;
-import com.softwaredesign.project.order.Meal;
-import com.softwaredesign.project.order.Recipe;
-import com.softwaredesign.project.order.RecipeTask;
-import com.softwaredesign.project.inventory.InventoryStockTracker;
+import com.softwaredesign.project.model.customer.DineInCustomer;
+import com.softwaredesign.project.model.inventory.Inventory;
+import com.softwaredesign.project.model.inventory.InventoryStockTracker;
+import com.softwaredesign.project.model.kitchen.Kitchen;
+import com.softwaredesign.project.model.kitchen.StationManager;
+import com.softwaredesign.project.model.kitchen.StationType;
+import com.softwaredesign.project.model.menu.Menu;
+import com.softwaredesign.project.model.order.Meal;
+import com.softwaredesign.project.model.order.OrderManager;
+import com.softwaredesign.project.model.order.Recipe;
+import com.softwaredesign.project.model.order.RecipeTask;
+import com.softwaredesign.project.model.orderfulfillment.CollectionPoint;
+import com.softwaredesign.project.model.orderfulfillment.Table;
+import com.softwaredesign.project.model.staff.Waiter;
 
 public class OrderFulfillmentTest {
     private OrderManager orderManager;

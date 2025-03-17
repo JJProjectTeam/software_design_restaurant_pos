@@ -1,13 +1,12 @@
 package com.softwaredesign.project.controller;
 
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
-import com.softwaredesign.project.orderfulfillment.SeatingPlan;
-import com.softwaredesign.project.orderfulfillment.Table;
+import com.softwaredesign.project.model.orderfulfillment.SeatingPlan;
+import com.softwaredesign.project.model.orderfulfillment.Table;
+import com.softwaredesign.project.model.singletons.BankBalanceSingleton;
 import com.softwaredesign.project.view.DiningRoomView;
 import com.softwaredesign.project.view.View;
 import com.softwaredesign.project.view.ViewType;
-
-import com.softwaredesign.project.model.BankBalanceSingleton;
 
 public class DiningRoomController extends BaseController {
     private SeatingPlan seatingPlan;

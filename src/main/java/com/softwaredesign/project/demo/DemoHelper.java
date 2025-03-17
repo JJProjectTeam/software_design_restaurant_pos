@@ -9,23 +9,23 @@ import java.io.IOException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.softwaredesign.project.customer.DineInCustomer;
-import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.kitchen.Kitchen;
-import com.softwaredesign.project.kitchen.Station;
-import com.softwaredesign.project.kitchen.StationManager;
-import com.softwaredesign.project.menu.BurgerRecipe;
-import com.softwaredesign.project.menu.KebabRecipe;
-import com.softwaredesign.project.order.Order;
-import com.softwaredesign.project.order.OrderManager;
-import com.softwaredesign.project.orderfulfillment.FloorManager;
-import com.softwaredesign.project.orderfulfillment.SeatingPlan;
-import com.softwaredesign.project.orderfulfillment.Table;
-import com.softwaredesign.project.staff.Chef;
-import com.softwaredesign.project.staff.ChefManager;
-import com.softwaredesign.project.staff.chefstrategies.ChefStrategy;
-import com.softwaredesign.project.staff.chefstrategies.DynamicChefStrategy;
-import com.softwaredesign.project.staff.chefstrategies.SimpleChefStrategy;
+import com.softwaredesign.project.model.customer.DineInCustomer;
+import com.softwaredesign.project.model.inventory.Inventory;
+import com.softwaredesign.project.model.kitchen.Kitchen;
+import com.softwaredesign.project.model.kitchen.Station;
+import com.softwaredesign.project.model.kitchen.StationManager;
+import com.softwaredesign.project.model.menu.BurgerRecipe;
+import com.softwaredesign.project.model.menu.KebabRecipe;
+import com.softwaredesign.project.model.order.Order;
+import com.softwaredesign.project.model.order.OrderManager;
+import com.softwaredesign.project.model.orderfulfillment.FloorManager;
+import com.softwaredesign.project.model.orderfulfillment.SeatingPlan;
+import com.softwaredesign.project.model.orderfulfillment.Table;
+import com.softwaredesign.project.model.staff.Chef;
+import com.softwaredesign.project.model.staff.ChefManager;
+import com.softwaredesign.project.model.staff.chefstrategies.ChefStrategy;
+import com.softwaredesign.project.model.staff.chefstrategies.DynamicChefStrategy;
+import com.softwaredesign.project.model.staff.chefstrategies.SimpleChefStrategy;
 
 /**
  * Utility class to help set up and progress through demo scenarios.
