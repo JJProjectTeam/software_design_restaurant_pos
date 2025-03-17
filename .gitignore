@@ -2,3 +2,4 @@ target/
 .vscode/
 decisions.txt
 logs/restaurant.log
+logs/restaurant-2025-03-16.log
