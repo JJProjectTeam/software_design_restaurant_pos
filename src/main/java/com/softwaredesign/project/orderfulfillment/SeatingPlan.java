@@ -28,8 +28,6 @@ public class SeatingPlan {
         tables = new ArrayList<>();
         Random random = new Random();
 
-        // First, ensure each table gets at least one seat
-        int remainingTables = totalTables;
         int remainingSeats = totalSeats - totalTables; // Reserve one seat per table
 
         // Create all tables with minimum 1 seat

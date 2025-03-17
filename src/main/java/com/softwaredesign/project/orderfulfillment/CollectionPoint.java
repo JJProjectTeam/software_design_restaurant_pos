@@ -1,13 +1,11 @@
 package com.softwaredesign.project.orderfulfillment;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import com.softwaredesign.project.inventory.Ingredient;
 import com.softwaredesign.project.model.BankBalanceSingleton;
 import com.softwaredesign.project.model.StatisticsSingleton;
 import com.softwaredesign.project.order.Meal;
-import com.softwaredesign.project.order.Recipe;
 
 public class CollectionPoint {
     private Map<String, List<Meal>> completedMeals;

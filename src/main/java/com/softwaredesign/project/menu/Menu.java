@@ -100,13 +100,6 @@ public class Menu {
         return recipeIngredients.get(random.nextInt(recipeIngredients.size()));
     }
 
-    private Ingredient getRandomIngredient() {
-        // TODO Placeholder ingredients - will be replaced with actual inventory items
-        String[] sampleIngredients = {"Cheese", "Tomato", "Lettuce", "Onion", "Pickles", "Mayo", "Mustard"};
-        Random random = new Random();
-        return new Ingredient(sampleIngredients[random.nextInt(sampleIngredients.length)], inventoryService);
-    }
-
     public void addRecipe(Recipe recipe) {
         availableRecipes.add(recipe);
     }

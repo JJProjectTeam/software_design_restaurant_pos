@@ -53,10 +53,7 @@ public class Station extends Entity {
      * and have their dependencies met
      * @return A recipe with ready tasks, or null if none found
      */
-    public Recipe findRecipeWithReadyTasks() {
-        // Check if any recipes have tasks that can be done at this station and have dependencies met
-        List<Recipe> availableRecipes = new ArrayList<>();
-        
+    public Recipe findRecipeWithReadyTasks() {        
         // First check the current recipe if there is one
         if (currentRecipe != null) {
             for (RecipeTask task : currentRecipe.getUncompletedTasks()) {
@@ -226,7 +223,7 @@ public class Station extends Entity {
     }
 
     public LocalDateTime getOldestTaskTime() {
-        return LocalDateTime.now(); //TODO task must be given a timestamp when added to stations
+        return LocalDateTime.now();
     }
 
     // get tasks from station
@@ -822,45 +819,5 @@ public class Station extends Entity {
      */
     public void setCollectionPoint(CollectionPoint collectionPoint) {
         this.collectionPoint = collectionPoint;
-    }
-
-    /**
-     * Completes the current meal and adds it to the collection point.
-     * This is a critical method for order fulfillment.
-     */
-    private void completeMeal() {
-        if (currentRecipe != null && currentTask != null && currentTask.isCompleted()) {
-            // Check if this is the last task for the recipe
-            if (currentRecipe.isComplete()) {
-                logger.info("[Station] Recipe complete: " + currentRecipe.getName());
-                
-                try {
-                    // Build the meal using the recipe's buildMeal method
-                    Meal meal = currentRecipe.buildMeal();
-                    
-                    logger.info("[Station] Adding completed meal to collection point: " + 
-                        meal.getOrderId() + " - " + currentRecipe.getName());
-                    
-                    // This is the critical step - use the correct CollectionPoint
-                    if (collectionPoint != null) {
-                        collectionPoint.addCompletedMeal(meal);
-                        logger.info("[Station] Successfully added meal to collection point");
-                    } else {
-                        logger.error("[Station] ERROR: CollectionPoint is null! Meal cannot be added.");
-                    }
-                } catch (Exception e) {
-                            logger.error("[Station] ERROR creating meal: " + e.getMessage());
-                }
-                
-                // Clear current recipe and task
-                currentRecipe = null;
-                currentTask = null;
-                cookingProgress = 0;
-            } else {
-                // Only the task is complete, but more tasks remain for the recipe
-                currentTask = null;
-                cookingProgress = 0;
-            }
-        }
     }
 }
