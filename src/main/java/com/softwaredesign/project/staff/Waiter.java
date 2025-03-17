@@ -70,8 +70,7 @@ public class Waiter extends StaffMember {
                 }
             } catch (IllegalArgumentException e) {
                 logger.info(e.getMessage());
-                // TODO: Handle what to do if the order cannot be fulfilled
-                return false;
+                throw new IllegalStateException("Out of stock, customer will try again next tick");
             }
         }
 
@@ -103,7 +102,10 @@ public class Waiter extends StaffMember {
 
         for (DineInCustomer customer : table.getCustomers()) {
             Recipe customerRecipe = customer.selectRecipeFromMenu(menu);
-            customer.requestRecipeModification(menu);
+            if (customerRecipe == null) {
+                return null;
+            }
+            customer.requestRecipeModification(menu); // TODO: does this work?
             tableOrder.addRecipes(customerRecipe);
             for (Ingredient ingredient : customer.getRemovedIngredients()) {
                 tableOrder.addModification(customerRecipe, ingredient, false);
