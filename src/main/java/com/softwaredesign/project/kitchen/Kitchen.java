@@ -230,43 +230,6 @@ public class Kitchen extends Entity {
         pendingRecipes.removeAll(assignedRecipes);
     }
     
-    private Station findAvailableStationForTask(RecipeTask task) {
-        // First check if the task's dependencies are met
-        if (!task.areDependenciesMet()) {
-            return null; // Can't assign a task whose dependencies aren't met
-        }
-        
-        List<Station> stations = stationManager.getStationsByType(task.getStationType());
-        
-        if (stations.isEmpty()) {
-            logger.info("[ERROR] No stations found for type " + task.getStationType() + " for task " + task.getName());
-            return null;
-        }
-        
-        // First preference: Station that's not busy and has a chef ready
-        for (Station station : stations) {
-            if (!station.isBusy() && station.hasChef() && !station.getAssignedChef().isWorking()) {
-                logger.info("[DEBUG] Found optimal station " + station.getType() + " for task " + 
-                                  task.getName() + " (not busy with available chef)");
-                return station;
-            }
-        }
-        
-        // Second preference: Station that's not busy (even if it doesn't have a chef yet)
-        // This will allow the task to be queued up for when a chef arrives
-        for (Station station : stations) {
-            if (!station.isBusy()) {
-                logger.info("[DEBUG] Found available station " + station.getType() + " for task " + 
-                                  task.getName() + " (no chef currently assigned)");
-                return station;
-            }
-        }
-        
-        // No available station found, log that information
-        logger.info("[DEBUG] All stations of type " + task.getStationType() + 
-                          " are busy. Task " + task.getName() + " will wait.");
-        return null;
-    }
     
     private void provideIngredientsToStations() {
         for (Station station : stationManager.getAllStations()) {
