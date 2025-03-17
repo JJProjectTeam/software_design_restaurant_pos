@@ -26,7 +26,6 @@ import com.softwaredesign.project.orderfulfillment.CollectionPoint;
 import com.softwaredesign.project.orderfulfillment.SeatingPlan;
 import com.softwaredesign.project.orderfulfillment.Table;
 import com.softwaredesign.project.staff.Waiter;
-import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
 
 /**
  * Test suite to validate the statistics tracking functionality.

@@ -53,7 +53,6 @@ public class Table {
         return customers.stream().allMatch(DineInCustomer::isDoneBrowsing);
     }
 
-    // TODO -- kill? 
     public List<Recipe> takeTableOrder() {
         if (!isEveryoneReadyToOrder()) {
             throw new IllegalStateException("Not all customers are ready to order");

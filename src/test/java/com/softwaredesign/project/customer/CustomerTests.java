@@ -12,7 +12,6 @@ import com.softwaredesign.project.inventory.Inventory;
 public class CustomerTests {
     private DineInCustomer customer;
     private Menu menu;
-    //TODO test if a customer orders something that is out of stock (recipe or ingredient)
     @Before
     public void setUp() {
         customer = new DineInCustomer();

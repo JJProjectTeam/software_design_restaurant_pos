@@ -15,7 +15,6 @@ import com.softwaredesign.project.kitchen.StationType;
 import com.softwaredesign.project.menu.Menu;
 
 public class AppTest {
-    //TODO: Tests to add - waiter assignment? Can we handle if more customers come than we can seat gracefully?
     @Test
     public void testSystemInitialization() {
         Inventory  inventory = new Inventory();

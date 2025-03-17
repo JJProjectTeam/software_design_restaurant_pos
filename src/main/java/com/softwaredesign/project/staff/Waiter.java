@@ -111,7 +111,7 @@ public class Waiter extends StaffMember {
             if (customerRecipe == null) {
                 return null;
             }
-            customer.requestRecipeModification(menu); // TODO: does this work?
+            customer.requestRecipeModification(menu);
             tableOrder.addRecipes(customerRecipe);
             for (Ingredient ingredient : customer.getRemovedIngredients()) {
                 tableOrder.addModification(customerRecipe, ingredient, false);

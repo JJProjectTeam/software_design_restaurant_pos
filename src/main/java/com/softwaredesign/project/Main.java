@@ -66,7 +66,6 @@
 //         logger.info("------------------------------");
 
 //         // Order 1: Burger with extra cheese
-//         // TODO: Need to replace this with a factory maybe to make it sequential
 //         String orderId1 = orderManager.generateOrderId();
 //         Order order1 = new Order(orderId1);
 //         BurgerRecipe burger = new BurgerRecipe(inventory);

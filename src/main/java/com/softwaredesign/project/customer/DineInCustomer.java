@@ -48,7 +48,6 @@ public class DineInCustomer extends Customer {
         }
         
         Random random = new Random();
-        //this could be bad magic numbers, TODO should player set this? Ruan: we could have a global config file for this
         int numberOfModifications = random.nextInt(4); // 0-3 modifications
         
         

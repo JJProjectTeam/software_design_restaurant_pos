@@ -21,7 +21,6 @@ import com.softwaredesign.project.staff.chefstrategies.LongestQueueFirstStrategy
 import com.softwaredesign.project.staff.staffspeeds.BaseSpeed;
 import com.softwaredesign.project.staff.staffspeeds.ISpeedComponent;
 import com.softwaredesign.project.inventory.Inventory;
-import com.softwaredesign.project.inventory.InventoryService;
 
 public class StaffTests {
     private Waiter waiter;
