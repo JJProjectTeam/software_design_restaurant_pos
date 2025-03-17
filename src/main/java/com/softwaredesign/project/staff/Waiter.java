@@ -108,7 +108,10 @@ public class Waiter extends StaffMember {
 
         for (DineInCustomer customer : table.getCustomers()) {
             Recipe customerRecipe = customer.selectRecipeFromMenu(menu);
-            customer.requestRecipeModification(menu);
+            if (customerRecipe == null) {
+                return null;
+            }
+            customer.requestRecipeModification(menu); // TODO: does this work?
             tableOrder.addRecipes(customerRecipe);
             for (Ingredient ingredient : customer.getRemovedIngredients()) {
                 tableOrder.addModification(customerRecipe, ingredient, false);

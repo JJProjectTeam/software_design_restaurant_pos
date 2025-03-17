@@ -36,24 +36,15 @@ public class DineInCustomer extends Customer {
             throw new IllegalStateException("Customer is still browsing!");
         }
 
-        boolean validChoice = false;
-        while (!validChoice) {
             selectedRecipe = menu.getRandomRecipe();
-            try {
-                // Validate base recipe ingredients
-                // RecipeValidator.getInstance().validateIngredients(selectedRecipe.getIngredients());
-                validChoice = true;
-            } catch (RecipeValidationException e) {
-                logger.info("Sorry, that item is unavailable. Selecting something else...");
-            }
-        }
         return selectedRecipe;
     }
 
     @Override
     public void requestRecipeModification(Menu menu) {
         if (selectedRecipe == null) {
-            throw new IllegalArgumentException("Can't modify a recipe that hasn't been selected yet!");
+            logger.info("Customer has not selected a recipe yet!");
+            return;    
         }
         
         Random random = new Random();

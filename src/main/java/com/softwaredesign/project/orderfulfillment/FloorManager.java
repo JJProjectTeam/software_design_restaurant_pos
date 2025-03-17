@@ -12,12 +12,15 @@ import com.softwaredesign.project.order.Order;
 import com.softwaredesign.project.order.OrderManager;
 import com.softwaredesign.project.order.Recipe;
 import com.softwaredesign.project.staff.Waiter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages the restaurant floor operations in a tick-based system.
  * Responsible for tables, customers, and waiters.
  */
 public class FloorManager extends Entity {
+    private static final Logger logger = LoggerFactory.getLogger(FloorManager.class);
     private SeatingPlan seatingPlan;
     private List<Waiter> waiters;
     private OrderManager orderManager;
@@ -106,18 +109,17 @@ public class FloorManager extends Entity {
                     waiter.assignTable(table);
                 }
                 
-                try {
-                    // Take the order and remember which table it belongs to
-                    String orderId = waiter.takeTableOrderAndReturnId(table);
-                    if (orderId != null) {
-                        orderToTableMap.put(orderId, table);
-                        System.out.println("Waiter took order " + orderId + " from table " + table.getTableNumber());
-                    }
-                } catch (IllegalStateException e) {
-                    System.out.println("Could not take order from table " + table.getTableNumber() + ": " + e.getMessage());
+                // Take the order and remember which table it belongs to
+                String orderId = waiter.takeTableOrderAndReturnId(table);
+                if (orderId != null) {
+                    orderToTableMap.put(orderId, table);
+                    logger.info("Waiter took order {} from table {}", orderId, table.getTableNumber());
+                } else {
+                    logger.info("Could not take order from table {} due to inventory issues", table.getTableNumber());
                 }
+
             } else {
-                System.out.println("No available waiter to take order from table " + table.getTableNumber());
+                logger.info("No available waiter to take order from table {}", table.getTableNumber());
                 // Mark table for processing in next tick
                 if (!tablesToProcess.contains(table)) {
                     tablesToProcess.add(table);
@@ -131,7 +133,7 @@ public class FloorManager extends Entity {
      */
     private void collectCompletedOrders() {
         if (collectionPoint == null) {
-            System.out.println("[FloorManager] No CollectionPoint set, cannot collect completed orders");
+            logger.info("[FloorManager] No CollectionPoint set, cannot collect completed orders");
             return;
         }
         
@@ -142,8 +144,7 @@ public class FloorManager extends Entity {
                 Table targetTable = orderToTableMap.get(orderId);
                 
                 if (targetTable != null) {
-                    System.out.println("[FloorManager] Collected completed order " + orderId + 
-                                      " for table " + targetTable.getTableNumber());
+                    logger.info("[FloorManager] Collected completed order {} for table {}", orderId, targetTable.getTableNumber());
                     
                     // Add meals to the delivery queue
                     if (!mealsToDeliver.containsKey(targetTable)) {
@@ -151,8 +152,7 @@ public class FloorManager extends Entity {
                     }
                     mealsToDeliver.get(targetTable).addAll(completedMeals);
                 } else {
-                    System.out.println("[FloorManager] Warning: Collected order " + orderId + 
-                                      " but couldn't find which table it belongs to");
+                    logger.info("[FloorManager] Warning: Collected order {} but couldn't find which table it belongs to", orderId);
                 }
             }
         }
@@ -189,8 +189,7 @@ public class FloorManager extends Entity {
                     mealsToDeliver.remove(table);
                 }
             } else {
-                System.out.println("[FloorManager] No waiter available to deliver meals to table " + 
-                                  table.getTableNumber());
+                logger.info("[FloorManager] No waiter available to deliver meals to table {}", table.getTableNumber());
             }
         }
     }
@@ -233,7 +232,7 @@ public class FloorManager extends Entity {
                     // Simple logic - 50% chance to finish browsing each tick
                     if (Math.random() > 0.5) {
                         customer.finishBrowsing();
-                        System.out.println("Customer at table " + table.getTableNumber() + " finished browsing");
+                        logger.info("Customer at table {} finished browsing", table.getTableNumber());
                     }
                 }
             }
@@ -252,8 +251,7 @@ public class FloorManager extends Entity {
                     Meal meal = table.getNextPendingMeal();
                     if (meal != null) {
                         customer.eatMeal(meal);
-                        System.out.println("Customer at table " + table.getTableNumber() + 
-                                         " is eating " + meal.getName());
+                        logger.info("Customer at table {} is eating {}", table.getTableNumber(), meal.getName());
                         
                         // After eating, customer will leave
                         customersToRemove.add(customer);
@@ -263,7 +261,7 @@ public class FloorManager extends Entity {
                 // Remove customers who have eaten
                 for (DineInCustomer customer : customersToRemove) {
                     table.removeCustomer(customer);
-                    System.out.println("Customer has finished eating and left table " + table.getTableNumber());
+                    logger.info("Customer has finished eating and left table {}", table.getTableNumber());
                 }
             }
         }
@@ -306,7 +304,7 @@ public class FloorManager extends Entity {
                         if (orderId != null) {
                             orderToTableMap.put(orderId, table);
                         }
-                        System.out.println("Waiter took order from previously queued table " + table.getTableNumber());
+                        logger.info("Waiter took order from previously queued table {}", table.getTableNumber());
                         processed.add(table);
                     } catch (IllegalStateException e) {
                         // If not ready to order anymore, remove from processing queue

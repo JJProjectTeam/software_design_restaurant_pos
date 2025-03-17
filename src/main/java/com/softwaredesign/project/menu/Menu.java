@@ -67,6 +67,10 @@ public class Menu {
         Random random = new Random();
         Recipe selectedRecipe = availableRecipes.get(random.nextInt(availableRecipes.size()));
         
+        if (!inventoryService.getIngredientStores().containsAll(selectedRecipe.getIngredients())) {
+            logger.info("[Menu] Selected recipe cannot be made due to insufficient ingredients. Trying again.");
+            return null;
+        }
         // Randomly customize the recipe
         return selectedRecipe;
     }
