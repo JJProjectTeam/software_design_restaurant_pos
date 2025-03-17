@@ -272,6 +272,27 @@ public class Station extends Entity {
                 currentChefStation.getType() + " station, unregistering from there");
             logger.info("Chef " + chef.getName() + " was at " + currentChefStation.getType() + 
                               " station but is now moving to " + type + " station");
+            
+            // Handle the working status - we need to check if the chef is actively working
+            if (chef.isWorking()) {
+                logger.info("[DEBUG-STATION-SYNC] Chef " + chef.getName() + " is still marked as working. " +
+                    "Checking if they're the taskChef at their current station...");
+                
+                // Check if this chef is the taskChef at their current station
+                if (currentChefStation.getCurrentTask() != null) {
+                    logger.info("[DEBUG-STATION-SYNC] Chef's current station has an active task.");
+                    
+                    // Do NOT unregister the chef while they're in the middle of a task
+                    logger.info("[DEBUG-STATION-SYNC] Chef " + chef.getName() + 
+                        " is in the middle of a task. Cannot reassign until task is complete.");
+                    return;
+                } else {
+                    // No active task, safe to reset working status
+                    chef.setWorking(false);
+                    logger.info("[DEBUG-STATION-SYNC] Reset working status for chef " + chef.getName());
+                }
+            }
+            
             // Unregister from the other station
             if (currentChefStation.getAssignedChef() == chef) {
                 logger.info("[DEBUG-STATION] Unregistering chef from " + currentChefStation.getType());
@@ -279,6 +300,9 @@ public class Station extends Entity {
             } else {
                 logger.info("[DEBUG-STATION] WARNING: Chef thinks they're at " + 
                     currentChefStation.getType() + " but that station doesn't have them assigned!");
+                
+                // Force update the chef's current station reference to avoid inconsistency
+                chef.setCurrentStation(null);
             }
         }
         
@@ -293,6 +317,7 @@ public class Station extends Entity {
         if (currentTask != null && taskChef == null) {
             logger.info("[DEBUG-STATION] Assigning chef to task: " + currentTask.getName());
             taskChef = chef;
+            chef.setWorking(true);
         }
         
         // Verify the registration worked
@@ -307,9 +332,16 @@ public class Station extends Entity {
         logger.info("\n[DEBUG-STATION] Unregistering chef from " + type + " station");
         logger.info("[DEBUG-STATION] Current assignedChef: " + 
             (assignedChef != null ? assignedChef.getName() : "NONE"));
+        logger.info("[DEBUG-STATION] Current taskChef: " + 
+            (taskChef != null ? taskChef.getName() : "NONE"));
         
-        // Note: We don't unregister the taskChef here because they remain
-        // associated with the current task even if they leave the station
+        // Special case: if there's an active task and taskChef is set,
+        // we should NOT unregister if the assignedChef is the taskChef
+        if (currentTask != null && taskChef != null && assignedChef == taskChef) {
+            logger.info("[DEBUG-STATION] WARNING: Cannot unregister chef " + 
+                assignedChef.getName() + " as they are actively cooking a task");
+            return;
+        }
         
         if (assignedChef != null) {
             logger.info("[DEBUG-STATION] Found assigned chef: " + assignedChef.getName());
@@ -326,6 +358,9 @@ public class Station extends Entity {
                     " is assigned here but thinks they're at " + 
                     (assignedChef.getCurrentStation() != null ? 
                         assignedChef.getCurrentStation().getType() : "NONE"));
+                
+                // Fix the inconsistency - if the chef thinks they're at a different station,
+                // but we have them as assigned, clear our reference
             }
             
             Chef departingChef = assignedChef;
@@ -335,6 +370,12 @@ public class Station extends Entity {
             // Make sure the chef's assigned stations list no longer contains this station
             logger.info("[DEBUG-STATION] Removing station from chef's assigned stations list");
             departingChef.removeStationAssignment(this);
+            
+            // Reset working status if appropriate
+            if (departingChef.isWorking() && (taskChef == null || taskChef != departingChef)) {
+                departingChef.setWorking(false);
+                logger.info("[DEBUG-STATION] Reset working status for departing chef " + departingChef.getName());
+            }
             
             logger.info("[DEBUG-STATION] After unregistration: Chef " + departingChef.getName() + 
                 " current station is " + 
@@ -478,12 +519,20 @@ public class Station extends Entity {
             }
             
             cookingProgress++;
-            int requiredWork =  (int) Math.round(currentTask.getCookingWorkRequired() / assignedChef.getSpeedMultiplier());
+            
+            // Calculate required work with a minimum threshold to prevent instant completion
+            int taskWorkRequired = currentTask.getCookingWorkRequired();
+            double chefSpeedMultiplier = assignedChef.getSpeedMultiplier();
+            
+            // Ensure a minimum required work of at least 1 tick
+            int requiredWork = Math.max(1, (int) Math.round(taskWorkRequired / chefSpeedMultiplier));
             
             StringBuilder progressMessage = new StringBuilder();
             progressMessage.append(type).append(" station cooking ").append(currentTask.getName());
             progressMessage.append(" for ").append(currentRecipe.getName());
             progressMessage.append(" - Progress: ").append(cookingProgress).append("/").append(requiredWork);
+            progressMessage.append(" (Task work: ").append(taskWorkRequired);
+            progressMessage.append(", Chef speed: ").append(chefSpeedMultiplier).append(")");
             
             // Add chef information if available - use taskChef instead of assignedChef
             if (taskChef != null) {
@@ -502,6 +551,7 @@ public class Station extends Entity {
                 StringBuilder completionMessage = new StringBuilder();
                 completionMessage.append(type).append(" station completed task: ").append(currentTask.getName());
                 completionMessage.append(" for ").append(currentRecipe.getName());
+                completionMessage.append(" after ").append(cookingProgress).append(" ticks");
                 
                 // Add chef information if available - use taskChef instead of assignedChef
                 if (taskChef != null) {
@@ -630,9 +680,21 @@ public class Station extends Entity {
                 // Store current chef for later use
                 Chef currentChef = taskChef;
                 
-                // Reset the working status of the chef
+                // Reset the working status of the chef BEFORE clearing references
                 if (taskChef != null) {
                     taskChef.setWorking(false);
+                }
+                
+                // Check if assignedChef and taskChef are different (which would indicate potential duplication)
+                if (assignedChef != null && taskChef != null && assignedChef != taskChef) {
+                    logger.info("[DEBUG-CHEF-SYNC] Possible duplication detected: " + 
+                        "assignedChef is " + assignedChef.getName() + " but taskChef is " + taskChef.getName());
+                    // Synchronize by clearing assignedChef if it's not the same as taskChef
+                    // This ensures only the chef who did the work remains assigned
+                    if (assignedChef.getCurrentStation() == this) {
+                        assignedChef.setCurrentStation(null);
+                    }
+                    assignedChef = null;
                 }
                 
                 // Reset station state
@@ -641,7 +703,7 @@ public class Station extends Entity {
                 taskChef = null;
                 cookingProgress = 0;
                 
-                // Try to find a new task for this station immediately
+                // Try to assign a new task for this station immediately
                 tryAssignNewTask();
                 
                 // If we still don't have a task and the chef is still assigned here,
@@ -655,6 +717,24 @@ public class Station extends Entity {
         // If we have a chef but no task, try to assign a new task
         else if (hasChef() && currentTask == null && !assignedChef.isWorking()) {
             tryAssignNewTask();
+            
+            // If we still don't have a task after trying to assign one, 
+            // and we have a chef who isn't working, this might be a good time for them to look elsewhere
+            if (currentTask == null && assignedChef != null && !assignedChef.isWorking()) {
+                logger.info("[DEBUG-CHEF-IDLE] Chef " + assignedChef.getName() + 
+                    " is idle at " + type + " station with no tasks. Releasing chef to look for work elsewhere.");
+                
+                // Store chef reference before clearing it
+                Chef idleChef = assignedChef;
+                
+                // We should unregister this chef from the station since there's no work here
+                unregisterChef();
+                
+                // Have the chef look for work elsewhere
+                if (idleChef != null) {
+                    idleChef.chooseNextStation();
+                }
+            }
         }
     }
     
@@ -680,8 +760,17 @@ public class Station extends Entity {
             logger.info("[DEBUG] " + type + " station pulling queued task: " + nextTask.getName());
             currentRecipe = recipe;
             currentTask = nextTask;
-            cookingProgress = 0;
-            needsIngredients = true;
+            cookingProgress = 0; // Explicitly reset cooking progress to zero
+            needsIngredients = true; // Always need ingredients for a new task
+            
+            // Additional logging to verify working values
+            logger.info("[DEBUG-TASK-VALUES] New task initialized. cookingWorkRequired=" + 
+                nextTask.getCookingWorkRequired() + ", chef speed=" + 
+                (assignedChef != null ? assignedChef.getSpeedMultiplier() : "n/a") + 
+                ", estimated required work=" + 
+                (assignedChef != null ? 
+                    Math.max(1, (int)Math.round(nextTask.getCookingWorkRequired() / assignedChef.getSpeedMultiplier())) : 
+                    "n/a"));
 
             if (assignedChef != null) {
                 assignedChef.setWorking(true);

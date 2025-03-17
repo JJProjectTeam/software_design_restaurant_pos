@@ -21,7 +21,7 @@ public class RecipeTask {
     private StationType stationType;
     private List<Ingredient> ingredients;
     private boolean completed;
-    private static final int DEFAULT_COOKING_WORK_REQUIRED = 5;
+    private static final int DEFAULT_COOKING_WORK_REQUIRED = 10;
     private int cookingWorkRequired;
     private Set<RecipeTask> dependencies; // Tasks that must be completed before this task can start
     private boolean assigned; // Tracks if this task has been assigned to a station

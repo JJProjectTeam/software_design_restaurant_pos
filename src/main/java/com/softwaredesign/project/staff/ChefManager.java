@@ -52,6 +52,11 @@ public class ChefManager extends Entity {
     public void writeState() {
         logger.info("\n=== CHEF MANAGER: CHECKING FOR WORK FOR " + chefs.size() + " CHEFS ===");
         
+        // First, periodically check for and fix inconsistencies
+        if (isConsistencyCheckNeeded()) {
+            checkAndFixConsistencies();
+        }
+        
         // In the write phase, have each chef check for work
         for (Chef chef : chefs) {
             logger.info("\nCHEF " + chef.getName() + " STATUS:");
@@ -67,6 +72,45 @@ public class ChefManager extends Entity {
             logger.info("AFTER CHECK: " + chef.getName() + " at " + 
                 (chef.getCurrentStation() != null ? chef.getCurrentStation().getType() : "NONE") + 
                 ", working: " + chef.isWorking());
+        }
+    }
+
+    // Track tick count to perform consistency checks periodically
+    private int tickCount = 0;
+    private static final int CONSISTENCY_CHECK_INTERVAL = 10; // Check every 10 ticks
+
+    private boolean isConsistencyCheckNeeded() {
+        tickCount++;
+        return tickCount % CONSISTENCY_CHECK_INTERVAL == 0;
+    }
+
+    /**
+     * Checks for and fixes inconsistencies between chefs and stations
+     */
+    private void checkAndFixConsistencies() {
+        logger.info("\n=== CHEF MANAGER: PERFORMING CONSISTENCY CHECK ===");
+        
+        // Have each chef check its own consistency
+        for (Chef chef : chefs) {
+            chef.checkStationConsistency();
+        }
+        
+        // Check for chefs that are in inconsistent states
+        int inconsistenciesFixed = 0;
+        for (Chef chef : chefs) {
+            if (chef.isWorking() && chef.getCurrentStation() == null) {
+                logger.info("[CONSISTENCY-ERROR] Chef " + chef.getName() + 
+                    " is marked as working but has no current station");
+                chef.setWorking(false);
+                inconsistenciesFixed++;
+            }
+        }
+        
+        // Log the results
+        if (inconsistenciesFixed > 0) {
+            logger.info("[CONSISTENCY-CHECK] Fixed " + inconsistenciesFixed + " inconsistencies");
+        } else {
+            logger.info("[CONSISTENCY-CHECK] No inconsistencies found");
         }
     }
 }

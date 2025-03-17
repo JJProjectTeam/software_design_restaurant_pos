@@ -262,4 +262,51 @@ public class Chef extends StaffMember {
         return speedDecorator.getSpeedMultiplier();
     }
 
+    /**
+     * Checks and resolves any inconsistencies between the chef's state and its current station.
+     * This is useful for fixing duplication issues where references get out of sync.
+     */
+    public void checkStationConsistency() {
+        logger.info("[DEBUG-CHEF-SYNC] Checking station consistency for " + name);
+        
+        // Case 1: Chef thinks it's at a station, but that station doesn't have this chef assigned
+        if (currentStation != null) {
+            if (currentStation.getAssignedChef() != this) {
+                logger.info("[DEBUG-CHEF-SYNC] Inconsistency detected: " + name + 
+                    " thinks it's at " + currentStation.getType() + 
+                    " but that station has " + 
+                    (currentStation.getAssignedChef() != null ? 
+                        currentStation.getAssignedChef().getName() : "no chef") + " assigned");
+                
+                // Fix: Clear chef's current station reference
+                logger.info("[DEBUG-CHEF-SYNC] Fixing: Setting currentStation to null for " + name);
+                currentStation = null;
+            }
+        }
+        
+        // Case 2: Chef is marked as working but has no current station
+        if (isWorking && currentStation == null) {
+            logger.info("[DEBUG-CHEF-SYNC] Inconsistency detected: " + name + 
+                " is marked as working but has no current station");
+            
+            // Fix: Reset working status
+            logger.info("[DEBUG-CHEF-SYNC] Fixing: Setting isWorking to false for " + name);
+            isWorking = false;
+        }
+        
+        // Case 3: Chef is not working but is at a station with an active task
+        if (!isWorking && currentStation != null && 
+            currentStation.getCurrentTask() != null && 
+            currentStation.getAssignedChef() == this) {
+            
+            logger.info("[DEBUG-CHEF-SYNC] Inconsistency detected: " + name + 
+                " is not marked as working but is at " + currentStation.getType() + 
+                " station with an active task: " + currentStation.getCurrentTask().getName());
+            
+            // Fix: Set working status to match the station's state
+            logger.info("[DEBUG-CHEF-SYNC] Fixing: Setting isWorking to true for " + name);
+            isWorking = true;
+        }
+    }
+
 }
