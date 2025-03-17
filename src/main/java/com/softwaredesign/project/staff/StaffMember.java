@@ -2,18 +2,18 @@ package com.softwaredesign.project.staff;
 
 
 public abstract class StaffMember {
-    private double payPerHour;
+    private double pay;
 
-    public StaffMember(double payPerHour) {
-        this.payPerHour = payPerHour;
+    public StaffMember(double pay) {
+        this.pay = pay;
     }
 
-    public double getPayPerHour() {
-        return payPerHour;
+    public double getPay() {
+        return pay;
     }
 
-    public void setPayPerHour(double payPerHour) {
-        this.payPerHour = payPerHour;
+    public void setPay(double pay) {
+        this.pay = pay;
     }
 
 

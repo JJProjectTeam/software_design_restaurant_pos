@@ -23,9 +23,9 @@ public class Waiter extends StaffMember {
     private Menu menu;
     private InventoryStockTracker inventoryStockTracker;
 
-    public Waiter(double payPerHour, OrderManager orderManager, Menu menu,
+    public Waiter(double pay, OrderManager orderManager, Menu menu,
             InventoryStockTracker inventoryStockTracker) {
-        super(payPerHour);
+        super(pay);
         this.assignedTables = new ArrayList<>();
         this.orderManager = orderManager;
         this.menu = menu;

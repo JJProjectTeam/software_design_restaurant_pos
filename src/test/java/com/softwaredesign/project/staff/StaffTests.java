@@ -112,7 +112,7 @@ public class StaffTests {
 
     @Test
     public void testStaffPayRate() {
-        assertEquals(15.0, waiter.getPayPerHour(), 0.01);
-        assertEquals(20.0, chef.getPayPerHour(), 0.01);
+        assertEquals(15.0, waiter.getPay(), 0.01);
+        assertEquals(20.0, chef.getPay(), 0.01);
     }
 }

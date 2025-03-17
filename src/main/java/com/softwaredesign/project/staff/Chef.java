@@ -24,8 +24,8 @@ public class Chef extends StaffMember {
     private static int chefCounter = 0;
     private ISpeedComponent speedDecorator;
     
-    public Chef(double payPerHour, ISpeedComponent speedDecorator, ChefStrategy strategy, StationManager stationManager) {
-        super(payPerHour);
+    public Chef(double pay, ISpeedComponent speedDecorator, ChefStrategy strategy, StationManager stationManager) {
+        super(pay);
         this.speedDecorator = speedDecorator;
         this.assignedStations = new ArrayList<>();
         this.workStrategy = strategy;
@@ -35,8 +35,8 @@ public class Chef extends StaffMember {
         logger.info("[DEBUG] Created new chef: " + name + speedDecorator.getSpeedMultiplier());
     }
     
-    public Chef(String name, double payPerHour, ISpeedComponent speedDecorator, ChefStrategy strategy, StationManager stationManager) {
-        super(payPerHour);
+    public Chef(String name, double pay, ISpeedComponent speedDecorator, ChefStrategy strategy, StationManager stationManager) {
+        super(pay);
         this.speedDecorator = speedDecorator;
         this.assignedStations = new ArrayList<>();
         this.workStrategy = strategy;

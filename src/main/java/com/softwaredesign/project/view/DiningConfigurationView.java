@@ -22,7 +22,7 @@ public class DiningConfigurationView extends ConfigurationView {
     private int currentTableCapacity = 1;
     private int minWaiters;
     private int maxWaiters; 
-    private double standardPayPerHour = 10.0; // Default value
+    private double standardPay = 10.0; // Default value
 
     // Public setters for configuration constants
     public void setMaxTables(int maxTables) {
@@ -57,8 +57,8 @@ public class DiningConfigurationView extends ConfigurationView {
         this.maxWaiters = maxWaiters;
     }
 
-    public void setStandardPayPerHour(double standardPayPerHour) {
-        this.standardPayPerHour = standardPayPerHour;
+    public void setStandardPay(double standardPay) {
+        this.standardPay = standardPay;
     }
 
     // Local storage for waiter data
@@ -67,12 +67,12 @@ public class DiningConfigurationView extends ConfigurationView {
     // Inner class to hold waiter data
     public static class WaiterData {
         String name;
-        double costPerHour;
+        double cost;
         List<Integer> assignedTables;
 
-        WaiterData(String name, double costPerHour) {
+        WaiterData(String name, double cost) {
             this.name = name;
-            this.costPerHour = costPerHour;
+            this.cost = cost;
             this.assignedTables = new ArrayList<>();
         }
         
@@ -80,8 +80,8 @@ public class DiningConfigurationView extends ConfigurationView {
             return name;
         }
         
-        public double getCostPerHour() {
-            return costPerHour;
+        public double getCost() {
+            return cost;
         }
     }
 
@@ -132,7 +132,7 @@ public class DiningConfigurationView extends ConfigurationView {
             
             // Set column labels
             waiterTable.setColumnLabel(0, "Waiter Name");
-            waiterTable.setColumnLabel(1, "Cost/Hour");
+            waiterTable.setColumnLabel(1, "Cost");
             waiterTable.setColumnLabel(2, "Tables Assigned");
 
             // Set column widths
@@ -167,7 +167,7 @@ public class DiningConfigurationView extends ConfigurationView {
             // Populate from local storage without deducting costs again
             for (var entry : waiters.entrySet()) {
                 var waiter = entry.getValue();
-                addWaiterToTable(waiter.name, waiter.costPerHour, false);
+                addWaiterToTable(waiter.name, waiter.cost, false);
             }
         } catch (Exception e) {
             logger.error("[DiningConfigurationView] Error refreshing waiter table: " + e.getMessage());
@@ -288,19 +288,19 @@ public class DiningConfigurationView extends ConfigurationView {
                 return;
             }
 
-            double costPerHour = calculateCost();
+            double cost = calculateCost();
 
             // Check if adding this waiter would cause bank balance to go negative
-            if (bankBalance - costPerHour < 0) {
-                showError("Cannot hire waiter. Cost of " + String.format("%.2f", costPerHour) + " exceeds available bankBalance of " + String.format("%.2f", bankBalance));
+            if (bankBalance - cost < 0) {
+                showError("Cannot hire waiter. Cost of " + String.format("%.2f", cost) + " exceeds available bankBalance of " + String.format("%.2f", bankBalance));
                 return;
             }
 
             // Add to local storage
-            waiters.put(name, new WaiterData(name, costPerHour));
+            waiters.put(name, new WaiterData(name, cost));
             
             // Add to table and deduct cost
-            addWaiterToTable(name, costPerHour, true);
+            addWaiterToTable(name, cost, true);
 
             // Clear inputs
             nameField.setText("");
@@ -311,16 +311,16 @@ public class DiningConfigurationView extends ConfigurationView {
         }
     }
 
-    private void addWaiterToTable(String name, double costPerHour, boolean deductCost) {
+    private void addWaiterToTable(String name, double cost, boolean deductCost) {
         try {
             int row = waiterTable.getRowCount();
             waiterTable.insertRowBelow(row-1);
             waiterTable.setCellText(0, row, name);
-            waiterTable.setCellText(2, row, String.format("%.2f", costPerHour));
+            waiterTable.setCellText(2, row, String.format("%.2f", cost));
             waiterTable.setCellText(3, row, "0"); // Initially no tables assigned
             
             if (deductCost) {
-                setBankBalance(bankBalance - costPerHour);
+                setBankBalance(bankBalance - cost);
             }
         } catch (Exception e) {
             logger.error("[DiningConfigurationView] Error adding waiter to table: " + e.getMessage());
@@ -329,7 +329,7 @@ public class DiningConfigurationView extends ConfigurationView {
     }
 
     private double calculateCost() {
-        return standardPayPerHour;
+        return standardPay;
     }
 
     @Override
@@ -407,7 +407,7 @@ public class DiningConfigurationView extends ConfigurationView {
             }
 
             // Get the waiter's cost before removing them
-            double waiterCost = waiters.get(waiterName).getCostPerHour();
+            double waiterCost = waiters.get(waiterName).getCost();
             
             // Remove from local storage
             waiters.remove(waiterName);
