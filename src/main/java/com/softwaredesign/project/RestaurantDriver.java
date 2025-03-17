@@ -86,12 +86,7 @@ public class RestaurantDriver {
     private InventoryController inventoryController;
     private EndOfGameController endOfGameController;
     
-    // Demo state
-    private boolean hasStartedDemo = false;
-    private int demoStep = 0;
-    private final int DEMO_DELAY = 5;
     private int tickCount = 0;
-    private List<Order> createdOrders = new ArrayList<>();
     
     private static final Logger logger = LoggerFactory.getLogger(RestaurantDriver.class);
 
