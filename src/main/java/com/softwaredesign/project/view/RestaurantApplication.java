@@ -10,7 +10,7 @@ import jexer.event.TMenuEvent;
 import jexer.menu.TMenu;
 
 import com.softwaredesign.project.mediator.RestaurantViewMediator;
-import com.softwaredesign.project.RestaurantDriver;
+import com.softwaredesign.project.GameEntryPoint;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ public class RestaurantApplication extends TApplication {
     private TWindow mainWindow;
     private Map<ViewType, View> views = new HashMap<>();
     private ViewType currentView;
-    private RestaurantDriver driver;
+    private GameEntryPoint driver;
 
     public RestaurantApplication() throws Exception {
         super(BackendType.SWING);
@@ -139,14 +139,14 @@ public class RestaurantApplication extends TApplication {
     /**
      * Sets the driver reference for restart functionality
      */
-    public void setDriver(RestaurantDriver driver) {
+    public void setDriver(GameEntryPoint driver) {
         this.driver = driver;
     }
 
     /**
      * Gets the driver instance
      */
-    public RestaurantDriver getDriver() {
+    public GameEntryPoint getDriver() {
         return this.driver;
     }
 

@@ -62,7 +62,7 @@ import com.softwaredesign.project.inventory.InventoryStockTracker;
  * - Implement writeState() to process orders
  * - Register it with the GameEngine
  */
-public class RestaurantDriver {
+public class GameEntryPoint {
     // Core components
     private GameEngine gameEngine;
     private Kitchen kitchen;
@@ -87,9 +87,9 @@ public class RestaurantDriver {
     
     private int tickCount = 0;
     
-    private static final Logger logger = LoggerFactory.getLogger(RestaurantDriver.class);
+    private static final Logger logger = LoggerFactory.getLogger(GameEntryPoint.class);
 
-    public RestaurantDriver() {
+    public GameEntryPoint() {
         try{
             this.app = new RestaurantApplication();
             this.mediator = RestaurantViewMediator.getInstance();
@@ -512,7 +512,7 @@ public class RestaurantDriver {
         // Delete the current RestaurantApplication instance
         this.app = null;
         // Create a new RestaurantDriver to reinitialize all components
-        RestaurantDriver newDriver = new RestaurantDriver();
+        GameEntryPoint newDriver = new GameEntryPoint();
         newDriver.start();
     }
 
@@ -539,7 +539,7 @@ public class RestaurantDriver {
 
 
     public static void main(String[] args) {
-        RestaurantDriver driver = new RestaurantDriver();
+        GameEntryPoint driver = new GameEntryPoint();
         driver.start();
     }
 }
