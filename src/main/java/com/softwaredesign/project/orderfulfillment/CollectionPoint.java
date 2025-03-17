@@ -101,16 +101,12 @@ public class CollectionPoint {
     }
 
     /**
-     * Gets the total number of meals expected for a specific order
-     * 
-     * @param orderId The order ID to check
-     * @return The total number of meals expected for the order
+     * Gets the total number of meals expected for an order
+     * @param orderId The order ID
+     * @return The number of meals expected for this order, or 0 if the order is not registered
      */
     public int getTotalMealsExpected(String orderId) {
-        if (!mealsPerOrder.containsKey(orderId)) {
-            return 0;
-        }
-        return mealsPerOrder.get(orderId);
+        return mealsPerOrder.getOrDefault(orderId, 0);
     }
 
     public void addMealsToBankBalance(List<Meal> meals) {
