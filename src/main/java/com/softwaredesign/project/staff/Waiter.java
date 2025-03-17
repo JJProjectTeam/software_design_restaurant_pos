@@ -30,6 +30,11 @@ public class Waiter extends StaffMember {
         this.orderManager = orderManager;
         this.menu = menu;
         this.inventoryStockTracker = inventoryStockTracker;
+        
+        // Set the inventory stock tracker in the order manager if not already set
+        if (orderManager != null) {
+            orderManager.setInventoryStockTracker(inventoryStockTracker);
+        }
     }
 
     public void assignTable(Table table) {
@@ -64,18 +69,19 @@ public class Waiter extends StaffMember {
                 for (Ingredient ingredient : customer.getAddedIngredients()) {
                     tableOrder.addModification(customerRecipe, ingredient, true);
                 }
-
-                if (!inventoryStockTracker.canFulfillOrder(tableOrder.getIngredients())) {
-                    throw new IllegalStateException("Not enough ingredients to fulfill the order");
-                }
             } catch (IllegalArgumentException e) {
                 logger.info(e.getMessage());
-                // TODO: Handle what to do if the order cannot be fulfilled
                 return false;
             }
         }
+        
+        // Check if we can reserve all required ingredients
+        if (!inventoryStockTracker.reserveIngredientsForOrder(orderId, tableOrder.getIngredients())) {
+            logger.info("Not enough ingredients to fulfill the order");
+            return false;
+        }
 
-        // Only add the order if we have all ingredients
+        // Ingredients are reserved, so add the order to the order manager
         orderManager.addOrder(tableOrder);
         
         // Mark the table's order as placed
@@ -86,7 +92,7 @@ public class Waiter extends StaffMember {
     /**
      * Takes an order from a table and returns the order ID.
      * @param table The table to take an order from
-     * @return The ID of the created order
+     * @return The ID of the created order, or null if the order could not be placed
      */
     public String takeTableOrderAndReturnId(Table table) {
         if (!assignedTables.contains(table)) {
@@ -96,7 +102,6 @@ public class Waiter extends StaffMember {
         if (!table.isEveryoneReadyToOrder()) {
             throw new IllegalStateException("Not everyone at the table is ready to order");
         }
-
 
         String orderId = orderManager.generateOrderId();
         Order tableOrder = new Order(orderId);
@@ -111,6 +116,14 @@ public class Waiter extends StaffMember {
             for (Ingredient ingredient : customer.getAddedIngredients()) {
                 tableOrder.addModification(customerRecipe, ingredient, true);
             }
+        }
+        
+        // Check if we can reserve all required ingredients
+        if (!inventoryStockTracker.reserveIngredientsForOrder(orderId, tableOrder.getIngredients())) {
+            logger.info("Not enough ingredients to fulfill the order");
+            // Release any reservations we might have made (though there shouldn't be any)
+            inventoryStockTracker.releaseReservedIngredients(orderId);
+            return null;
         }
 
         orderManager.addOrder(tableOrder);

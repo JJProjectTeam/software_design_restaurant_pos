@@ -7,6 +7,7 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.softwaredesign.project.inventory.Ingredient;
+import com.softwaredesign.project.inventory.InventoryStockTracker;
 import com.softwaredesign.project.kitchen.StationManager;
 import com.softwaredesign.project.model.StatisticsSingleton;
 import com.softwaredesign.project.orderfulfillment.CollectionPoint;
@@ -18,12 +19,19 @@ public class OrderManager {
     private Queue<Order> orders;
     private StationMapper stationMapper;
     private CollectionPoint collectionPoint;
+    private InventoryStockTracker inventoryStockTracker;
     private static final AtomicInteger orderCounter = new AtomicInteger(1000);
 
-    public OrderManager(CollectionPoint collectionPoint, StationManager stationManager) {
+    public OrderManager(CollectionPoint collectionPoint, StationManager stationManager, InventoryStockTracker inventoryStockTracker) {
         orders = new LinkedList<>();
         stationMapper = new StationMapper(stationManager);
         this.collectionPoint = collectionPoint;
+        this.inventoryStockTracker = inventoryStockTracker;
+    }
+    
+    // Constructor for backward compatibility
+    public OrderManager(CollectionPoint collectionPoint, StationManager stationManager) {
+        this(collectionPoint, stationManager, null);
     }
 
     /**
@@ -57,13 +65,19 @@ public class OrderManager {
         // Get the next order and remove it from the queue
         Order order = orders.poll();
         List<Recipe> recipes = order.getRecipes();
+        String orderId = order.getOrderId();
 
         // Track statistics
         StatisticsSingleton.getInstance().incrementStat("ordersProcessed");
+        
+        // Release the reserved ingredients since we're now going to actually use them
+        if (inventoryStockTracker != null) {
+            inventoryStockTracker.releaseReservedIngredients(orderId);
+            logger.info("[DEBUG] Released ingredient reservations for order " + orderId);
+        }
 
         // Ensure the order is registered with the collection point
         // This is a safety check in case the order was not properly registered before
-        String orderId = order.getOrderId();
         // Only re-register if it's not already registered
         if (collectionPoint.getTotalMealsExpected(orderId) == 0) {
             collectionPoint.registerOrder(orderId, recipes.size());
@@ -128,5 +142,14 @@ public class OrderManager {
 
     public List<Order> getOrders() {
         return new ArrayList<>(orders);
+    }
+    
+    /**
+     * Sets the inventory stock tracker for this order manager.
+     * This is used to release reservations when orders are processed.
+     * @param inventoryStockTracker The inventory stock tracker to use
+     */
+    public void setInventoryStockTracker(InventoryStockTracker inventoryStockTracker) {
+        this.inventoryStockTracker = inventoryStockTracker;
     }
 }
