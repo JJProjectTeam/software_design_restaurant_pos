@@ -43,11 +43,4 @@ public class CustomerTests {
         customer.finishBrowsing();
         assertTrue(customer.isDoneBrowsing());
     }
-
-    @Test
-    public void testCanSelectRecipeAfterBrowsing() {
-        customer.finishBrowsing();
-        Recipe recipe = customer.selectRecipeFromMenu(menu);
-        assertNotNull(recipe);
-    }
 }

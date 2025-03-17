@@ -145,4 +145,8 @@ public class DineInCustomer extends Customer {
     public boolean isDoneBrowsing() {
         return !isBrowsing;
     }
+
+    public void setSelectedRecipe(Recipe recipe) {
+        this.selectedRecipe = recipe;
+    }
 }
