@@ -32,8 +32,6 @@ public class Menu {
         }
         this.inventoryService = inventoryService;
         this.availableRecipes = new ArrayList<>();
-        // Don't initialize recipes immediately
-        // initializeSampleMenu();
     }
 
     // Call this method when gameplay actually starts
@@ -108,5 +106,9 @@ public class Menu {
         String[] sampleIngredients = {"Cheese", "Tomato", "Lettuce", "Onion", "Pickles", "Mayo", "Mustard"};
         Random random = new Random();
         return new Ingredient(sampleIngredients[random.nextInt(sampleIngredients.length)], inventoryService);
+    }
+
+    public void addRecipe(Recipe recipe) {
+        availableRecipes.add(recipe);
     }
 }

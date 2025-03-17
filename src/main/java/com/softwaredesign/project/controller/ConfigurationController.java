@@ -183,9 +183,6 @@ public class ConfigurationController extends BaseController {
                     int maxChefs = chefRules.path("max").asInt(20);
                     int maxStationsPerChef = chefRules.path("maxStationsPerChef").asInt(10);
                     int maxSpeed = chefRules.path("maxSpeed").asInt(5);
-                    double standardPayr = chefRules.path("standardPay").asDouble(15.0);
-                    double payMultiplierBySpeed = chefRules.path("payMultiplierBySpeed").asDouble(1.0);
-                    double payMultiplierByStation = chefRules.path("payMultiplierByStation").asDouble(1.0);
 
                     chefView.setMinChefs(minChefs);
                     chefView.setMaxChefs(maxChefs);
@@ -194,7 +191,6 @@ public class ConfigurationController extends BaseController {
                     chefView.setStandardPay(chefStandardPay);
                     chefView.setPayMultiplierBySpeed(chefPayMultiplierBySpeed);
                     chefView.setPayMultiplierByStation(chefPayMultiplierByStation);
-                    //todo - also for waiters
                     
                     logger.info("[ConfigurationController] Set chef constants - Min Chefs: {}, Max Chefs: {}, Max Stations Per Chef: {}, Max Speed: {}, Standard Pay: {}, Speed Multiplier: {}, Station Multiplier: {}", 
                         minChefs, maxChefs, maxStationsPerChef, maxSpeed, chefStandardPay, chefPayMultiplierBySpeed, chefPayMultiplierByStation);
@@ -311,47 +307,6 @@ public class ConfigurationController extends BaseController {
         configurationComplete = true;
         logger.info("[ConfigurationController] Configuration complete");
         
-        // Notify mediator that configuration is complete
-        // mediator.notifyConfigurationComplete();
-    }
-    
-    private void createDefaultConfiguration() {        
-        // Define default stations
-        List<String> defaultStations = Arrays.asList("Grill", "Prep", "Plate");
-        
-        // Create default stations FIRST
-        for (String stationType : defaultStations) {
-            Station station = new Station(StationType.valueOf(stationType.toUpperCase()), collectionPoint);
-            station.setKitchen(kitchen);
-            stationManager.addStation(station);
-        }
-        
-        // Create default chef AFTER stations exist
-        ChefStrategy strategy = new PriorityBasedChefStrategy();
-        Chef chef = new Chef(200.0, new BaseSpeed(), strategy, stationManager);
-        
-        // Assign chef to stations
-        for (String stationType : defaultStations) {
-            chef.assignToStation(StationType.valueOf(stationType.toUpperCase()));
-        }
-        
-        // Create default tables
-        seatingPlan = new SeatingPlan(4, 40, 5, menu);
-        
-
-        // Create default waiter
-        Waiter waiter = new Waiter(20.0, orderManager, menu, inventoryStockTracker);
-        
-        // Assign tables to waiter
-        for (Table table : seatingPlan.getAllTables()) {
-            waiter.assignTable(table);
-        }
-        
-        waiters.add(waiter);
-        
-        // Create default menu items
-        Set<String> defaultRecipes = new HashSet<>(Arrays.asList("Burger", "Kebab"));
-        createMenuItems(defaultRecipes);
     }
 
     private void createChefs(Map<String, ChefConfigurationView.ChefData> chefData) {
@@ -503,8 +458,7 @@ public class ConfigurationController extends BaseController {
                         .getConstructor(InventoryService.class)
                         .newInstance(inventory);
                     
-                    // TODO: Uncomment when menu implementation is ready
-                    // menu.addRecipe(newRecipe);
+                    menu.addRecipe(newRecipe);
                     
                     logger.info("[ConfigurationController] Created recipe: {}", recipeName);
                 } else {
